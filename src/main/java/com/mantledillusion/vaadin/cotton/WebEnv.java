@@ -5,7 +5,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import com.mantledillusion.vaadin.cotton.CottonServletService.SessionBean;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http902IllegalStateException;
@@ -89,7 +88,7 @@ public final class WebEnv {
 	 * @return True if there is a localization for the given id, false otherwise
 	 */
 	public static boolean canTranslate(String msgId) {
-		return SessionBean.current(Localizer.class).canTranslate(msgId, Localizer.currentLang());
+		return CottonServletService.SessionBean.current(Localizer.class).canTranslate(msgId, Localizer.currentLang());
 	}
 
 	/**
@@ -109,7 +108,7 @@ public final class WebEnv {
 	 *         localization was not possible
 	 */
 	public static <T> String getTranslation(String msgId) {
-		return SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
+		return CottonServletService.SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
 				Collections.emptyMap());
 	}
 
@@ -136,7 +135,7 @@ public final class WebEnv {
 	 */
 	@SafeVarargs
 	public static <T> String getTranslation(String msgId, T... indexedMessageParameters) {
-		return SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
+		return CottonServletService.SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
 				Collections.emptyMap(), indexedMessageParameters);
 	}
 
@@ -163,7 +162,7 @@ public final class WebEnv {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> String getTranslation(String msgId, Map<String, T> messageParameters) {
-		return SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
+		return CottonServletService.SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
 				(Map<String, Object>) messageParameters);
 	}
 
@@ -182,7 +181,7 @@ public final class WebEnv {
 		} else if (isLoggedIn()) {
 			throw new Http902IllegalStateException("Unable to log in a user while another is already logged in.");
 		}
-		SessionBean.current(LoginHandler.class).login(user);
+		CottonServletService.SessionBean.current(LoginHandler.class).login(user);
 	}
 
 	/**
@@ -193,7 +192,7 @@ public final class WebEnv {
 	 */
 	public static boolean logOut() {
 		if (isLoggedIn()) {
-			return SessionBean.current(LoginHandler.class).logout();
+			return CottonServletService.SessionBean.current(LoginHandler.class).logout();
 		}
 		return true;
 	}
@@ -204,7 +203,7 @@ public final class WebEnv {
 	 * @return True if there is a {@link User} logged in, false otherwise
 	 */
 	public static boolean isLoggedIn() {
-		return SessionBean.current(LoginHandler.class).getUser() != null;
+		return CottonServletService.SessionBean.current(LoginHandler.class).getUser() != null;
 	}
 
 	/**
@@ -215,6 +214,6 @@ public final class WebEnv {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <U extends User> U getLoggedInUser() {
-		return (U) SessionBean.current(LoginHandler.class).getUser();
+		return (U) CottonServletService.SessionBean.current(LoginHandler.class).getUser();
 	}
 }

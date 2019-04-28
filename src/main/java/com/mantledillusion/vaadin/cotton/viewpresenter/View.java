@@ -7,17 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mantledillusion.injection.hura.PhasedProcessor;
-import com.mantledillusion.injection.hura.Processor;
-import com.mantledillusion.injection.hura.Processor.Phase;
-import com.mantledillusion.injection.hura.Blueprint.TypedBlueprintTemplate;
-import com.mantledillusion.injection.hura.AnnotationValidator;
-import com.mantledillusion.injection.hura.BeanAllocation;
-import com.mantledillusion.injection.hura.Blueprint.TypedBlueprint;
-import com.mantledillusion.injection.hura.Injector;
-import com.mantledillusion.injection.hura.Injector.TemporalInjectorCallback;
-import com.mantledillusion.injection.hura.annotation.Define;
-import com.mantledillusion.injection.hura.annotation.Process;
+import com.mantledillusion.injection.hura.core.Blueprint;
+import com.mantledillusion.injection.hura.core.Injector;
+import com.mantledillusion.injection.hura.core.PhasedBeanProcessor;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.Phase;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.AnnotationProcessor;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.BeanProcessor;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostInject;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http902IllegalStateException;
@@ -33,7 +29,7 @@ import com.vaadin.flow.component.html.Div;
 /**
  * Basic super type for a view.
  * <p>
- * NOTE: Should be injected, since the {@link Injector} handles the instance's
+ * NOTE: Should be injected, since the {@link com.mantledillusion.injection.hura.core.Injector} handles the instance's
  * life cycles.
  * <p>
  * Might be controlled by an {@link Presenter} implementation
@@ -45,14 +41,13 @@ public abstract class View extends Composite<Div> {
 	private static final long serialVersionUID = 1L;
 
 	// #########################################################################################################################################
-	// ################################################################ PRESENT
-	// ################################################################
+	// ################################################################ PRESENT ################################################################
 	// #########################################################################################################################################
 
-	static class PresentValidator implements AnnotationValidator<Presented, Class<?>> {
+	static class PresentValidator implements AnnotationProcessor<Presented, Class<?>> {
 
 		@Override
-		public void validate(Presented annotationInstance, Class<?> annotatedElement) throws Exception {
+		public void process(Phase phase, Object bean, Presented annotationInstance, Class<?> annotatedElement, Injector.TemporalInjectorCallback callback) {
 			if (!View.class.isAssignableFrom(annotatedElement)) {
 				throw new Http904IllegalAnnotationUseException("The @" + Presented.class.getSimpleName()
 						+ " annotation can only be used on " + View.class.getSimpleName()
@@ -62,8 +57,7 @@ public abstract class View extends Composite<Div> {
 	}
 
 	// #########################################################################################################################################
-	// ########################################################## COMPONENT REGISTRY
-	// ###########################################################
+	// ########################################################## COMPONENT REGISTRY ###########################################################
 	// #########################################################################################################################################
 
 	/**
@@ -148,8 +142,8 @@ public abstract class View extends Composite<Div> {
 	private Component root;
 
 	@SuppressWarnings("rawtypes")
-	@Process
-	private <T2 extends View, T3 extends Presenter<T2>> void initialize(TemporalInjectorCallback callback) {
+	@PostInject
+	private <T2 extends View, T3 extends Presenter<T2>> void initialize(Injector.TemporalInjectorCallback callback) {
 
 		TemporalActiveComponentRegistry reg = setupUI();
 
@@ -158,37 +152,19 @@ public abstract class View extends Composite<Div> {
 			@SuppressWarnings("unchecked")
 			Class<T3> presenterType = (Class<T3>) getClass().getAnnotation(Presented.class).value();
 
-			Processor<T3> postProcessor = new Processor<T3>() {
-
-				@SuppressWarnings("unchecked")
-				@Override
-				public void process(T3 bean, TemporalInjectorCallback callback) throws Exception {
-					try {
-						bean.setView((T2) View.this, reg);
-					} catch (Exception e) {
-						throw new Http906InjectionErrorException("The view type " + View.this.getClass().getSimpleName()
-								+ " is wired to the subscriber type " + bean.getClass().getSimpleName()
-								+ "; setting an instance of that view on an instance of that subscriber however failed.",
-								e);
-					}
+			BeanProcessor<T3> postProcessor = (phase, bean, injectorCallback) -> {
+				try {
+					bean.setView((T2) View.this, reg);
+				} catch (Exception e) {
+					throw new Http906InjectionErrorException("The view type " + View.this.getClass().getSimpleName()
+							+ " is wired to the subscriber type " + bean.getClass().getSimpleName()
+							+ "; setting an instance of that view on an instance of that subscriber however failed.",
+							e);
 				}
 			};
 
-			callback.instantiate(TypedBlueprint.from(new TypedBlueprintTemplate<Presenter>() {
-
-				@Override
-				public Class<Presenter> getRootType() {
-					return Presenter.class;
-				}
-
-				@SuppressWarnings("unchecked")
-				@Define
-				public BeanAllocation<Presenter> allocate() {
-					BeanAllocation alloc = BeanAllocation.allocateToType(presenterType,
-							PhasedProcessor.of(postProcessor, Phase.CONSTRUCT));
-					return (BeanAllocation<Presenter>) alloc;
-				}
-			}));
+			callback.instantiate(presenterType, Blueprint.TypeAllocation.allocateToType(Presenter.class, presenterType,
+					PhasedBeanProcessor.of(postProcessor, Phase.POST_CONSTRUCT)));
 		}
 	}
 

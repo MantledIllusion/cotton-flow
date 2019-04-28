@@ -1,5 +1,9 @@
 package com.mantledillusion.vaadin.cotton.model;
 
+import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
+import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.instruction.Optional;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.data.epiphy.context.ContextedValue;
@@ -7,10 +11,6 @@ import com.mantledillusion.data.epiphy.interfaces.ReadableProperty;
 import com.mantledillusion.data.epiphy.interfaces.WriteableProperty;
 import com.mantledillusion.data.epiphy.interfaces.function.ContextableProperty;
 import com.mantledillusion.data.epiphy.interfaces.function.EnumerableProperty;
-import com.mantledillusion.injection.hura.Processor.Phase;
-import com.mantledillusion.injection.hura.annotation.Inject;
-import com.mantledillusion.injection.hura.annotation.Optional;
-import com.mantledillusion.injection.hura.annotation.Process;
 
 /**
  * {@link ModelHandler} implementation that is a child to a
@@ -24,14 +24,14 @@ public final class ModelAccessor<ModelType> extends ModelBinder<ModelType> {
 
 	private final ModelContainer<ModelType> parent;
 
-	private ModelAccessor(@Inject(ModelContainer.SID_CONTAINER) ModelContainer<ModelType> parent,
-			@Inject(PropertyContext.SID_PROPERTYCONTEXT) @Optional PropertyContext context) {
+	private ModelAccessor(@Inject @Qualifier(ModelContainer.SID_CONTAINER) ModelContainer<ModelType> parent,
+			@Inject @Qualifier(PropertyContext.SID_PROPERTYCONTEXT) @Optional PropertyContext context) {
 		super(ObjectUtils.defaultIfNull(context, PropertyContext.EMPTY));
 		this.parent = parent;
 		this.parent.register(this);
 	}
 
-	@Process(Phase.DESTROY)
+	@PreDestroy
 	private void destroy() {
 		this.parent.unregister(this);
 	}

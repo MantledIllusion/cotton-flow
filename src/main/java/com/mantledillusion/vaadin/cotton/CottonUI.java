@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.mantledillusion.vaadin.cotton.CottonServletService.SessionBean;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
@@ -109,7 +108,7 @@ public final class CottonUI extends UI {
 	public <E> List<E> getNavigationListeners(Class<E> navigationHandler) {
 		if (navigationHandler.isAssignableFrom(LoginHandler.class)) {
 			List<E> listeners = new ArrayList<>();
-			listeners.add((E) SessionBean.current(LoginHandler.class));
+			listeners.add((E) CottonServletService.SessionBean.current(LoginHandler.class));
 			listeners.addAll(super.getNavigationListeners(navigationHandler));
 			return Collections.unmodifiableList(listeners);
 		} else {

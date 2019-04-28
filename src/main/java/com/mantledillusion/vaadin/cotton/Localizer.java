@@ -10,11 +10,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -28,12 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mantledillusion.vaadin.cotton.CottonServletService.SessionBean;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.server.VaadinSession;
 
-class Localizer implements SessionBean, I18NProvider {
+class Localizer implements CottonServletService.SessionBean, I18NProvider {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -49,19 +46,19 @@ class Localizer implements SessionBean, I18NProvider {
 	// ################################################################ CONTROL ################################################################
 	// #########################################################################################################################################
 
-	private static final class LocalizationControl extends java.util.ResourceBundle.Control {
+	static final class LocalizationControl extends java.util.ResourceBundle.Control {
 
 		private final Charset charset;
 		private final String extension;
 
-		private LocalizationControl(Charset charset, String extension) {
+		LocalizationControl(Charset charset, String extension) {
 			this.charset = charset;
 			this.extension = extension;
 		}
 
 		@Override
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader,
-				boolean reload) throws IllegalAccessException, InstantiationException, IOException {
+				boolean reload) throws IOException {
 
 			final String bundleName = toBundleName(baseName, locale);
 			final String resourceName = toResourceName(bundleName, this.extension);
@@ -116,7 +113,7 @@ class Localizer implements SessionBean, I18NProvider {
 		Evaluateable collapse();
 	}
 
-	private static final class LocalizationResource {
+	static final class LocalizationResource {
 
 		private final class StaticEvaluateable implements Evaluateable {
 
@@ -165,11 +162,11 @@ class Localizer implements SessionBean, I18NProvider {
 		private final Map<String, ResourceBundle> bundles = new HashMap<>();
 		private final Map<String, Evaluateable> evaluateables = new HashMap<>();
 
-		private LocalizationResource(Locale locale) {
+		LocalizationResource(Locale locale) {
 			this.locale = locale;
 		}
 
-		private void addBundle(ResourceBundle bundle, Set<String> bundleKeys) {
+		void addBundle(ResourceBundle bundle, Set<String> bundleKeys) {
 			Set<String> intersection = SetUtils.intersection(bundles.keySet(), bundleKeys);
 			if (intersection.isEmpty()) {
 				MapUtils.populateMap(this.bundles, bundleKeys, key -> key, value -> bundle);
@@ -269,7 +266,7 @@ class Localizer implements SessionBean, I18NProvider {
 	private final Map<String, LocalizationResource> resourceBundleRegistry;
 	private final List<Locale> supportedLocales;
 
-	private Localizer(Map<String, LocalizationResource> resourceBundleRegistry, List<Locale> supportedLocales) {
+	Localizer(Map<String, LocalizationResource> resourceBundleRegistry, List<Locale> supportedLocales) {
 		this.resourceBundleRegistry = Collections.unmodifiableMap(resourceBundleRegistry);
 		this.supportedLocales = Collections.unmodifiableList(supportedLocales);
 	}
@@ -316,108 +313,14 @@ class Localizer implements SessionBean, I18NProvider {
 	// ################################################################ BUILDER ################################################################
 	// #########################################################################################################################################
 
-	static final class LocalizerBuilder {
-
-		private final Map<String, LocalizationResource> resourceBundleRegistry = new HashMap<>();
-		private final Set<Locale> supportedLocales = new HashSet<>();
-		private Locale defaultLocale;
-
-		LocalizerBuilder() {
-		}
-
-		LocalizerBuilder withLocalization(String baseName, String fileExtension, Charset charset, Locale locale,
-				Locale... locales) {
-			if (StringUtils.isBlank(baseName)) {
-				throw new Http901IllegalArgumentException(
-						"Cannot register a localization for a blank base name.");
-			} else if (StringUtils.isBlank(fileExtension)) {
-				throw new Http901IllegalArgumentException(
-						"Cannot register a localization for a blank file extension.");
-			} else if (charset == null) {
-				throw new Http901IllegalArgumentException(
-						"Cannot register a localization for a null charset.");
-			} else if (locale == null) {
-				throw new Http901IllegalArgumentException(
-						"Cannot register a localization for a null first locale.");
-			}
-			LocalizationControl control = new LocalizationControl(charset, fileExtension);
-			Set<Locale> uniqueLocales = new HashSet<>();
-			uniqueLocales.add(locale);
-			uniqueLocales.addAll(Arrays.asList(locales));
-			uniqueLocales.remove(null);
-
-			Set<Locale> addedLocales = new HashSet<>();
-			Set<String> expectedBundleKeys = new HashSet<>();
-			for (Locale loc : uniqueLocales) {
-				if (loc != null) {
-					checkLocale(loc);
-
-					loc = new Locale(loc.getLanguage(), loc.getCountry());
-
-					ResourceBundle bundle;
-					try {
-						bundle = ResourceBundle.getBundle(baseName, loc, control);
-					} catch (MissingResourceException e) {
-						throw new Http901IllegalArgumentException(
-								"Unable to find localization class resource '" + baseName + '_' + toLang(loc) + '.'
-										+ fileExtension + "' for locale " + loc,
-								e);
-					}
-
-					Set<String> bundleKeys = new HashSet<>(Collections.list(bundle.getKeys()));
-					if (addedLocales.isEmpty()) {
-						addedLocales.add(loc);
-						expectedBundleKeys.addAll(bundleKeys);
-					} else {
-						Set<String> difference = SetUtils.disjunction(expectedBundleKeys, bundleKeys);
-						if (difference.isEmpty()) {
-							addedLocales.add(loc);
-						} else {
-							throw new Http901IllegalArgumentException(
-									"The localization resource '" + baseName + '_' + toLang(loc) + '.' + fileExtension
-											+ "' for locale " + loc
-											+ " differs from the resources of the already analyzed locales "
-											+ addedLocales + " regarding the message ids " + difference
-											+ "; on differently localed resources of the same base resource, all message id sets have to be equal.");
-						}
-					}
-
-					String lang = toLang(loc);
-					if (!this.resourceBundleRegistry.containsKey(lang)) {
-						this.resourceBundleRegistry.put(lang, new LocalizationResource(loc));
-						this.supportedLocales.add(loc);
-					}
-					this.resourceBundleRegistry.get(lang).addBundle(bundle, bundleKeys);
-				}
-			}
-			return this;
-		}
-
-		LocalizerBuilder withDefaultLocale(Locale locale) {
-			if (locale != null) {
-				checkLocale(locale);
-			}
-			this.defaultLocale = locale;
-			return this;
-		}
-
-		Localizer build() {
-			List<Locale> supportedLocales = new ArrayList<>(this.supportedLocales);
-			if (this.defaultLocale != null) {
-				supportedLocales.sort((o1, o2) -> this.defaultLocale.equals(o1) ? -1 : 0);
-			}
-			return new Localizer(this.resourceBundleRegistry, supportedLocales);
-		}
-	}
-
-	private static void checkLocale(Locale loc) {
+	static void checkLocale(Locale loc) {
 		if (StringUtils.isBlank(loc.getISO3Language())) {
 			throw new Http901IllegalArgumentException(
 					"Cannot register a localization to a locale with a blank ISO3 language.");
 		}
 	}
 
-	private static String toLang(Locale loc) {
+	static String toLang(Locale loc) {
 		if (StringUtils.isNotBlank(loc.getISO3Country())) {
 			return loc.getISO3Language() + '_' + loc.getISO3Country();
 		} else {

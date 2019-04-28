@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.mantledillusion.injection.hura.annotation.Construct;
+import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.vaadin.cotton.event.EventBusSubscriber.BusEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;

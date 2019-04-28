@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.mantledillusion.injection.hura.core.Injector;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.Phase;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.AnnotationProcessor;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
-import com.mantledillusion.injection.hura.AnnotationValidator;
-import com.mantledillusion.injection.hura.Injector;
 import com.mantledillusion.vaadin.cotton.event.EventBusSubscriber;
 import com.mantledillusion.vaadin.cotton.event.Subscribe;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http904IllegalAnnotationUseException;
@@ -20,8 +21,8 @@ import com.vaadin.flow.component.ComponentEvent;
 /**
  * Basic super type for a presenter that controls an {@link View}.
  * <p>
- * NOTE: Should be injected, since the {@link Injector} handles the instance's
- * life cycles.
+ * NOTE: Should be injected, since the {@link com.mantledillusion.injection.hura.core.Injector}
+ * handles the instance's life cycles.
  * <P>
  * Instances of sub types of {@link Presenter} will be instantiated
  * automatically during injection for every {@link View} implementation that
@@ -51,10 +52,11 @@ public abstract class Presenter<T extends View> extends EventBusSubscriber {
 	// ################################################################ LISTEN #################################################################
 	// #########################################################################################################################################
 
-	static class ListenValidator implements AnnotationValidator<Listen, Method> {
+	static class ListenValidator implements AnnotationProcessor<Listen, Method> {
 
 		@Override
-		public void validate(Listen annotationInstance, Method annotatedElement) throws Exception {
+		public void process(Phase phase, Object bean, Listen annotationInstance, Method annotatedElement,
+							Injector.TemporalInjectorCallback callback) {
 			Class<?> listeningType = annotatedElement.getDeclaringClass();
 
 			if (!Presenter.class.isAssignableFrom(listeningType)) {

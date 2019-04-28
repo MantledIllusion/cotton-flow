@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import com.mantledillusion.injection.hura.annotation.Validated;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PreConstruct;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Presenter.ListenValidator;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -29,7 +29,7 @@ import com.vaadin.flow.component.ComponentEvent;
  */
 @Retention(RUNTIME)
 @Target(METHOD)
-@Validated(ListenValidator.class)
+@PreConstruct(ListenValidator.class)
 public @interface Listen {
 
 	/**

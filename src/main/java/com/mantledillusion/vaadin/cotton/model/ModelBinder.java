@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.data.epiphy.context.PropertyRoute;
@@ -22,8 +23,6 @@ import com.mantledillusion.data.epiphy.interfaces.function.ContextableProperty;
 import com.mantledillusion.data.epiphy.interfaces.function.IdentifyableProperty;
 import com.mantledillusion.data.epiphy.interfaces.type.ListedProperty;
 import com.mantledillusion.data.epiphy.interfaces.type.NodedProperty;
-import com.mantledillusion.injection.hura.Processor.Phase;
-import com.mantledillusion.injection.hura.annotation.Process;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
@@ -583,7 +582,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 	}
 
-	@Process(Phase.DESTROY)
+	@PreDestroy
 	private synchronized void destroy() {
 		Iterator<Entry<ReadableProperty<ModelType, ?>, List<Binding>>> mapIter = this.bindings.entrySet().iterator();
 		while (mapIter.hasNext()) {

@@ -3,13 +3,12 @@ package com.mantledillusion.vaadin.cotton;
 import java.util.Arrays;
 import java.util.List;
 
-import com.mantledillusion.injection.hura.Injector;
-import com.mantledillusion.injection.hura.Processor.Phase;
-import com.mantledillusion.injection.hura.annotation.Construct;
-import com.mantledillusion.injection.hura.annotation.Global;
-import com.mantledillusion.injection.hura.annotation.Inject;
-import com.mantledillusion.injection.hura.annotation.Process;
-import com.mantledillusion.vaadin.cotton.CottonServletService.SessionBean;
+import com.mantledillusion.injection.hura.core.Injector;
+import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
+import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostInject;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import com.vaadin.flow.server.VaadinSession;
 
 class CottonSession extends VaadinSession {
@@ -19,26 +18,26 @@ class CottonSession extends VaadinSession {
 	@Inject
 	private Injector injector;
 	
-	private final List<SessionBean> sessionBeans;
+	private final List<CottonServletService.SessionBean> sessionBeans;
 
 	@Construct
-	private CottonSession(@Inject(CottonServletService.SID_SERVLETSERVICE) @Global CottonServletService servletService,
-			@Inject(Localizer.SID_LOCALIZER) @Global Localizer localizer,
+	private CottonSession(@Inject @Qualifier(CottonServletService.SID_SERVLETSERVICE) CottonServletService servletService,
+			@Inject @Qualifier(Localizer.SID_LOCALIZER) Localizer localizer,
 			@Inject LoginHandler loginHandler) {
 		super(servletService);
 		this.sessionBeans = Arrays.asList(localizer, loginHandler);
 	}
 
-	@Process(Phase.INJECT)
+	@PostInject
 	private void startup() {
-		for (SessionBean bean: this.sessionBeans) {
+		for (CottonServletService.SessionBean bean: this.sessionBeans) {
 			bean.hook(this);
 		}
 	}
 
-	@Process(Phase.DESTROY)
+	@PreDestroy
 	private void shutdown() {
-		for (SessionBean bean: this.sessionBeans) {
+		for (CottonServletService.SessionBean bean: this.sessionBeans) {
 			bean.unhook(this);
 		}
 	}

@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.mantledillusion.essentials.reflection.TypeEssentials;
-import com.mantledillusion.injection.hura.annotation.Construct;
-import com.mantledillusion.injection.hura.annotation.Global;
-import com.mantledillusion.injection.hura.annotation.Inject;
-import com.mantledillusion.vaadin.cotton.CottonServletService.SessionBean;
+import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
+import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
+import com.mantledillusion.injection.hura.core.annotation.instruction.Optional;
 import com.mantledillusion.vaadin.cotton.CottonUI.AfterLoginListener;
 import com.mantledillusion.vaadin.cotton.CottonUI.BeforeLogoutListener;
 import com.mantledillusion.vaadin.cotton.event.EventBusSubscriber;
@@ -19,12 +19,13 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterListener;
 
-class LoginHandler extends EventBusSubscriber implements SessionBean, BeforeEnterListener {
+class LoginHandler extends EventBusSubscriber implements CottonServletService.SessionBean, BeforeEnterListener {
 	
 	private static final long serialVersionUID = 1L;
 
-	@Inject(LoginProvider.SID_LOGIN_PROVIDER)
-	@Global
+	@Inject
+	@Qualifier(LoginProvider.SID_LOGIN_PROVIDER)
+	@Optional
 	private LoginProvider provider;
 	
 	private User user;

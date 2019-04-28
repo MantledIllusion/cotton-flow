@@ -7,7 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.mantledillusion.injection.hura.annotation.Validated;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PreConstruct;
 import com.mantledillusion.vaadin.cotton.viewpresenter.View.PresentValidator;
 
 /**
@@ -19,7 +19,7 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.View.PresentValidator;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Validated(PresentValidator.class)
+@PreConstruct(PresentValidator.class)
 public @interface Presented {
 
 	/**

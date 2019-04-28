@@ -1,15 +1,9 @@
 package com.mantledillusion.vaadin.cotton;
 
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Set;
-
-import org.apache.commons.collections4.ListUtils;
-
-import com.mantledillusion.injection.hura.Injector;
-import com.mantledillusion.injection.hura.Injector.RootInjector;
-import com.mantledillusion.injection.hura.Predefinable.Singleton;
-import com.mantledillusion.vaadin.cotton.CottonServlet.TemporalCottonServletConfiguration;
+import com.mantledillusion.injection.hura.core.Blueprint;
+import com.mantledillusion.injection.hura.core.Injector;
+import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
+import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionContextException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.metrics.MetricsDispatcherFlow;
@@ -19,18 +13,18 @@ import com.vaadin.flow.di.DefaultInstantiator;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.server.InvalidRouteConfigurationException;
-import com.vaadin.flow.server.ServiceException;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServlet;
-import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.*;
+
+import java.util.Optional;
+import java.util.function.BiPredicate;
 
 class CottonServletService extends VaadinServletService {
 
 	private static final long serialVersionUID = 1L;
+	private static final BiPredicate<String, Class> ROUTE_COMPONENT_PREDICATE = (qualifier, componentClass) ->
+		Component.class.isAssignableFrom(componentClass) && componentClass.isAnnotationPresent(Route.class);
 
 	static final String SID_SERVLETSERVICE = "_servletService";
 
@@ -38,8 +32,8 @@ class CottonServletService extends VaadinServletService {
 
 		private static final long serialVersionUID = 1L;
 
-		public CottonInstantiator(VaadinService service) {
-			super(service);
+		public CottonInstantiator() {
+			super(CottonServletService.this);
 		}
 
 		@Override
@@ -53,7 +47,7 @@ class CottonServletService extends VaadinServletService {
 			T view = CottonSession.current().create(type);
 			ms = System.currentTimeMillis() - ms;
 			MetricsDispatcherFlow.dispatch(CottonMetrics.SYSTEM_INJECTION.build(
-					new MetricAttribute("viewClass", type.getName()), 
+					new MetricAttribute("viewClass", type.getName()),
 					new MetricAttribute("duration", String.valueOf(ms))));
 			return view;
 		}
@@ -78,29 +72,24 @@ class CottonServletService extends VaadinServletService {
 		}
 	}
 
-	private final Set<Class<? extends Component>> views;
+	private final Injector serviceInjector;
 	private final Localizer localizer;
-	private final RootInjector serviceInjector;
 
-	CottonServletService(VaadinServlet servlet, DeploymentConfiguration deploymentConfiguration,
-			TemporalCottonServletConfiguration config) {
+	CottonServletService(@Inject @Qualifier(CottonServlet.SID_SERVLET) VaadinServlet servlet,
+						 @Inject @Qualifier(CottonServlet.SID_DEPLOYMENTCONFIG) DeploymentConfiguration deploymentConfiguration,
+						 @Inject @Qualifier(Localizer.SID_LOCALIZER) Localizer localizer,
+						 @Inject Injector serviceInjector) {
 		super(servlet, deploymentConfiguration);
-		this.views = config.getViews();
-		this.localizer = config.getLocalizerBuilder().build();
-
-		Singleton servletService = Singleton.of(SID_SERVLETSERVICE, this);
-		Singleton localizer = Singleton.of(Localizer.SID_LOCALIZER, this.localizer);
-		Singleton loginProvider = Singleton.of(LoginProvider.SID_LOGIN_PROVIDER, config.getLoginProvider());
-		this.serviceInjector = Injector.of(
-				ListUtils.union(config.getPredefinables(), Arrays.asList(servletService, localizer, loginProvider)));
+		this.serviceInjector = serviceInjector;
+		this.localizer = localizer;
 	}
 
 	@Override
 	public void init() throws ServiceException {
 		super.init();
 		try {
-			for (Class<? extends Component> view: this.views) {
-				RouteConfiguration.forRegistry(getRouter().getRegistry()).setAnnotatedRoute(view);
+			for (Class<?> view: this.serviceInjector.aggregate(Class.class, ROUTE_COMPONENT_PREDICATE)) {
+				RouteConfiguration.forRegistry(getRouter().getRegistry()).setAnnotatedRoute((Class<? extends Component>) view);
 			}
 		} catch (InvalidRouteConfigurationException e) {
 			throw new ServiceException("Cannot set up routing for the given views", e);
@@ -108,14 +97,9 @@ class CottonServletService extends VaadinServletService {
 	}
 
 	@Override
-	public void destroy() {
-		super.destroy();
-		this.serviceInjector.destroyInjector();
-	}
-
-	@Override
 	protected VaadinSession createVaadinSession(VaadinRequest request) {
-		return this.serviceInjector.instantiate(CottonSession.class);
+		return this.serviceInjector.instantiate(CottonSession.class,
+				Blueprint.SingletonAllocation.of(CottonServletService.SID_SERVLETSERVICE, this));
 	}
 
 	@Override
@@ -125,7 +109,7 @@ class CottonServletService extends VaadinServletService {
 	}
 
 	@Override
-	protected Optional<Instantiator> loadInstantiators() throws ServiceException {
-		return Optional.of(new CottonInstantiator(this));
+	protected Optional<Instantiator> loadInstantiators() {
+		return Optional.of(new CottonInstantiator());
 	}
 }

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import com.mantledillusion.injection.hura.annotation.Validated;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PreConstruct;
 import com.mantledillusion.vaadin.cotton.event.EventBusSubscriber.ReactValidator;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
@@ -38,7 +38,7 @@ import com.vaadin.flow.router.BeforeLeaveEvent;
  */
 @Retention(RUNTIME)
 @Target(METHOD)
-@Validated(ReactValidator.class)
+@PreConstruct(ReactValidator.class)
 public @interface React {
 
 }

@@ -14,15 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.mantledillusion.injection.hura.core.Injector;
+import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
+import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.Phase;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.AnnotationProcessor;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostInject;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
-import com.mantledillusion.injection.hura.AnnotationValidator;
-import com.mantledillusion.injection.hura.Injector;
-import com.mantledillusion.injection.hura.Processor.Phase;
-import com.mantledillusion.injection.hura.annotation.Global;
-import com.mantledillusion.injection.hura.annotation.Inject;
-import com.mantledillusion.injection.hura.annotation.Process;
 import com.mantledillusion.vaadin.cotton.CottonUI;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
@@ -40,8 +41,8 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Basic super type for a subscriber on the global event bus.
  * <p>
- * NOTE: Should be injected, since the {@link Injector} handles the instance's
- * life cycles.
+ * NOTE: Should be injected, since the {@link com.mantledillusion.injection.hura.core.Injector}
+ * handles the instance's life cycles.
  * <P>
  * The only implementation of the {@link EventBusSubscriber} on framework side
  * is the {@link Presenter}; that being said, an own {@link EventBusSubscriber}
@@ -161,10 +162,11 @@ public class EventBusSubscriber {
 	// ############################################################### SUBSCRIBE ###############################################################
 	// #########################################################################################################################################
 
-	static class SubscribeValidator implements AnnotationValidator<Subscribe, Method> {
+	static class SubscribeValidator implements AnnotationProcessor<Subscribe, Method> {
 
 		@Override
-		public void validate(Subscribe annotationInstance, Method annotatedElement) throws Exception {
+		public void process(Phase phase, Object bean, Subscribe annotationInstance, Method annotatedElement,
+							Injector.TemporalInjectorCallback callback) {
 			Class<?> subscribingType = annotatedElement.getDeclaringClass();
 
 			if (!EventBusSubscriber.class.isAssignableFrom(subscribingType)) {
@@ -209,14 +211,15 @@ public class EventBusSubscriber {
 	// ################################################################# REACT #################################################################
 	// #########################################################################################################################################
 
-	static class ReactValidator implements AnnotationValidator<React, Method> {
+	static class ReactValidator implements AnnotationProcessor<React, Method> {
 
 		private static final Set<Class<? extends EventObject>> UI_EVENT_TYPES = Collections
 				.unmodifiableSet(new HashSet<>(Arrays.asList(BeforeEnterEvent.class, BeforeLeaveEvent.class,
 						AfterNavigationEvent.class, AfterLoginEvent.class, BeforeLogoutEvent.class)));
 
 		@Override
-		public void validate(React annotationInstance, Method annotatedElement) throws Exception {
+		public void process(Phase phase, Object bean, React annotationInstance, Method annotatedElement,
+							Injector.TemporalInjectorCallback callback) {
 			Class<?> subscribingType = annotatedElement.getDeclaringClass();
 
 			if (!EventBusSubscriber.class.isAssignableFrom(subscribingType)) {
@@ -258,12 +261,13 @@ public class EventBusSubscriber {
 	// ################################################################## TYPE #################################################################
 	// #########################################################################################################################################
 
-	@Inject(EventBus.SID_EVENTBUS)
-	@Global
+	@Inject
+	@Qualifier(EventBus.SID_EVENTBUS)
 	private EventBus bus;
+
 	private List<Registration> uiListenerRegistrations = new ArrayList<>();
 
-	@Process
+	@PostInject
 	private void initialize() {
 		// PRESENTER EVENT METHODS
 		for (Method method : MethodUtils.getMethodsListWithAnnotation(getClass(), Subscribe.class, true, true)) {
@@ -345,7 +349,7 @@ public class EventBusSubscriber {
 		}
 	}
 
-	@Process(Phase.DESTROY)
+	@PreDestroy
 	private void releaseReferences() {
 		this.bus.unsubscribe(this);
 		this.uiListenerRegistrations.forEach(reg -> reg.remove());
