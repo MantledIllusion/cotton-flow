@@ -17,7 +17,7 @@ import java.util.*;
 
 public class CottonServlet extends VaadinServlet {
 
-    public static final String PKEY_DEFAULT_LOCALE = "cotton.localization.defaultLocale";
+    public static final String PKEY_DEFAULT_LOCALE = "${cotton.localization.defaultLocale:en}";
 
     static final String SID_SERVLET = "_servlet";
     static final String SID_DEPLOYMENTCONFIG = "_deploymentConfig";
@@ -57,6 +57,13 @@ public class CottonServlet extends VaadinServlet {
     protected final VaadinServletService createServletService(DeploymentConfiguration deploymentConfiguration) throws ServiceException {
         VaadinServletService service;
         try {
+            // SERVLET
+            Blueprint.SingletonAllocation servlet = Blueprint.SingletonAllocation.of(SID_SERVLET, this);
+
+            // DEPLOYMENT CONFIG
+            Blueprint.SingletonAllocation deploymentConfig = Blueprint.SingletonAllocation.of(SID_DEPLOYMENTCONFIG,
+                    deploymentConfiguration);
+
             // LOCALIZER
             Map<String, Localizer.LocalizationResource> resourceBundleRegistry = new HashMap<>();
             Set<Locale> supportedLocales = new HashSet<>();
@@ -72,18 +79,15 @@ public class CottonServlet extends VaadinServlet {
             }
             List<Locale> supportedLocales2 = new ArrayList<>(supportedLocales);
 
-            String resolvedLocale = this.servletInjector.resolve(PKEY_DEFAULT_LOCALE);
-            if (resolvedLocale != null) {
-                Locale defaultLocale = Locale.forLanguageTag(resolvedLocale);
-                Localizer.checkLocale(defaultLocale);
-                supportedLocales2.sort((o1, o2) -> defaultLocale.equals(o1) ? -1 : 0);
-            }
+            Locale defaultLocale = Locale.forLanguageTag(this.servletInjector.resolve(PKEY_DEFAULT_LOCALE));
+            Localizer.checkLocale(defaultLocale);
+            supportedLocales2.sort((o1, o2) -> defaultLocale.equals(o1) ? -1 : 0);
 
             Blueprint.SingletonAllocation localizer = Blueprint.SingletonAllocation.of(Localizer.SID_LOCALIZER,
                     new Localizer(resourceBundleRegistry, supportedLocales2));
 
             // BUILD VAADIN SERVICE
-            service = this.servletInjector.instantiate(CottonServletService.class, localizer);
+            service = this.servletInjector.instantiate(CottonServletService.class, servlet, deploymentConfig, localizer);
             service.init();
 
             // METRICS

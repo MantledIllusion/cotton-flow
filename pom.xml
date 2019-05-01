@@ -37,10 +37,19 @@
 
 		<!-- maven dependency versions -->
 		<com.vaadin.version>13.0.4</com.vaadin.version>
-		<injection.hura.version>2.0.0.ALPHA1</injection.hura.version>
+
+		<!-- com.mantledillusion dependencies -->
+		<injection.hura.version>2.0.0.ALPHA2</injection.hura.version>
 		<data.epiphy.version>3.0.0-SNAPSHOT</data.epiphy.version>
 		<vaadin.metrics.version>1.0.0-SNAPSHOT</vaadin.metrics.version>
+
+		<!-- org.apache dependencies -->
 		<commons.collections.version>4.3</commons.collections.version>
+
+		<!-- javax dependencies -->
+		<javax-servlet.version>4.0.1</javax-servlet.version>
+
+		<!-- testing dependencies -->
 		<junit.version>5.4.2</junit.version>
 	</properties>
 
@@ -91,6 +100,14 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>${commons.collections.version}</version>
+		</dependency>
+
+		<!-- javax dependencies -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${javax-servlet.version}</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- testing dependencies -->

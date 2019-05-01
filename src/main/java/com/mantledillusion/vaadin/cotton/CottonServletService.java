@@ -9,10 +9,12 @@ import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.metrics.MetricsDispatcherFlow;
 import com.mantledillusion.vaadin.metrics.api.MetricAttribute;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.di.DefaultInstantiator;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
+import com.vaadin.flow.router.NavigationEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.*;
@@ -42,14 +44,19 @@ class CottonServletService extends VaadinServletService {
 		}
 
 		@Override
-		public <T> T getOrCreate(Class<T> type) {
+		public <T extends HasElement> T createRouteTarget(Class<T> routeTargetType, NavigationEvent event) {
 			long ms = System.currentTimeMillis();
-			T view = CottonSession.current().create(type);
+			T target = super.createRouteTarget(routeTargetType, event);
 			ms = System.currentTimeMillis() - ms;
 			MetricsDispatcherFlow.dispatch(CottonMetrics.SYSTEM_INJECTION.build(
-					new MetricAttribute("viewClass", type.getName()),
+					new MetricAttribute("viewClass", routeTargetType.getName()),
 					new MetricAttribute("duration", String.valueOf(ms))));
-			return view;
+			return target;
+		}
+
+		@Override
+		public <T> T getOrCreate(Class<T> type) {
+			return CottonSession.current().create(type);
 		}
 	}
 
