@@ -4,6 +4,7 @@ import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
+import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
 import com.mantledillusion.vaadin.metrics.MetricsObserverFlow;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.DefaultDeploymentConfiguration;
@@ -17,10 +18,13 @@ import java.util.*;
 
 public class CottonServlet extends VaadinServlet {
 
-    public static final String PKEY_DEFAULT_LOCALE = "${cotton.localization.defaultLocale:en}";
+    private static final String PKEY_HURAWEB_INITIALIZER = "hura.web.application.initializerClass";
+    private static final String PKEY_HURAWEB_BASEPACKAGE = "hura.web.application.basePackage";
 
     static final String SID_SERVLET = "_servlet";
     static final String SID_DEPLOYMENTCONFIG = "_deploymentConfig";
+    static final String PID_INITIALIZERCLASS = "_initializerClass";
+    static final String PID_BASEPACKAGE = "_basePackage";
 
     private final class CottonDeploymentConfiguration extends DefaultDeploymentConfiguration {
 
@@ -36,17 +40,29 @@ public class CottonServlet extends VaadinServlet {
         }
     }
 
-    @Inject
-    private Injector servletInjector;
-
     private final Logger logger = LoggerFactory.getLogger(((Object) this).getClass());
+    private final Injector servletInjector;
+    private final String applicationInitializerClass;
+    private final String applicationPackage;
 
     protected CottonServlet(Blueprint cottonEnvironment) {
+        if (cottonEnvironment == null) {
+            throw new IllegalArgumentException("Cannot initialize a " + CottonServlet.class.getSimpleName() + " using a null cotton environment blueprint");
+        }
+
         this.servletInjector = Injector.of(cottonEnvironment);
+        this.applicationInitializerClass = cottonEnvironment.getClass().getName();
+        this.applicationPackage = this.servletInjector.resolve("${"+ CottonEnvironment.PKEY_APPLICATION_BASE_PACKAGE +":"+cottonEnvironment.getClass().getPackage().getName()+"}", true);
     }
 
     @Construct
-    private CottonServlet() {}
+    private CottonServlet(@Inject Injector servletInjector,
+                          @Resolve("${"+ PKEY_HURAWEB_INITIALIZER +"}") String applicationInitializerClass,
+                          @Resolve("${"+ PKEY_HURAWEB_BASEPACKAGE +"}") String applicationPackage) {
+        this.servletInjector = servletInjector;
+        this.applicationInitializerClass = applicationInitializerClass;
+        this.applicationPackage = applicationPackage;
+    }
 
     @Override
     protected final DeploymentConfiguration createDeploymentConfiguration(Properties initParameters) {
@@ -79,15 +95,20 @@ public class CottonServlet extends VaadinServlet {
             }
             List<Locale> supportedLocales2 = new ArrayList<>(supportedLocales);
 
-            Locale defaultLocale = Locale.forLanguageTag(this.servletInjector.resolve(PKEY_DEFAULT_LOCALE));
+            Locale defaultLocale = Locale.forLanguageTag(this.servletInjector.resolve("${"+ CottonEnvironment.PKEY_DEFAULT_LOCALE+":en}"));
             Localizer.checkLocale(defaultLocale);
             supportedLocales2.sort((o1, o2) -> defaultLocale.equals(o1) ? -1 : 0);
 
             Blueprint.SingletonAllocation localizer = Blueprint.SingletonAllocation.of(Localizer.SID_LOCALIZER,
                     new Localizer(resourceBundleRegistry, supportedLocales2));
 
+            // APPLICATION
+            Blueprint.PropertyAllocation initializerClass = Blueprint.PropertyAllocation.of(PID_INITIALIZERCLASS, this.applicationInitializerClass);
+            Blueprint.PropertyAllocation basePackage = Blueprint.PropertyAllocation.of(PID_BASEPACKAGE, this.applicationPackage);
+
             // BUILD VAADIN SERVICE
-            service = this.servletInjector.instantiate(CottonServletService.class, servlet, deploymentConfig, localizer);
+            service = this.servletInjector.instantiate(CottonServletService.class, servlet, deploymentConfig, localizer,
+                    initializerClass, basePackage);
             service.init();
 
             // METRICS

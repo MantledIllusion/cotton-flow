@@ -12,6 +12,22 @@ import java.util.*;
 
 public final class CottonEnvironment {
 
+    // #################################################################################################################
+    // ############################################### APPLICATION #####################################################
+    // #################################################################################################################
+
+    static final String PKEY_APPLICATION_BASE_PACKAGE = "cotton.application.basePackage";
+
+    public static Blueprint.PropertyAllocation forApplicationBasePackage(Package basePackage) {
+        return Blueprint.PropertyAllocation.of(PKEY_APPLICATION_BASE_PACKAGE, basePackage.getName());
+    }
+
+    // #################################################################################################################
+    // ############################################## LOCALIZATION #####################################################
+    // #################################################################################################################
+
+    static final String PKEY_DEFAULT_LOCALE = "cotton.localization.defaultLocale";
+
     static final class LocalizationRegistration {
 
         final Locale locale;
@@ -23,6 +39,10 @@ public final class CottonEnvironment {
             this.bundleKeys = bundleKeys;
             this.bundle = bundle;
         }
+    }
+
+    public static Blueprint.PropertyAllocation forDefaultLocale(Locale defauleLocale) {
+        return Blueprint.PropertyAllocation.of(PKEY_DEFAULT_LOCALE, defauleLocale.toLanguageTag());
     }
 
     public static List<Blueprint.SingletonAllocation> forLocalization(String baseName, String fileExtension, Charset charset, Locale locale,
@@ -91,6 +111,10 @@ public final class CottonEnvironment {
 
         return registrations;
     }
+
+    // #################################################################################################################
+    // ################################################# METRICS #######################################################
+    // #################################################################################################################
 
     static final class MetricsConsumerRegistration {
 

@@ -4,6 +4,8 @@ import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
+import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionContextException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.metrics.MetricsDispatcherFlow;
@@ -16,17 +18,23 @@ import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.NavigationEvent;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-import java.util.function.BiPredicate;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarFile;
 
 class CottonServletService extends VaadinServletService {
 
-	private static final long serialVersionUID = 1L;
-	private static final BiPredicate<String, Class> ROUTE_COMPONENT_PREDICATE = (qualifier, componentClass) ->
-		Component.class.isAssignableFrom(componentClass) && componentClass.isAnnotationPresent(Route.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
 
 	static final String SID_SERVLETSERVICE = "_servletService";
 
@@ -81,25 +89,95 @@ class CottonServletService extends VaadinServletService {
 
 	private final Injector serviceInjector;
 	private final Localizer localizer;
+	private final String applicationInitializerClass;
+	private final String applicationBasePackage;
 
 	CottonServletService(@Inject @Qualifier(CottonServlet.SID_SERVLET) VaadinServlet servlet,
 						 @Inject @Qualifier(CottonServlet.SID_DEPLOYMENTCONFIG) DeploymentConfiguration deploymentConfiguration,
 						 @Inject @Qualifier(Localizer.SID_LOCALIZER) Localizer localizer,
-						 @Inject Injector serviceInjector) {
+						 @Inject Injector serviceInjector,
+						 @Resolve("${" + CottonServlet.PID_INITIALIZERCLASS + "}") String applicationInitializerClass,
+						 @Resolve("${" + CottonServlet.PID_BASEPACKAGE + "}") String applicationBasePackage) {
 		super(servlet, deploymentConfiguration);
 		this.serviceInjector = serviceInjector;
 		this.localizer = localizer;
+		this.applicationInitializerClass = applicationInitializerClass;
+		this.applicationBasePackage = applicationBasePackage;
 	}
 
 	@Override
 	public void init() throws ServiceException {
 		super.init();
+
+		Class<?> applicationInitializerClass = load(this.applicationInitializerClass);
+		String applicationBasePath = this.applicationBasePackage.replace('.', '/');
 		try {
-			for (Class<?> view: this.serviceInjector.aggregate(Class.class, ROUTE_COMPONENT_PREDICATE)) {
-				RouteConfiguration.forRegistry(getRouter().getRegistry()).setAnnotatedRoute((Class<? extends Component>) view);
+			File file = new File(applicationInitializerClass.getProtectionDomain().getCodeSource().getLocation().toURI());
+			if (file.isDirectory()){
+				getClasses(applicationBasePath).parallelStream()
+						.forEach(this::registerIfRoute);
+			} else {
+				JarFile jarFile = new JarFile(file);
+				Collections.list(jarFile.entries()).parallelStream()
+						.filter(e -> e.getName().startsWith(applicationBasePath) && e.getName().endsWith(".class"))
+						.forEach(e -> registerIfRoute(load(e.getName().replace('/', '.').replace(".class", ""))));
 			}
-		} catch (InvalidRouteConfigurationException e) {
-			throw new ServiceException("Cannot set up routing for the given views", e);
+		} catch (Exception e) {
+			throw new ServiceException("Automatic @" + Route.class.getSimpleName() + " detection failed", e);
+		}
+	}
+
+	private void registerIfRoute(Class<?> clazz) {
+		if (Component.class.isAssignableFrom(clazz) && (clazz.isAnnotationPresent(Route.class) || clazz.isAnnotationPresent(RouteAlias.class))) {
+			Class<? extends Component> routeTarget = (Class<? extends Component>) clazz;
+			RouteConfiguration router = RouteConfiguration.forRegistry(getRouter().getRegistry());
+			router.setAnnotatedRoute(routeTarget);
+			LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl(routeTarget) + "'");
+		}
+	}
+
+	private Set<Class<?>> getClasses(String applicationBasePath) throws IOException {
+		ClassLoader classLoader = CottonServlet.class.getClassLoader();
+
+		Set<Class<?>> classes = ConcurrentHashMap.newKeySet();
+		Collections.list(classLoader.getResources(applicationBasePath))
+				.parallelStream()
+				.map(this::toFile)
+				.forEach(dir -> classes.addAll(findClasses(dir, this.applicationBasePackage)));
+
+		return classes;
+	}
+
+	private File toFile(URL url) {
+		try {
+			return new File(url.toURI().getPath());
+		} catch (URISyntaxException e) {
+			throw new Http500InternalServerErrorException("Unable to create file to URL", e);
+		}
+	}
+
+	private Set<Class<?>> findClasses(File directory, String packageName) {
+		Set<Class<?>> classes = ConcurrentHashMap.newKeySet();
+		if (!directory.exists()) {
+			return classes;
+		}
+		Arrays.asList(directory.listFiles()).parallelStream().forEach(file -> {
+			if (file.isDirectory()) {
+				if (!file.getName().contains(".")) {
+					classes.addAll(findClasses(file, packageName + "." + file.getName()));
+				}
+			} else if (file.getName().endsWith(".class")) {
+				classes.add(load(packageName + '.' + file.getName().replace(".class", "")));
+			}
+		});
+		return classes;
+	}
+
+	private Class<?> load(String className) {
+		try {
+			return Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			throw new Http500InternalServerErrorException("Unable to load class for automatic @" + Route.class.getSimpleName() + " detection", e);
 		}
 	}
 

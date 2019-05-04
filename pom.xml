@@ -39,7 +39,7 @@
 		<com.vaadin.version>13.0.4</com.vaadin.version>
 
 		<!-- com.mantledillusion dependencies -->
-		<injection.hura.version>2.0.0.ALPHA2</injection.hura.version>
+		<injection.hura.version>2.0.0.ALPHA3</injection.hura.version>
 		<data.epiphy.version>3.0.0-SNAPSHOT</data.epiphy.version>
 		<vaadin.metrics.version>1.0.0-SNAPSHOT</vaadin.metrics.version>
 
