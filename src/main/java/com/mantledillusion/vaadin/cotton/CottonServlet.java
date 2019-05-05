@@ -5,6 +5,7 @@ import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
+import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.metrics.MetricsObserverFlow;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.DefaultDeploymentConfiguration;
@@ -47,7 +48,7 @@ public class CottonServlet extends VaadinServlet {
 
     protected CottonServlet(Blueprint cottonEnvironment) {
         if (cottonEnvironment == null) {
-            throw new IllegalArgumentException("Cannot initialize a " + CottonServlet.class.getSimpleName() + " using a null cotton environment blueprint");
+            throw new Http901IllegalArgumentException("Cannot initialize a " + CottonServlet.class.getSimpleName() + " using a null cotton environment blueprint");
         }
 
         this.servletInjector = Injector.of(cottonEnvironment);
