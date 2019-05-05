@@ -8,7 +8,7 @@
 	<version>2.0.0.ALPHA1</version>
 
 	<name>Cotton</name>
-	<description>Cotton is a Vaadin extension for automatic url pathing, MVP injection and advanced data binding.</description>
+	<description>Cotton is a Vaadin extension destined for the ultimate of developer convenience.</description>
 	<url>http://www.mantledillusion.com</url>
 
 	<licenses>
@@ -40,8 +40,8 @@
 
 		<!-- com.mantledillusion dependencies -->
 		<injection.hura.version>2.0.0.ALPHA3</injection.hura.version>
-		<data.epiphy.version>3.0.0-SNAPSHOT</data.epiphy.version>
-		<vaadin.metrics.version>1.0.0-SNAPSHOT</vaadin.metrics.version>
+		<data.epiphy.version>3.0.0.ALPHA1</data.epiphy.version>
+		<vaadin.metrics.version>1.0.0.ALPHA1</vaadin.metrics.version>
 
 		<!-- org.apache dependencies -->
 		<commons.collections.version>4.3</commons.collections.version>

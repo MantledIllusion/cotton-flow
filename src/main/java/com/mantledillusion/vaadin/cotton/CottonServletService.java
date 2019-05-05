@@ -4,11 +4,13 @@ import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.property.Matches;
 import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionContextException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.metrics.MetricsDispatcherFlow;
+import com.mantledillusion.vaadin.metrics.MetricsObserverFlow;
 import com.mantledillusion.vaadin.metrics.api.MetricAttribute;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
@@ -91,39 +93,52 @@ class CottonServletService extends VaadinServletService {
 	private final Localizer localizer;
 	private final String applicationInitializerClass;
 	private final String applicationBasePackage;
+	private final boolean automaticRouteDiscovery;
 
 	CottonServletService(@Inject @Qualifier(CottonServlet.SID_SERVLET) VaadinServlet servlet,
 						 @Inject @Qualifier(CottonServlet.SID_DEPLOYMENTCONFIG) DeploymentConfiguration deploymentConfiguration,
 						 @Inject @Qualifier(Localizer.SID_LOCALIZER) Localizer localizer,
 						 @Inject Injector serviceInjector,
 						 @Resolve("${" + CottonServlet.PID_INITIALIZERCLASS + "}") String applicationInitializerClass,
-						 @Resolve("${" + CottonServlet.PID_BASEPACKAGE + "}") String applicationBasePackage) {
+						 @Resolve("${" + CottonServlet.PID_BASEPACKAGE + "}") String applicationBasePackage,
+						 @Resolve("${" + CottonEnvironment.PKEY_AUTOMATIC_ROUTE_DISCOVERY + ":true}") @Matches("(true)|(false)") String automaticRouteDiscovery) {
 		super(servlet, deploymentConfiguration);
 		this.serviceInjector = serviceInjector;
 		this.localizer = localizer;
 		this.applicationInitializerClass = applicationInitializerClass;
 		this.applicationBasePackage = applicationBasePackage;
+		this.automaticRouteDiscovery = Boolean.parseBoolean(automaticRouteDiscovery);
 	}
 
 	@Override
 	public void init() throws ServiceException {
 		super.init();
 
-		Class<?> applicationInitializerClass = load(this.applicationInitializerClass);
-		String applicationBasePath = this.applicationBasePackage.replace('.', '/');
-		try {
-			File file = new File(applicationInitializerClass.getProtectionDomain().getCodeSource().getLocation().toURI());
-			if (file.isDirectory()){
-				getClasses(applicationBasePath).parallelStream()
-						.forEach(this::registerIfRoute);
-			} else {
-				JarFile jarFile = new JarFile(file);
-				Collections.list(jarFile.entries()).parallelStream()
-						.filter(e -> e.getName().startsWith(applicationBasePath) && e.getName().endsWith(".class"))
-						.forEach(e -> registerIfRoute(load(e.getName().replace('/', '.').replace(".class", ""))));
+		// DISCOVER ROUTES
+		if (this.automaticRouteDiscovery) {
+			Class<?> applicationInitializerClass = load(this.applicationInitializerClass);
+			String applicationBasePath = this.applicationBasePackage.replace('.', '/');
+			try {
+				File file = new File(applicationInitializerClass.getProtectionDomain().getCodeSource().getLocation().toURI());
+				if (file.isDirectory()){
+					getClasses(applicationBasePath).parallelStream()
+							.forEach(this::registerIfRoute);
+				} else {
+					JarFile jarFile = new JarFile(file);
+					Collections.list(jarFile.entries()).parallelStream()
+							.filter(e -> e.getName().startsWith(applicationBasePath) && e.getName().endsWith(".class"))
+							.forEach(e -> registerIfRoute(load(e.getName().replace('/', '.').replace(".class", ""))));
+				}
+			} catch (Exception e) {
+				throw new ServiceException("Automatic @" + Route.class.getSimpleName() + " detection failed", e);
 			}
-		} catch (Exception e) {
-			throw new ServiceException("Automatic @" + Route.class.getSimpleName() + " detection failed", e);
+		}
+
+		// OBSERVE METRICS
+		MetricsObserverFlow observer = MetricsObserverFlow.observe(this);
+		for (CottonEnvironment.MetricsConsumerRegistration registration:
+				this.serviceInjector.aggregate(CottonEnvironment.MetricsConsumerRegistration.class)) {
+			observer.addConsumer(registration.consumerId, registration.consumer, registration.gate, registration.filter);
 		}
 	}
 

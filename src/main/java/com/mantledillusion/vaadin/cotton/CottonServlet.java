@@ -17,6 +17,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+/**
+ * Extended {@link VaadinServlet} that sets up Cotton's application environment.
+ * <p>
+ * In application who are completely injected by Hura, this {@link javax.servlet.Servlet} class can be injected directly.
+ * <p>
+ * In other environments (such as Spring or plain Servlet-API deployments), this class has to be extended,
+ * so the protected constructor is used with an instance of the {@link Blueprint} that defines the application's environment.
+ */
 public class CottonServlet extends VaadinServlet {
 
     private static final String PKEY_HURAWEB_INITIALIZER = "hura.web.application.initializerClass";
@@ -46,6 +54,12 @@ public class CottonServlet extends VaadinServlet {
     private final String applicationInitializerClass;
     private final String applicationPackage;
 
+    /**
+     * Constructor when Cotton is running in a non-Hura injected application.
+     *
+     * @param cottonEnvironment The {@link Blueprint} that @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}s
+     *                          the application's environment; might <b>not</b> be null.
+     */
     protected CottonServlet(Blueprint cottonEnvironment) {
         if (cottonEnvironment == null) {
             throw new Http901IllegalArgumentException("Cannot initialize a " + CottonServlet.class.getSimpleName() + " using a null cotton environment blueprint");
@@ -111,13 +125,6 @@ public class CottonServlet extends VaadinServlet {
             service = this.servletInjector.instantiate(CottonServletService.class, servlet, deploymentConfig, localizer,
                     initializerClass, basePackage);
             service.init();
-
-            // METRICS
-            MetricsObserverFlow observer = MetricsObserverFlow.observe(service);
-            for (CottonEnvironment.MetricsConsumerRegistration registration:
-                    this.servletInjector.aggregate(CottonEnvironment.MetricsConsumerRegistration.class)) {
-                observer.addConsumer(registration.consumerId, registration.consumer, registration.gate, registration.filter);
-            }
         } catch (Exception e) {
             ServiceException se = new ServiceException(e);
             this.logger.error("Unable to create " + CottonServletService.class.getSimpleName() + " for "

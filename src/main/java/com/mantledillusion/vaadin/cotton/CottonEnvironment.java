@@ -24,6 +24,7 @@ public final class CottonEnvironment {
     // #################################################################################################################
 
     static final String PKEY_APPLICATION_BASE_PACKAGE = "cotton.application.basePackage";
+    static final String PKEY_AUTOMATIC_ROUTE_DISCOVERY = "cotton.application.automaticRouteDiscovery";
 
     /**
      * Builds a {@link Blueprint.PropertyAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
@@ -40,6 +41,20 @@ public final class CottonEnvironment {
                     "Cannot set the application's base package to null.");
         }
         return Blueprint.PropertyAllocation.of(PKEY_APPLICATION_BASE_PACKAGE, basePackage.getName());
+    }
+
+    /**
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
+     * whether Cotton should automatically define @{@link com.vaadin.flow.router.Route}d {@link com.vaadin.flow.component.Component}s
+     * found in {@link Package}s in and underneath the application's base package.
+     * <p>
+     * By default, this option is enabled.
+     *
+     * @param discoverRoutesAutomatically True to enable automatic route defining, false otherwise.
+     * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
+     */
+    public static Blueprint.PropertyAllocation forAutomaticRouteDiscovery(boolean discoverRoutesAutomatically) {
+        return Blueprint.PropertyAllocation.of(PKEY_AUTOMATIC_ROUTE_DISCOVERY, Boolean.toString(discoverRoutesAutomatically));
     }
 
     // #################################################################################################################
