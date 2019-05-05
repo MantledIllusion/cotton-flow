@@ -1,14 +1,12 @@
 package com.mantledillusion.vaadin.cotton;
 
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
-import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
-import com.mantledillusion.vaadin.cotton.viewpresenter.View;
 import com.vaadin.flow.component.Component;
 
 /**
  * Provider for automated login.
  * <p>
- * Is triggered for example when a @{@link Restricted} {@link View} is visited.
+ * Is triggered for example when a @{@link com.mantledillusion.vaadin.cotton.viewpresenter.Restricted} @{@link com.vaadin.flow.router.Route} is visited.
  * <p>
  * Use one of the factory methods...<br>
  * - {@link #byView(Class)}<br>
@@ -16,8 +14,6 @@ import com.vaadin.flow.component.Component;
  * ... to for instantiation.
  */
 public final class LoginProvider {
-	
-	static final String SID_LOGIN_PROVIDER = "_loginProvider";
 
 	/**
 	 * Provider for {@link User} instances when automated login is triggered.

@@ -43,6 +43,28 @@ public final class CottonEnvironment {
     }
 
     // #################################################################################################################
+    // ################################################## LOGIN ########################################################
+    // #################################################################################################################
+
+    static final String SID_LOGIN_PROVIDER = "_loginProvider";
+
+    /**
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
+     * a {@link LoginProvider} which is triggered for example when
+     * a @{@link com.mantledillusion.vaadin.cotton.viewpresenter.Restricted} @{@link com.vaadin.flow.router.Route} is visited.
+     *
+     * @param loginProvider The {@link LoginProvider} to register; might <b>not</b> be null.
+     * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
+     */
+    public static Blueprint.SingletonAllocation forLoginProvider(LoginProvider loginProvider) {
+        if (loginProvider == null) {
+            throw new Http901IllegalArgumentException(
+                    "Cannot set the application's login provider to a null instance.");
+        }
+        return Blueprint.SingletonAllocation.of(SID_LOGIN_PROVIDER, loginProvider);
+    }
+
+    // #################################################################################################################
     // ############################################## LOCALIZATION #####################################################
     // #################################################################################################################
 

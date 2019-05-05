@@ -24,7 +24,7 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 	private static final long serialVersionUID = 1L;
 
 	@Inject
-	@Qualifier(LoginProvider.SID_LOGIN_PROVIDER)
+	@Qualifier(CottonEnvironment.SID_LOGIN_PROVIDER)
 	@Optional
 	private LoginProvider provider;
 	
