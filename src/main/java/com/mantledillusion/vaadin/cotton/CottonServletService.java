@@ -101,7 +101,7 @@ class CottonServletService extends VaadinServletService {
 						 @Inject Injector serviceInjector,
 						 @Resolve("${" + CottonServlet.PID_INITIALIZERCLASS + "}") String applicationInitializerClass,
 						 @Resolve("${" + CottonServlet.PID_BASEPACKAGE + "}") String applicationBasePackage,
-						 @Resolve("${" + CottonEnvironment.PKEY_AUTOMATIC_ROUTE_DISCOVERY + ":true}") @Matches("(true)|(false)") String automaticRouteDiscovery) {
+						 @Resolve("${" + CottonEnvironment.PKEY_AUTOMATIC_ROUTE_DISCOVERY + ":false}") @Matches("(true)|(false)") String automaticRouteDiscovery) {
 		super(servlet, deploymentConfiguration);
 		this.serviceInjector = serviceInjector;
 		this.localizer = localizer;
