@@ -35,14 +35,14 @@ Like in native Vaadin, the base of all Cotton applications is the Servlet-API.
  | Environment Injection | &#10003; | &#10003; | &#10003; | &#10003; | X |
  | Massive Framework | X | X | &#10003; | &#10003; | X |
  
-Obviously, Hura Web and WebLaunche's low profile provide a great performance at a very low footprint at the cost of lacking the huge framework support Spring offers.
+Obviously, Hura Web and WebLaunches' low profile provide great performance at a very low footprint, but it comes the cost of lacking the huge framework support Spring offers.
 
 For example, when in need for calling a REST web service, a Hura Web environment will bring the necessity of adding a REST framework like [Retrofit](http://square.github.io/retrofit/), while Spring already provides its RestTemplate for the job.
 
 **In the end, the Vaadin application's target architecture defines which way to go.**
 
-If the frontend is meant to be rather lightweight, either without any heavy computation or with all of the complexity done in a middleware or backend, a Hura Web environment can be a provide an awesome base.
+If the frontend is meant to be rather lightweight, either without any heavy computation or with all of the complexity done in a middleware or backend, a Hura Web environment can provide an awesome base.
 
-If frontend and backend are combined however and the application needs to call several services, grab data from a database and needs to publish events made by users to a JMS queue, a Spring setup might be right way to go.
+However, if frontend and backend are combined and the application needs to call several services, grab data from a database and needs to publish events made by users to a JMS queue, a Spring setup might be right way to go.
 
-Since main environment beans are delivered to the Hura injected views from the CottonServlet either way, it is no problem to start off with a lightweight Hura Web environment at the start and later switch to a heavier Spring environment later on.
+_**Tip**_: it is no problem to start off with a lightweight Hura Web environment and later on switch to a heavier Spring environment when the requirements become complex, because the Vaadin part of the application (like views and presenters) are injected by Hura either way. The only thing changing when switching the environment is the framework that provides main environment beans to the _**CottonServlet**_, so no frontend class will have to be touched as long as that environment bean's API does not change.
