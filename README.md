@@ -26,7 +26,7 @@ Like in native Vaadin, the base of all Cotton applications is the Servlet-API.
  
  The following Table provides a quick summary over the differences when building and deploying that chapter's demo applications:
  
- | | Cotton + Hura Web | Cotton + Hura WebLaunch |Cotton +  Spring WebMVC | Cotton + Spring Boot | Cotton + Native Servlet-API |
+ | | [Cotton + Hura Web](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/a/hura_web_setup) | [Cotton + Hura WebLaunch](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/b/hura_weblaunch_setup) | [Cotton +  Spring WebMVC](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/c/spring_webmvc_setup) | [Cotton + Spring Boot](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/d/spring_boot_setup) | [Cotton + Native Servlet-API](https://github.com/MantledIllusion/cotton-flow-demo/tree/01/e/native_setup) |
  | --- | :---: | :---: | :---: | :---: | :---: |
  | Packaging | .WAR | .JAR | .WAR | .JAR | .WAR |
  | Webserver | Tomcat 9 | Undertow 2 (embedded) | Tomcat 9 | Tomcat 9 (embedded) | Tomcat 9 |
