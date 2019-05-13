@@ -37,6 +37,8 @@ import java.util.jar.JarFile;
 class CottonServletService extends VaadinServletService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
+	private static final String JAR = "jar";
+	private static final String FILE = "file";
 
 	static final String SID_SERVLETSERVICE = "_servletService";
 
@@ -119,15 +121,16 @@ class CottonServletService extends VaadinServletService {
 			Class<?> applicationInitializerClass = load(this.applicationInitializerClass);
 			String applicationBasePath = this.applicationBasePackage.replace('.', '/');
 			try {
-				File file = new File(applicationInitializerClass.getProtectionDomain().getCodeSource().getLocation().toURI());
-				if (file.isDirectory()){
-					getClasses(applicationBasePath).parallelStream()
-							.forEach(this::registerIfRoute);
-				} else {
-					JarFile jarFile = new JarFile(file);
-					Collections.list(jarFile.entries()).parallelStream()
-							.filter(e -> e.getName().startsWith(applicationBasePath) && e.getName().endsWith(".class"))
-							.forEach(e -> registerIfRoute(load(e.getName().replace('/', '.').replace(".class", ""))));
+				URL url = applicationInitializerClass.getProtectionDomain().getCodeSource().getLocation();
+				if (FILE.equals(url.getProtocol())) {
+					File file = new File(url.toURI());
+					if (file.isDirectory()) {
+						getClasses(applicationBasePath).parallelStream().forEach(this::registerIfRoute);
+					} else if (file.getName().toLowerCase().endsWith(JAR)) {
+						readJar(new JarFile(file), applicationBasePath);
+					}
+				} else if(JAR.equals(url.getProtocol())) {
+					readJar(((JarFile) url.getContent()), applicationBasePath);
 				}
 			} catch (Exception e) {
 				throw new ServiceException("Automatic @" + Route.class.getSimpleName() + " detection failed", e);
@@ -140,6 +143,12 @@ class CottonServletService extends VaadinServletService {
 				this.serviceInjector.aggregate(CottonEnvironment.MetricsConsumerRegistration.class)) {
 			observer.addConsumer(registration.consumerId, registration.consumer, registration.gate, registration.filter);
 		}
+	}
+
+	private void readJar(JarFile jarFile, String applicationBasePath) {
+		Collections.list(jarFile.entries()).parallelStream()
+				.filter(e -> e.getName().startsWith(applicationBasePath) && e.getName().endsWith(".class"))
+				.forEach(e -> registerIfRoute(load(e.getName().replace('/', '.').replace(".class", ""))));
 	}
 
 	private void registerIfRoute(Class<?> clazz) {
