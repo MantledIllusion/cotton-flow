@@ -60,6 +60,7 @@ public final class CottonUI extends UI {
 	 * <p>
 	 * Will be notified after a new {@link User} logs in.
 	 */
+	@FunctionalInterface
 	public interface BeforeLogoutListener {
 
 		/**

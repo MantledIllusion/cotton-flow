@@ -6,12 +6,12 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.property.Matches;
 import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
+import com.mantledillusion.metrics.trail.MetricsTrailConsumer;
+import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.api.MetricAttribute;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionContextException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
-import com.mantledillusion.vaadin.metrics.MetricsDispatcherFlow;
-import com.mantledillusion.vaadin.metrics.MetricsObserverFlow;
-import com.mantledillusion.vaadin.metrics.api.MetricAttribute;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.di.DefaultInstantiator;
@@ -60,9 +60,8 @@ class CottonServletService extends VaadinServletService {
 			long ms = System.currentTimeMillis();
 			T target = super.createRouteTarget(routeTargetType, event);
 			ms = System.currentTimeMillis() - ms;
-			MetricsDispatcherFlow.dispatch(CottonMetrics.SYSTEM_INJECTION.build(
-					new MetricAttribute("viewClass", routeTargetType.getName()),
-					new MetricAttribute("duration", String.valueOf(ms))));
+			VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SYSTEM_INJECTION.build(ms,
+					new MetricAttribute("class", routeTargetType.getName())));
 			return target;
 		}
 
@@ -138,11 +137,8 @@ class CottonServletService extends VaadinServletService {
 		}
 
 		// OBSERVE METRICS
-		MetricsObserverFlow observer = MetricsObserverFlow.observe(this);
-		for (CottonEnvironment.MetricsConsumerRegistration registration:
-				this.serviceInjector.aggregate(CottonEnvironment.MetricsConsumerRegistration.class)) {
-			observer.addConsumer(registration.consumerId, registration.consumer, registration.gate, registration.filter);
-		}
+		VaadinMetricsTrailSupport support = VaadinMetricsTrailSupport.support(this);
+		this.serviceInjector.aggregate(MetricsTrailConsumer.class).forEach(support::hook);
 	}
 
 	private void readJar(JarFile jarFile, String applicationBasePath) {

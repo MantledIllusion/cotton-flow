@@ -9,6 +9,8 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostInject;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
+import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.vaadin.flow.server.ErrorHandler;
 import com.vaadin.flow.server.VaadinSession;
 
 class CottonSession extends VaadinSession {
@@ -26,6 +28,7 @@ class CottonSession extends VaadinSession {
 			@Inject LoginHandler loginHandler) {
 		super(servletService);
 		this.sessionBeans = Arrays.asList(localizer, loginHandler);
+		setErrorHandler(getErrorHandler());
 	}
 
 	@PostInject
@@ -40,6 +43,11 @@ class CottonSession extends VaadinSession {
 		for (CottonServletService.SessionBean bean: this.sessionBeans) {
 			bean.unhook(this);
 		}
+	}
+
+	@Override
+	public void setErrorHandler(ErrorHandler errorHandler) {
+		super.setErrorHandler(VaadinMetricsTrailSupport.support(errorHandler));
 	}
 
 	<T> T create(Class<T> type) {

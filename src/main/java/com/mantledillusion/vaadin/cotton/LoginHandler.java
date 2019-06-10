@@ -9,15 +9,19 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Optional;
+import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.api.MetricAttribute;
 import com.mantledillusion.vaadin.cotton.CottonUI.AfterLoginListener;
 import com.mantledillusion.vaadin.cotton.CottonUI.BeforeLogoutListener;
 import com.mantledillusion.vaadin.cotton.event.EventBusSubscriber;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.exception.http400.Http403UnauthorizedException;
+import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterListener;
+import org.apache.commons.lang3.ArrayUtils;
 
 class LoginHandler extends EventBusSubscriber implements CottonServletService.SessionBean, BeforeEnterListener {
 	
@@ -40,6 +44,9 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 	
 	void login(User user) {
 		this.user = user;
+		VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.USER_STATE.build(
+				MetricAttribute.operatorOf("LOGGED_IN"),
+				new MetricAttribute("user", user.toString())));
 		AfterLoginEvent event = new AfterLoginEvent(CottonUI.current());
 		for (AfterLoginListener listener: CottonUI.getCurrent().getNavigationListeners(AfterLoginListener.class)) {
 			listener.afterLogin(event);
@@ -55,6 +62,9 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 			}
 		}
 		this.user = null;
+		VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.USER_STATE.build(
+				MetricAttribute.operatorOf("LOGGED_OUT"),
+				new MetricAttribute("user", user.toString())));
 		return true;
 	}
 
@@ -70,6 +80,9 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 					return;
 				} else if (this.provider.userProvider != null) {
 					this.user = this.provider.userProvider.provide();
+					VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.USER_STATE.build(
+							MetricAttribute.operatorOf("LOGGED_IN"),
+							new MetricAttribute("user", user.toString())));
 				}
 			}
 			
@@ -77,7 +90,7 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 				Set<String> requiredUserRights = new HashSet<>();
 				for (Class<?> type : restrictions) {
 					Restricted restricted = type.getAnnotation(Restricted.class);
-					if (restricted.value() != null) {
+					if (ArrayUtils.isNotEmpty(restricted.value())) {
 						for (String requiredUserRight : restricted.value()) {
 							if (requiredUserRight != null) {
 								requiredUserRights.add(requiredUserRight);
@@ -87,9 +100,16 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 				}
 				
 				if (this.user.hasRights(requiredUserRights)) {
+					VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SECURITY_ACCESS_PERMITTED.build(
+							new MetricAttribute("target", event.getNavigationTarget().getName()),
+							new MetricAttribute("user", this.user.toString())));
 					return;
 				}
 			}
+
+			VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SECURITY_ACCESS_DENIED.build(
+					new MetricAttribute("target", event.getNavigationTarget().getName()),
+					new MetricAttribute("user", this.user != null ? this.user.toString() : null)));
 
 			event.rerouteToError(new Http403UnauthorizedException("Access to the view '"
 					+ event.getNavigationTarget().getSimpleName() + "' is restricted"), null);

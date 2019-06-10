@@ -36,12 +36,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- maven dependency versions -->
-		<com.vaadin.version>13.0.4</com.vaadin.version>
+		<com.vaadin.version>13.0.8</com.vaadin.version>
 
 		<!-- com.mantledillusion dependencies -->
 		<injection.hura.version>2.0.0.ALPHA3</injection.hura.version>
 		<data.epiphy.version>3.0.0.ALPHA1</data.epiphy.version>
-		<vaadin.metrics.version>1.0.0.ALPHA1</vaadin.metrics.version>
+		<trail.metrics.version>1.0.0.ALPHA1</trail.metrics.version>
 
 		<!-- org.apache dependencies -->
 		<commons.collections.version>4.3</commons.collections.version>
@@ -90,9 +90,9 @@
 			<version>${data.epiphy.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.mantledillusion.vaadin</groupId>
-			<artifactId>vaadin-metrics-observer-flow</artifactId>
-			<version>${vaadin.metrics.version}</version>
+			<groupId>com.mantledillusion.metrics</groupId>
+			<artifactId>trail-metrics-support-vaadin-flow</artifactId>
+			<version>${trail.metrics.version}</version>
 		</dependency>
 
 		<!-- org.apache dependencies -->

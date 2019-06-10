@@ -6,7 +6,6 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
-import com.mantledillusion.vaadin.metrics.MetricsObserverFlow;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.DefaultDeploymentConfiguration;
 import com.vaadin.flow.server.ServiceException;

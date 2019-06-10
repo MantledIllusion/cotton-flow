@@ -1,10 +1,11 @@
 package com.mantledillusion.vaadin.cotton;
 
 import com.mantledillusion.injection.hura.core.Blueprint;
+import com.mantledillusion.metrics.trail.MetricsConsumer;
+import com.mantledillusion.metrics.trail.MetricsPredicate;
+import com.mantledillusion.metrics.trail.MetricsTrailConsumer;
+import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
-import com.mantledillusion.vaadin.metrics.MetricsConsumer;
-import com.mantledillusion.vaadin.metrics.MetricsPredicate;
-import com.mantledillusion.vaadin.metrics.api.Metric;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -205,29 +206,13 @@ public final class CottonEnvironment {
     // ################################################# METRICS #######################################################
     // #################################################################################################################
 
-    static final class MetricsConsumerRegistration {
-
-        final String consumerId;
-        final MetricsConsumer consumer;
-        final MetricsPredicate gate;
-        final MetricsPredicate filter;
-
-        private MetricsConsumerRegistration(String consumerId, MetricsConsumer consumer, MetricsPredicate gate,
-                                            MetricsPredicate filter) {
-            this.consumerId = consumerId;
-            this.consumer = consumer;
-            this.gate = gate;
-            this.filter = filter;
-        }
-    }
-
     /**
      * Builds a {@link Blueprint.SingletonAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
      * a {@link MetricsConsumer} for the application's Vaadin metrics.
      *
      * @param consumerId The unique id to add the consumer under, which will be delivered
      *                   to the consumer on each
-     *                   {@link MetricsConsumer#consume(String, String, Metric)}
+     *                   {@link MetricsConsumer#consume(String, UUID, Metric)}
      *                   invocation. Allows the same consumer to be registered multiple
      *                   times with differing configurations; might <b>not</b> be null.
      * @param consumer   The consumer to add; might <b>not</b> be null.
@@ -240,15 +225,10 @@ public final class CottonEnvironment {
      *                   about-to-be-flushed event to be delivered to the consumer; might
      *                   be null.
      * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
-     * @see com.mantledillusion.vaadin.metrics.MetricsObserverFlow#addConsumer(String, MetricsConsumer, MetricsPredicate, MetricsPredicate)
+     * @see MetricsTrailConsumer#from(String, MetricsConsumer, MetricsPredicate, MetricsPredicate)
      */
     public static Blueprint.SingletonAllocation forMetricsConsumer(String consumerId, MetricsConsumer consumer,
                                                                    MetricsPredicate gate, MetricsPredicate filter) {
-        if (consumerId == null || consumerId.isEmpty()) {
-            throw new Http901IllegalArgumentException("Cannot register a consumer under a null or empty id");
-        } else if (consumer == null) {
-            throw new Http901IllegalArgumentException("Cannot register a null consumer");
-        }
-        return Blueprint.SingletonAllocation.of(new MetricsConsumerRegistration(consumerId, consumer, gate, filter));
+        return Blueprint.SingletonAllocation.of(MetricsTrailConsumer.from(consumerId, consumer, gate, filter));
     }
 }
