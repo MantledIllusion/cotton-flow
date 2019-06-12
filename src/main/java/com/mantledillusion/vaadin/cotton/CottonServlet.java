@@ -66,13 +66,15 @@ public class CottonServlet extends VaadinServlet {
 
         this.servletInjector = Injector.of(cottonEnvironment);
         this.applicationInitializerClass = cottonEnvironment.getClass().getName();
-        this.applicationPackage = this.servletInjector.resolve("${"+ CottonEnvironment.PKEY_APPLICATION_BASE_PACKAGE +":"+cottonEnvironment.getClass().getPackage().getName()+"}", true);
+        this.applicationPackage = this.servletInjector.resolve("${" + CottonEnvironment.PKEY_APPLICATION_BASE_PACKAGE
+                + ":"+cottonEnvironment.getClass().getPackage().getName() + "}", true);
     }
 
     @Construct
     private CottonServlet(@Inject Injector servletInjector,
-                          @Resolve("${"+ PKEY_HURAWEB_INITIALIZER +"}") String applicationInitializerClass,
-                          @Resolve("${"+ PKEY_HURAWEB_BASEPACKAGE +"}") String applicationPackage) {
+                          @Resolve("${" + PKEY_HURAWEB_INITIALIZER + "}") String applicationInitializerClass,
+                          @Resolve("${" + CottonEnvironment.PKEY_APPLICATION_BASE_PACKAGE + ":${"
+                                  + PKEY_HURAWEB_BASEPACKAGE + "}}") String applicationPackage) {
         this.servletInjector = servletInjector;
         this.applicationInitializerClass = applicationInitializerClass;
         this.applicationPackage = applicationPackage;
