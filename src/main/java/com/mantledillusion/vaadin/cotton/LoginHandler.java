@@ -51,6 +51,7 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 		for (AfterLoginListener listener: CottonUI.getCurrent().getNavigationListeners(AfterLoginListener.class)) {
 			listener.afterLogin(event);
 		}
+		CottonUI.current().getPage().reload();
 	}
 	
 	boolean logout() {
@@ -61,10 +62,11 @@ class LoginHandler extends EventBusSubscriber implements CottonServletService.Se
 				return false;
 			}
 		}
-		this.user = null;
 		VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.USER_STATE.build(
 				MetricAttribute.operatorOf("LOGGED_OUT"),
-				new MetricAttribute("user", user.toString())));
+				new MetricAttribute("user", this.user.toString())));
+		this.user = null;
+		CottonUI.current().getPage().reload();
 		return true;
 	}
 
