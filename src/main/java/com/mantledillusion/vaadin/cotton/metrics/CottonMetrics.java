@@ -53,7 +53,7 @@ public enum CottonMetrics implements EnumeratedMetric {
      */
     SECURITY_ACCESS_DENIED(MetricType.ALERT);
 
-    private static final String METRICS_DOMAIN = "cotton.";
+    private static final String METRICS_DOMAIN = "cotton";
 
     private final String metricId;
     private final MetricType type;
