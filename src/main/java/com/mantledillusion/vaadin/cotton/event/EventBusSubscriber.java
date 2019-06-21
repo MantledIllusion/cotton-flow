@@ -17,6 +17,7 @@ import java.util.Set;
 import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.Phase;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.AnnotationProcessor;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostInject;
@@ -164,6 +165,9 @@ public class EventBusSubscriber {
 
 	static class SubscribeValidator implements AnnotationProcessor<Subscribe, Method> {
 
+		@Construct
+		private SubscribeValidator() {}
+
 		@Override
 		public void process(Phase phase, Object bean, Subscribe annotationInstance, Method annotatedElement,
 							Injector.TemporalInjectorCallback callback) {
@@ -216,6 +220,9 @@ public class EventBusSubscriber {
 		private static final Set<Class<? extends EventObject>> UI_EVENT_TYPES = Collections
 				.unmodifiableSet(new HashSet<>(Arrays.asList(BeforeEnterEvent.class, BeforeLeaveEvent.class,
 						AfterNavigationEvent.class, AfterLoginEvent.class, BeforeLogoutEvent.class)));
+
+		@Construct
+		private ReactValidator() {}
 
 		@Override
 		public void process(Phase phase, Object bean, React annotationInstance, Method annotatedElement,
