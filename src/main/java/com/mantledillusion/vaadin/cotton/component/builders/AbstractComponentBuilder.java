@@ -6,8 +6,22 @@ import java.util.List;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
+import com.vaadin.flow.component.Component;
 
-abstract class AbstractComponentBuilder<C, B extends AbstractComponentBuilder<C, B>> implements ComponentBuilder<C, B> {
+/**
+ * Base implementation of {@link ComponentBuilder} that provides all of the base functionality except {@link ComponentBuilder#instantiate()};
+ *
+ * @param <C>
+ *            The {@link Component} type this builder builds. Not an extension
+ *            of {@link Component} on purpose, since Vaadin handles shared
+ *            {@link Component} behavior using interfaces that are not
+ *            necessarily bound to {@link Component}s.
+ * @param <B>
+ *            The final implementation type of this {@link AbstractComponentBuilder}.
+ *            Necessary to allow builder methods of non-final implementations to
+ *            return the builder instance in the correct type.
+ */
+public abstract class AbstractComponentBuilder<C, B extends AbstractComponentBuilder<C, B>> implements ComponentBuilder<C, B> {
 	
 	private final List<Configurer<C>> configurators = new ArrayList<>();
 	
