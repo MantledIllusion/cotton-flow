@@ -1,6 +1,7 @@
 package com.mantledillusion.vaadin.cotton;
 
 import com.mantledillusion.injection.hura.core.Blueprint;
+import com.mantledillusion.injection.hura.core.Bus;
 import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
@@ -204,7 +205,8 @@ class CottonServletService extends VaadinServletService {
 	@Override
 	protected VaadinSession createVaadinSession(VaadinRequest request) {
 		return this.serviceInjector.instantiate(CottonSession.class,
-				Blueprint.SingletonAllocation.of(CottonServletService.SID_SERVLETSERVICE, this));
+				Blueprint.SingletonAllocation.of(CottonServletService.SID_SERVLETSERVICE, this),
+				Blueprint.PropertyAllocation.of(Bus.PROPERTY_BUS_ISOLATION, Boolean.TRUE.toString()));
 	}
 
 	@Override

@@ -11,8 +11,6 @@ import com.mantledillusion.injection.hura.core.annotation.lifecycle.Phase;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.AnnotationProcessor;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
-import com.mantledillusion.vaadin.cotton.event.EventBusSubscriber;
-import com.mantledillusion.vaadin.cotton.event.Subscribe;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http904IllegalAnnotationUseException;
 import com.mantledillusion.vaadin.cotton.viewpresenter.View.TemporalActiveComponentRegistry;
 import com.vaadin.flow.component.Component;
@@ -36,17 +34,11 @@ import com.vaadin.flow.component.ComponentEvent;
  * {@link Component}s on the connected view that have been registered as
  * active component to the {@link TemporalActiveComponentRegistry} during the
  * view's UI build; see the documentation of @{@link Listen} for details.
- * <P>
- * Since {@link Presenter} extends {@link EventBusSubscriber}, all
- * {@link Method}s of an {@link Presenter} implementation that are annotated
- * with @{@link Subscribe} will receive specifiable events of other
- * {@link EventBusSubscriber}s; see the documentation of @{@link Subscribe} for
- * reference.
  *
  * @param <T>
  *            The type of {@link View} this {@link Presenter} can control.
  */
-public abstract class Presenter<T extends View> extends EventBusSubscriber {
+public abstract class Presenter<T extends View> {
 
 	// #########################################################################################################################################
 	// ################################################################ LISTEN #################################################################

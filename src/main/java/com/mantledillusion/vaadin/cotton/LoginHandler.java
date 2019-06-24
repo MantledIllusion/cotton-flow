@@ -13,7 +13,6 @@ import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
 import com.mantledillusion.metrics.trail.api.MetricAttribute;
 import com.mantledillusion.vaadin.cotton.CottonUI.AfterLoginListener;
 import com.mantledillusion.vaadin.cotton.CottonUI.BeforeLogoutListener;
-import com.mantledillusion.vaadin.cotton.event.EventBusSubscriber;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.exception.http400.Http403UnauthorizedException;
@@ -23,7 +22,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterListener;
 import org.apache.commons.lang3.ArrayUtils;
 
-class LoginHandler extends EventBusSubscriber implements CottonServletService.SessionBean, BeforeEnterListener {
+class LoginHandler implements CottonServletService.SessionBean, BeforeEnterListener {
 	
 	private static final long serialVersionUID = 1L;
 
