@@ -10,22 +10,20 @@ import java.lang.annotation.Target;
 import com.mantledillusion.vaadin.cotton.User;
 
 /**
- * {@link Annotation} for {@link View} implementations that require a logged in
- * {@link User} with certain rights in order to be displayed.
+ * {@link Annotation} for any @{@link com.vaadin.flow.router.Route}d {@link com.vaadin.flow.component.Component} that
+ * requires a logged in {@link User} with certain rights in order to be displayed.
  */
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface Restricted {
 
 	/**
-	 * Defines the rightIds of the rights the {@link User} has to have upon
-	 * injection of the {@link View}.
+	 * Defines the rightIds of the rights the {@link User} has to own upon navigating to the {@link com.vaadin.flow.router.Route}.
 	 * <P>
-	 * If no rightIds are specified the annotated {@link View} just requires a
-	 * {@link User} to be logged in.
+	 * If no rightIds are specified a {@link User} just has to be logged in.
 	 * 
-	 * @return The rightIds the logged in user has to have to be allowed to view the
-	 *         annotated {@link View}; never null, might be empty, empty by default
+	 * @return The rightIds the logged in user has to have to be allowed to view the annotated {@link View}; never null,
+	 * might be empty, empty by default
 	 */
 	String[] value() default {};
 }
