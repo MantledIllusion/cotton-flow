@@ -9,16 +9,16 @@ import com.mantledillusion.injection.hura.core.annotation.lifecycle.Phase;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.AnnotationProcessor;
 
 import com.mantledillusion.vaadin.cotton.exception.http900.Http904IllegalAnnotationUseException;
-import com.mantledillusion.vaadin.cotton.viewpresenter.View.TemporalActiveComponentRegistry;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.TemporalActiveComponentRegistry;
 import com.vaadin.flow.component.Component;
 
 /**
- * Basic super type for a presenter that controls an {@link View}.
+ * Basic super type for a presenter that controls an {@link Presentable}.
  * <p>
  * NOTE: Should be injected, since the {@link com.mantledillusion.injection.hura.core.Injector} handles the instance's
  * life cycles.
  * <P>
- * Instances of sub types of {@link AbstractPresenter} will be instantiated automatically during injection for every {@link View}
+ * Instances of sub types of {@link AbstractPresenter} will be instantiated automatically during injection for every {@link Presentable}
  * implementation that requires controlling by an @{@link Presented} annotation on that view type.
  * <P>
  * The {@link AbstractPresenter} will automatically be connected to the view it belongs to, that view can be retrieved by
@@ -30,9 +30,9 @@ import com.vaadin.flow.component.Component;
  * details.
  *
  * @param <V>
- *            The type of {@link View} this {@link AbstractPresenter} can control.
+ *            The type of {@link Presentable} this {@link AbstractPresenter} can control.
  */
-public abstract class AbstractPresenter<V extends View> {
+public abstract class AbstractPresenter<V extends Presentable> {
 
 	static class ListenValidator implements AnnotationProcessor<Listen, Method> {
 

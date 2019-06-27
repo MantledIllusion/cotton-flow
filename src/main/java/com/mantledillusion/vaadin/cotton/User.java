@@ -3,7 +3,6 @@ package com.mantledillusion.vaadin.cotton;
 import java.util.Set;
 
 import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
-import com.mantledillusion.vaadin.cotton.viewpresenter.View;
 
 /**
  * Interface for types that represent a single {@link User} of an
@@ -16,7 +15,7 @@ public interface User {
 	 * rightIds.
 	 * <P>
 	 * This method will be called whenever the {@link User} tries to navigate to a
-	 * URL whose {@link View} is @{@link Restricted} to {@link User}s with certain rights.
+	 * URL whose view is @{@link Restricted} to {@link User}s with certain rights.
 	 * 
 	 * @param rightIds The IDs of the rights this {@link User} is asked to have;
 	 *                 never null, might <b>not</b> be empty.

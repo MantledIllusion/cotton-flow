@@ -22,12 +22,12 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 
 /**
  * Basic interface for a view that contains active {@link Component}s a presenter hooked using @{@link Presented} on
- * the {@link View} implementation might @{@link Listen} to.
+ * the {@link Presentable} implementation might @{@link Listen} to.
  * <p>
  * NOTE: Should be injected, since the {@link com.mantledillusion.injection.hura.core.Injector} handles the instance's
  * life cycles.
  */
-public interface View {
+public interface Presentable {
 
 	final class PresentValidator implements AnnotationProcessor<Presented, Class<?>> {
 
@@ -37,9 +37,9 @@ public interface View {
 		@Override
 		public void process(Phase phase, Object bean, Presented annotationInstance, Class<?> annotatedElement,
 							Injector.TemporalInjectorCallback callback) {
-			if (!View.class.isAssignableFrom(annotatedElement)) {
+			if (!Presentable.class.isAssignableFrom(annotatedElement)) {
 				throw new Http904IllegalAnnotationUseException("The @" + Presented.class.getSimpleName()
-						+ " annotation can only be used on " + View.class.getSimpleName()
+						+ " annotation can only be used on " + Presentable.class.getSimpleName()
 						+ " implementations; the type '" + annotatedElement.getSimpleName() + "' however is not.");
 			}
 		}
@@ -53,23 +53,23 @@ public interface View {
 		@Override
 		public void process(Phase phase, Object bean, Presented annotationInstance, Class<?> annotatedElement,
 							Injector.TemporalInjectorCallback callback) throws Exception {
-			View view = (View) bean;
+			Presentable presentable = (Presentable) bean;
 
 			TemporalActiveComponentRegistry reg = new TemporalActiveComponentRegistry();
 			try {
-				view.registerActiveComponents(reg);
+				presentable.registerActiveComponents(reg);
 			} catch (Exception e) {
 				throw new Http500InternalServerErrorException(
-						"Unable to instantiatePresenter view " + getClass().getSimpleName() + ".", e);
+						"Unable to register active components of " + presentable.getClass().getSimpleName(), e);
 			}
 			reg.canRegister = false;
 
-			instantiatePresenter(view, annotationInstance, reg, callback);
+			instantiatePresenter(presentable, annotationInstance, reg, callback);
 		}
 
-		private <V extends View, T> void instantiatePresenter(V view, Presented annotationInstance,
-															  TemporalActiveComponentRegistry reg,
-															  Injector.TemporalInjectorCallback callback) {
+		private <V extends Presentable, T> void instantiatePresenter(V view, Presented annotationInstance,
+																	 TemporalActiveComponentRegistry reg,
+																	 Injector.TemporalInjectorCallback callback) {
 			@SuppressWarnings("unchecked")
 			Class<T> presenterType = (Class<T>) annotationInstance.value();
 
@@ -118,15 +118,17 @@ public interface View {
 	}
 
 	/**
-	 * Temporarily active registry for {@link Component}s on an {@link View} that are active, which means they fire
-	 * events that the {@link View}s presenter has to react on.
+	 * Temporarily active registry for {@link Component}s on an {@link Presentable} that are active, which means they fire
+	 * events that the {@link Presentable}s presenter has to react on.
 	 * <P>
-	 * May only be used during the initialization of the {@link View} it is given to.
+	 * May only be used during the initialization of the {@link Presentable} it is given to.
 	 */
 	final class TemporalActiveComponentRegistry {
 
 		private final Map<String, List<Component>> activeComponents = new HashMap<>();
 		private boolean canRegister = true;
+
+		private TemporalActiveComponentRegistry() {}
 
 		/**
 		 * Registers the given {@link Component}, which will make the component's events @{@link Listen}able to for presenter methods.
@@ -155,7 +157,7 @@ public interface View {
 			}
 		}
 
-		<T extends ComponentEvent<?>> void addListener(String componentId, Class<T> eventType, Object presenter, Method m) {
+		private <T extends ComponentEvent<?>> void addListener(String componentId, Class<T> eventType, Object presenter, Method m) {
 			if (componentId == null) {
 				for (List<Component> components : this.activeComponents.values()) {
 					for (Component component : components) {
@@ -172,7 +174,7 @@ public interface View {
 			}
 		}
 
-		<T extends ComponentEvent<?>> void routeEvent(Component c, Class<T> eventType, Method m, Object presenter) {
+		private <T extends ComponentEvent<?>> void routeEvent(Component c, Class<T> eventType, Method m, Object presenter) {
 			ComponentUtil.addListener(c, eventType, event -> {
 				try {
 					m.invoke(presenter, event);
@@ -188,7 +190,7 @@ public interface View {
 	 * Allows registering {@link Component}s as active to a {@link TemporalActiveComponentRegistry} so a presenter is
 	 * able to @{@link Listen} to its events.
 	 *
-	 * @param reg The {@link View.TemporalActiveComponentRegistry} the view may register its active components to;
+	 * @param reg The {@link Presentable.TemporalActiveComponentRegistry} the view may register its active components to;
 	 *            may <b>not</b> be null.
 	 * @throws Exception For convenience, this method may throw any {@link Exception} it desires that can occur during
 	 * its registration.

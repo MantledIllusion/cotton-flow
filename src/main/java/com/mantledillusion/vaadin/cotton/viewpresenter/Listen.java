@@ -16,7 +16,7 @@ import com.vaadin.flow.component.ComponentEvent;
 
 /**
  * {@link Annotation} for {@link Method}s of presenters that need to listen to events of active {@link Component}s of
- * the presenter's {@link View}.
+ * the presenter's {@link Presentable}.
  * <P>
  * An annotated {@link Method} is expected to be a void {@link Method} and has to receive exactly 1 {@link Parameter}
  * of an {@link ComponentEvent} implementation, or have at least one anonymous event type set.
@@ -33,11 +33,11 @@ public @interface Listen {
 	 * Defines the component id whose corresponding {@link Component} the {@link Method} annotated with @{@link Listen}
 	 * should listen to.
 	 * <P>
-	 * The component id has to be the one of the {@link Component} registered as an active component to its {@link View}
-	 * during {@link View#registerActiveComponents(View.TemporalActiveComponentRegistry)}.
+	 * The component id has to be the one of the {@link Component} registered as an active component to its {@link Presentable}
+	 * during {@link Presentable#registerActiveComponents(Presentable.TemporalActiveComponentRegistry)}.
 	 * <P>
 	 * By default none are declared, so the {@link Method} will listen to <B>all</B> active components the
-	 * presenter's {@link View} registers.
+	 * presenter's {@link Presentable} registers.
 	 * 
 	 * @return The {@link Component}s to listen to; never null, might be empty
 	 */

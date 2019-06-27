@@ -22,7 +22,7 @@ public @interface Restricted {
 	 * <P>
 	 * If no rightIds are specified a {@link User} just has to be logged in.
 	 * 
-	 * @return The rightIds the logged in user has to have to be allowed to view the annotated {@link View}; never null,
+	 * @return The rightIds the logged in user has to have to be allowed to view the annotated {@link Presentable}; never null,
 	 * might be empty, empty by default
 	 */
 	String[] value() default {};

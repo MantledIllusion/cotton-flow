@@ -9,13 +9,13 @@ import java.lang.annotation.Target;
 
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PostInject;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PreConstruct;
-import com.mantledillusion.vaadin.cotton.viewpresenter.View.PresentValidator;
-import com.mantledillusion.vaadin.cotton.viewpresenter.View.PresentProcessor;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentValidator;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentProcessor;
 
 /**
- * {@link Annotation} for {@link View} implementations that need controlling by a presenter.
+ * {@link Annotation} for {@link Presentable} implementations that need controlling by a presenter.
  * <P>
- * Presenters for {@link View}s are instantiated to be completely autonomous, without any possibility to be injected elsewhere.
+ * Presenters for {@link Presentable}s are instantiated to be completely autonomous, without any possibility to be injected elsewhere.
  */
 @Retention(RUNTIME)
 @Target(TYPE)
@@ -24,9 +24,9 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.View.PresentProcessor;
 public @interface Presented {
 
 	/**
-	 * Defines the presenter's implementation type that will be instantiated for instances of the annotated {@link View}.
+	 * Defines the presenter's implementation type that will be instantiated for instances of the annotated {@link Presentable}.
 	 *
-	 * @return The presenter implementation that presents instances of a {@link View} implementation; never null
+	 * @return The presenter implementation that presents instances of a {@link Presentable} implementation; never null
 	 */
 	Class<?> value();
 }

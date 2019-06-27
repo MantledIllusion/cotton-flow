@@ -9,9 +9,9 @@ import com.vaadin.flow.component.html.Div;
 import java.lang.reflect.Method;
 
 /**
- * Basic super type for {@link View}s that are a {@link Composite} of different {@link Component}s.
+ * Basic super type for {@link Presentable}s that are a {@link Composite} of different {@link Component}s.
  */
-public abstract class AbstractView extends Composite<Div> implements View {
+public abstract class AbstractView extends Composite<Div> implements Presentable {
 
     private static final long serialVersionUID = 1L;
 
@@ -30,28 +30,28 @@ public abstract class AbstractView extends Composite<Div> implements View {
     protected final Div initContent() {
         if (this.root == null) {
             throw new Http903NotImplementedException(
-                    "The composition root of an " + View.class.getSimpleName()
+                    "The composition root of an " + Presentable.class.getSimpleName()
                             + " is build during its injection; however, this has not been completed yet.");
         }
         return new Div(this.root);
     }
 
     /**
-     * Builds this {@link View}'s UI and return it.
+     * Builds this {@link Presentable}'s UI and return it.
      * <P>
      * Is called automatically once after the view's injection.
      * <P>
      * Active components that are instantiated during the build can be registered to
-     * the given {@link View.TemporalActiveComponentRegistry}; they are then available to
+     * the given {@link Presentable.TemporalActiveComponentRegistry}; they are then available to
      * listen to by the view's {@link AbstractPresenter}'s @{@link Listen} annotated
      * {@link Method}s.
      *
-     * @param reg The {@link View.TemporalActiveComponentRegistry} the view may register
+     * @param reg The {@link Presentable.TemporalActiveComponentRegistry} the view may register
      *            its active components to; may <b>not</b> be null.
      * @return The component containing the UI that represents this view; never null
      * @throws Exception For convenience, this method may throw any
      *                   {@link Exception} it desires that can occur during its
      *                   build.
      */
-    protected abstract Component buildUI(View.TemporalActiveComponentRegistry reg) throws Exception;
+    protected abstract Component buildUI(Presentable.TemporalActiveComponentRegistry reg) throws Exception;
 }
