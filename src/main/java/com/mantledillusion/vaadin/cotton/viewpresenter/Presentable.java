@@ -23,9 +23,6 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 /**
  * Basic interface for a view that contains active {@link Component}s a presenter hooked using @{@link Presented} on
  * the {@link Presentable} implementation might @{@link Listen} to.
- * <p>
- * NOTE: Should be injected, since the {@link com.mantledillusion.injection.hura.core.Injector} handles the instance's
- * life cycles.
  */
 public interface Presentable {
 
@@ -189,11 +186,13 @@ public interface Presentable {
 	/**
 	 * Allows registering {@link Component}s as active to a {@link TemporalActiveComponentRegistry} so a presenter is
 	 * able to @{@link Listen} to its events.
+	 * <p>
+	 * The default implementation does nothing.
 	 *
 	 * @param reg The {@link Presentable.TemporalActiveComponentRegistry} the view may register its active components to;
 	 *            may <b>not</b> be null.
 	 * @throws Exception For convenience, this method may throw any {@link Exception} it desires that can occur during
 	 * its registration.
 	 */
-	void registerActiveComponents(TemporalActiveComponentRegistry reg) throws Exception;
+	default void registerActiveComponents(TemporalActiveComponentRegistry reg) throws Exception {}
 }

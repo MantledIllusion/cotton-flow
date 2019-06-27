@@ -13,9 +13,10 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentValida
 import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentProcessor;
 
 /**
- * {@link Annotation} for {@link Presentable} implementations that need controlling by a presenter.
+ * {@link Annotation} for {@link Presentable} implementations that need controlling by a {@link Presenter}.
  * <P>
- * Presenters for {@link Presentable}s are instantiated to be completely autonomous, without any possibility to be injected elsewhere.
+ * {@link Presenter}s for {@link Presentable}s are instantiated to be completely autonomous, without any possibility to
+ * be injected elsewhere.
  */
 @Retention(RUNTIME)
 @Target(TYPE)
@@ -24,9 +25,11 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentProces
 public @interface Presented {
 
 	/**
-	 * Defines the presenter's implementation type that will be instantiated for instances of the annotated {@link Presentable}.
+	 * Defines the {@link Presenter}'s implementation type that will be instantiated for instances of the annotated
+	 * {@link Presentable}.
 	 *
-	 * @return The presenter implementation that presents instances of a {@link Presentable} implementation; never null
+	 * @return The {@link Presenter} implementation that presents instances of a {@link Presentable} implementation;
+	 * never null
 	 */
-	Class<?> value();
+	Class<? extends Presenter> value();
 }

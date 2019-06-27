@@ -32,7 +32,7 @@ import com.vaadin.flow.component.Component;
  * @param <V>
  *            The type of {@link Presentable} this {@link AbstractPresenter} can control.
  */
-public abstract class AbstractPresenter<V extends Presentable> {
+public abstract class AbstractPresenter<V extends Presentable> implements Presenter<V> {
 
 	static class ListenValidator implements AnnotationProcessor<Listen, Method> {
 
@@ -71,8 +71,8 @@ public abstract class AbstractPresenter<V extends Presentable> {
 		return view;
 	}
 
-	@SuppressWarnings("unchecked")
-	final void setView(V view) {
+	@Override
+	public void setView(V view) {
 		this.view = view;
 	}
 }
