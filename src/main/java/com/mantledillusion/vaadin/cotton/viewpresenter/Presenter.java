@@ -90,7 +90,8 @@ public interface Presenter<V extends Presentable> {
      * <p>
      * The default implementation does nothing.
      *
-     * @param view
+     * @param view The view that is annotated with @{@link Presented} and that this {@link Presenter} instance presents;
+     *             might <b>not</b> be null
      */
     default void setView(V view) {}
 }
