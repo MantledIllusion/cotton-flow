@@ -87,19 +87,13 @@ public interface Presentable {
 
 						Listen annotation = method.getAnnotation(Listen.class);
 
-						List<Class<? extends ComponentEvent<?>>> eventTypes = new ArrayList<>(Arrays.asList(annotation.anonymousEvents()));
-						if (method.getParameterCount() > 0) {
-							eventTypes.add((Class<? extends ComponentEvent<?>>) method.getParameterTypes()[0]);
+						List<Class<? extends ComponentEvent<?>>> eventTypes = Arrays.asList(annotation.extensions());
+						if (eventTypes.size() == 0) {
+							eventTypes = Arrays.asList((Class<? extends ComponentEvent<?>>) method.getParameterTypes()[0]);
 						}
 
 						for (Class<? extends ComponentEvent<?>> eventType: eventTypes) {
-							if (annotation.value().length == 0) {
-								reg.addListener(null, eventType, presenter, method);
-							} else {
-								for (String componentId : annotation.value()) {
-									reg.addListener(componentId, eventType, presenter, method);
-								}
-							}
+							reg.addListener(annotation.value(), eventType, presenter, method);
 						}
 					}
 				}
@@ -122,7 +116,7 @@ public interface Presentable {
 	 */
 	final class TemporalActiveComponentRegistry {
 
-		private final Map<String, List<Component>> activeComponents = new HashMap<>();
+		private final Map<Component, String> activeComponents = new IdentityHashMap<>();
 		private boolean canRegister = true;
 
 		private TemporalActiveComponentRegistry() {}
@@ -144,31 +138,15 @@ public interface Presentable {
 			} else if (!component.getId().isPresent()) {
 				throw new Http901IllegalArgumentException("Cannot register a component without an id.");
 			} else {
-				String componentId = component.getId().get();
-				if (!this.activeComponents.containsKey(componentId)) {
-					this.activeComponents.put(componentId, new ArrayList<>());
-				}
-				this.activeComponents.get(componentId).add(component);
-
-				return component;
+				this.activeComponents.put(component, component.getId().get());
 			}
+			return component;
 		}
 
-		private <T extends ComponentEvent<?>> void addListener(String componentId, Class<T> eventType, Object presenter, Method m) {
-			if (componentId == null) {
-				for (List<Component> components : this.activeComponents.values()) {
-					for (Component component : components) {
-						routeEvent(component, eventType, m, presenter);
-					}
-				}
-			} else if (this.activeComponents.containsKey(componentId)) {
-				for (Component component : this.activeComponents.get(componentId)) {
-					routeEvent(component, eventType, m, presenter);
-				}
-			} else {
-				throw new Http902IllegalStateException("There is no component named '" + componentId
-						+ "' registered in the view " + getClass().getSimpleName());
-			}
+		private <T extends ComponentEvent<?>> void addListener(String componentIdMatcher, Class<T> eventType, Object presenter, Method m) {
+			this.activeComponents.entrySet().parallelStream()
+					.filter(entry -> entry.getValue().matches(componentIdMatcher))
+					.forEach(entry -> routeEvent(entry.getKey(), eventType, m, presenter));
 		}
 
 		private <T extends ComponentEvent<?>> void routeEvent(Component c, Class<T> eventType, Method m, Object presenter) {
