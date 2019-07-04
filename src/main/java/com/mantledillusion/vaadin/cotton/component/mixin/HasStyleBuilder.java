@@ -2,7 +2,6 @@ package com.mantledillusion.vaadin.cotton.component.mixin;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 
 /**
@@ -10,7 +9,7 @@ import com.vaadin.flow.component.HasStyle;
  * {@link Component}s.
  *
  * @param <C>
- *            The {@link Component} type implementing {@link HasSize}.
+ *            The {@link Component} type implementing {@link HasStyle}.
  * @param <B>
  *            The final implementation type of {@link HasStyleBuilder}.
  */
