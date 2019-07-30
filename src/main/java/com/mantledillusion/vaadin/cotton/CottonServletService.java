@@ -212,7 +212,7 @@ class CottonServletService extends VaadinServletService {
 	@Override
 	public void fireSessionDestroy(VaadinSession vaadinSession) {
 		super.fireSessionDestroy(vaadinSession);
-		this.serviceInjector.destroy(vaadinSession);
+		vaadinSession.access(() -> this.serviceInjector.destroy(vaadinSession));
 	}
 
 	@Override
