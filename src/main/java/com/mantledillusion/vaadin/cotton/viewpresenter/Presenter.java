@@ -46,7 +46,7 @@ public interface Presenter<V extends Presentable> {
                 throw new Http904IllegalAnnotationUseException("The " + ValidatorUtils.getDescription(method)
                         + " is annotated with @" + Listen.class.getSimpleName() + " but is declared static, which is "
                         + "not allowed.");
-            } else if (isValidPattern(annotationInstance.value())) {
+            } else if (!isValidPattern(annotationInstance.value())) {
                 throw new Http904IllegalAnnotationUseException("The " + ValidatorUtils.getDescription(method)
                         + " is annotated with @" + Listen.class.getSimpleName() + " but declares the component id matcher '"
                         + annotationInstance.value() + "', which is not a valid pattern.");
