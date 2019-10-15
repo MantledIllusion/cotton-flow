@@ -1,6 +1,6 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.data.epiphy.interfaces.type.ListedProperty;
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.model.Converter;
@@ -11,9 +11,10 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 
+import java.util.List;
+
 /**
- * {@link ComponentBuilder} for {@link HasFilterableDataProvider} implementing
- * {@link Component}s.
+ * {@link ComponentBuilder} for {@link HasFilterableDataProvider} implementing {@link Component}s.
  *
  * @param <C>
  *            The {@link Component} type implementing {@link HasFilterableDataProvider}.
@@ -22,34 +23,28 @@ import com.vaadin.flow.function.SerializablePredicate;
  * @param <E>
  *            The filter type of the {@link HasFilterableDataProvider}.
  * @param <B>
- *            The final implementation type of
- *            {@link HasFilterableDataProviderBuilder}.
+ *            The final implementation type of {@link HasFilterableDataProviderBuilder}.
  */
 public interface HasFilterableDataProviderBuilder<C extends HasFilterableDataProvider<E, F>, E, F, B extends HasFilterableDataProviderBuilder<C, E, F, B>>
 		extends ComponentBuilder<C, B> {
 
 	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its
-	 * values from a binding to a {@link ListedProperty}.
+	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
 	 * 
-	 * @see HasFilterableDataProvider#setDataProvider(DataProvider,
-	 *      SerializableFunction)
+	 * @see HasFilterableDataProvider#setDataProvider(DataProvider, SerializableFunction)
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with;
-	 *            might <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ListedProperty} to bind the {@link DataProvider} to;
-	 *            might <b>not</b> be null.
+	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
 	 * @param filterConverter
-	 *            a function that converts filter values produced by this listing
-	 *            into filter values expected by the provided data provider; might
-	 *            <b>not</b> be null.
+	 *            a function that converts filter values produced by this listing into filter values expected by the
+	 *            provided data provider; might <b>not</b> be null.
 	 * @return this
 	 */
-	default <ModelType> B setDataProvider(ModelAccessor<ModelType> binder, ListedProperty<ModelType, E> property,
-			SerializableFunction<F, SerializablePredicate<E>> filterConverter) {
+	default <ModelType> B setDataProvider(ModelAccessor<ModelType> binder, Property<ModelType, List<E>> property,
+										  SerializableFunction<F, SerializablePredicate<E>> filterConverter) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null binder.");
 		} else if (property == null) {
@@ -59,33 +54,28 @@ public interface HasFilterableDataProviderBuilder<C extends HasFilterableDataPro
 	}
 
 	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its
-	 * values from a binding to a {@link ListedProperty}.
+	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
 	 * 
-	 * @see HasFilterableDataProvider#setDataProvider(DataProvider,
-	 *      SerializableFunction)
+	 * @see HasFilterableDataProvider#setDataProvider(DataProvider, SerializableFunction)
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
 	 * @param <PropertyValueType>
 	 *            The type of the properties' value to convert from/to.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with;
-	 *            might <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
 	 * @param converter
-	 *            The {@link Converter} to use to convert between the value type of
-	 *            the {@link DataProvider} and the {@link ListedProperty}; might
-	 *            <b>not</b> be null.
+	 *            The {@link Converter} to use to convert between the value type of the {@link DataProvider} and the
+	 *            {@link Property}; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ListedProperty} to bind the {@link DataProvider} to;
-	 *            might <b>not</b> be null.
+	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
 	 * @param filterConverter
-	 *            a function that converts filter values produced by this listing
-	 *            into filter values expected by the provided data provider; might
-	 *            <b>not</b> be null.
+	 *            a function that converts filter values produced by this listing into filter values expected by the
+	 *            provided data provider; might <b>not</b> be null.
 	 * @return this
 	 */
 	default <ModelType, PropertyValueType> B setDataProvider(ModelAccessor<ModelType> binder,
-			Converter<E, PropertyValueType> converter, ListedProperty<ModelType, PropertyValueType> property,
+															 Converter<E, PropertyValueType> converter,
+															 Property<ModelType, List<PropertyValueType>> property,
 			SerializableFunction<F, SerializablePredicate<E>> filterConverter) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null binder.");
@@ -94,7 +84,6 @@ public interface HasFilterableDataProviderBuilder<C extends HasFilterableDataPro
 		} else if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null property.");
 		}
-		return configure(hasDataProvider -> hasDataProvider.setDataProvider(binder.provide(converter, property),
-				filterConverter));
+		return configure(hasDataProvider -> hasDataProvider.setDataProvider(binder.provide(converter, property), filterConverter));
 	}
 }

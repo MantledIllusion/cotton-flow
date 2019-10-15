@@ -1,6 +1,6 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.data.epiphy.interfaces.ReadableProperty;
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -62,24 +62,20 @@ public interface HasValueBuilder<C extends HasValue<?, V>, V, B extends HasValue
 	}
 
 	/**
-	 * Creates a new {@link Component} instance using {@link #build()}, applies all
-	 * currently contained {@link Configurer}s to it and returns it.
+	 * Creates a new {@link Component} instance using {@link #build()}, applies all currently contained
+	 * {@link Configurer}s to it and returns it.
 	 * <p>
-	 * Then uses the given {@link ModelAccessor} to bind the {@link HasValue} to the
-	 * given {@link ReadableProperty}.
+	 * Then uses the given {@link ModelAccessor} to bind the {@link HasValue} to the given {@link Property}.
 	 * 
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link HasValue} with; might
-	 *            <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link HasValue} with; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind the {@link HasValue} to;
-	 *            might <b>not</b> be null.
-	 * @return A new {@link Component} instance, fully configured and bound, never
-	 *         null
+	 *            The {@link Property} to bind the {@link HasValue} to; might <b>not</b> be null.
+	 * @return A new {@link Component} instance, fully configured and bound, never null
 	 */
-	default <ModelType> C bind(ModelAccessor<ModelType> binder, ReadableProperty<ModelType, V> property) {
+	default <ModelType> C bind(ModelAccessor<ModelType> binder, Property<ModelType, V> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
 		} else if (property == null) {
@@ -91,31 +87,28 @@ public interface HasValueBuilder<C extends HasValue<?, V>, V, B extends HasValue
 	}
 
 	/**
-	 * Creates a new {@link Component} instance using {@link #build()}, applies all
-	 * currently contained {@link Configurer}s to it and returns it.
+	 * Creates a new {@link Component} instance using {@link #build()}, applies all currently contained
+	 * {@link Configurer}s to it and returns it.
 	 * <p>
-	 * Then uses the given {@link ModelAccessor} to bind the {@link HasValue} to the
-	 * given {@link ReadableProperty}.
+	 * Then uses the given {@link ModelAccessor} to bind the {@link HasValue} to the given {@link Property}.
 	 * 
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
 	 * @param <PropertyValueType>
 	 *            The type of the properties' value to convert from/to.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link HasValue} with; might
-	 *            <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link HasValue} with; might <b>not</b> be null.
 	 * @param converter
-	 *            The {@link Converter} to use to convert between the value type of
-	 *            the {@link HasValue} and the {@link ReadableProperty}; might
-	 *            <b>not</b> be null.
+	 *            The {@link Converter} to use to convert between the value type of the {@link HasValue} and the
+	 *            {@link Property}; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind the {@link HasValue} to;
-	 *            might <b>not</b> be null.
+	 *            The {@link Property} to bind the {@link HasValue} to; might <b>not</b> be null.
 	 * @return A new {@link Component} instance, fully configured and bound, never
 	 *         null
 	 */
 	default <ModelType, PropertyValueType> C bind(ModelAccessor<ModelType> binder,
-			Converter<V, PropertyValueType> converter, ReadableProperty<ModelType, PropertyValueType> property) {
+												  Converter<V, PropertyValueType> converter,
+												  Property<ModelType, PropertyValueType> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
 		} else if (converter == null) {

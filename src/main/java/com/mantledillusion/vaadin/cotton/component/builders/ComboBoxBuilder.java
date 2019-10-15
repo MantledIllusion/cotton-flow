@@ -1,8 +1,9 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
-import com.mantledillusion.data.epiphy.interfaces.type.ListedProperty;
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.FocusableBuilder;
@@ -168,55 +169,46 @@ public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, Co
 	}
 
 	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its
-	 * values from a binding to a {@link ListedProperty}.
+	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
 	 * <p>
 	 * Uses a {@link Object#toString()} based filter converter.
 	 * 
-	 * @see HasFilterableDataProvider#setDataProvider(DataProvider,
-	 *      SerializableFunction)
+	 * @see HasFilterableDataProvider#setDataProvider(DataProvider, SerializableFunction)
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with;
-	 *            might <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ListedProperty} to bind the {@link DataProvider} to;
-	 *            might <b>not</b> be null.
+	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
 	 * @return this
 	 */
 	public <ModelType> ComboBoxBuilder<E> setDataProvider(ModelAccessor<ModelType> binder,
-			ListedProperty<ModelType, E> property) {
+														  Property<ModelType, List<E>> property) {
 		return HasFilterableDataProviderBuilder.super.setDataProvider(binder, property, this.stringFilterFunction);
 	}
 
 	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its
-	 * values from a binding to a {@link ListedProperty}.
+	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
 	 * <p>
 	 * Uses a {@link Object#toString()} based filter converter.
 	 * 
-	 * @see HasFilterableDataProvider#setDataProvider(DataProvider,
-	 *      SerializableFunction)
+	 * @see HasFilterableDataProvider#setDataProvider(DataProvider, SerializableFunction)
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
 	 * @param <PropertyValueType>
 	 *            The type of the properties' value to convert from/to.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with;
-	 *            might <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
 	 * @param converter
-	 *            The {@link Converter} to use to convert between the value type of
-	 *            the {@link DataProvider} and the {@link ListedProperty}; might
-	 *            <b>not</b> be null.
+	 *            The {@link Converter} to use to convert between the value type of the {@link DataProvider} and the
+	 *            {@link Property}; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ListedProperty} to bind the {@link DataProvider} to;
-	 *            might <b>not</b> be null.
+	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
 	 * @return this
 	 */
 	public <ModelType, PropertyValueType> ComboBoxBuilder<E> setDataProvider(ModelAccessor<ModelType> binder,
-			Converter<E, PropertyValueType> converter, ListedProperty<ModelType, PropertyValueType> property) {
-		return HasFilterableDataProviderBuilder.super.setDataProvider(binder, converter, property,
-				this.stringFilterFunction);
+																			 Converter<E, PropertyValueType> converter,
+																			 Property<ModelType, List<PropertyValueType>> property) {
+		return HasFilterableDataProviderBuilder.super.setDataProvider(binder, converter, property, this.stringFilterFunction);
 	}
 }

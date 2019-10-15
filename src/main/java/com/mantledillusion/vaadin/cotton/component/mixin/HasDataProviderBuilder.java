@@ -1,6 +1,6 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.data.epiphy.interfaces.type.ListedProperty;
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.model.Converter;
@@ -8,6 +8,8 @@ import com.mantledillusion.vaadin.cotton.model.ModelAccessor;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+
+import java.util.List;
 
 /**
  * {@link ComponentBuilder} for {@link HasDataProvider} implementing
@@ -24,21 +26,18 @@ public interface HasDataProviderBuilder<C extends HasDataProvider<E>, E, B exten
 		extends ComponentBuilder<C, B> {
 
 	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its
-	 * values from a binding to a {@link ListedProperty}.
+	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
 	 * 
 	 * @see HasDataProvider#setDataProvider(DataProvider)
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with;
-	 *            might <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ListedProperty} to bind the {@link DataProvider} to;
-	 *            might <b>not</b> be null.
+	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
 	 * @return this
 	 */
-	default <ModelType> B setDataProvider(ModelAccessor<ModelType> binder, ListedProperty<ModelType, E> property) {
+	default <ModelType> B setDataProvider(ModelAccessor<ModelType> binder, Property<ModelType, List<E>> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null binder.");
 		} else if (property == null) {
@@ -48,8 +47,7 @@ public interface HasDataProviderBuilder<C extends HasDataProvider<E>, E, B exten
 	}
 
 	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its
-	 * values from a binding to a {@link ListedProperty}.
+	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
 	 * 
 	 * @see HasDataProvider#setDataProvider(DataProvider)
 	 * @param <ModelType>
@@ -57,19 +55,17 @@ public interface HasDataProviderBuilder<C extends HasDataProvider<E>, E, B exten
 	 * @param <PropertyValueType>
 	 *            The type of the properties' value to convert from/to.
 	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with;
-	 *            might <b>not</b> be null.
+	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
 	 * @param converter
-	 *            The {@link Converter} to use to convert between the value type of
-	 *            the {@link DataProvider} and the {@link ListedProperty}; might
-	 *            <b>not</b> be null.
+	 *            The {@link Converter} to use to convert between the value type of the {@link DataProvider} and the
+	 *            {@link Property}; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ListedProperty} to bind the {@link DataProvider} to;
-	 *            might <b>not</b> be null.
+	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
 	 * @return this
 	 */
 	default <ModelType, PropertyValueType> B setDataProvider(ModelAccessor<ModelType> binder,
-			Converter<E, PropertyValueType> converter, ListedProperty<ModelType, PropertyValueType> property) {
+															 Converter<E, PropertyValueType> converter,
+															 Property<ModelType, List<PropertyValueType>> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null binder.");
 		} else if (converter == null) {

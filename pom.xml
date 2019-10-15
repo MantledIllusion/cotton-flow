@@ -36,11 +36,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- maven dependency versions -->
-		<com.vaadin.version>13.0.9</com.vaadin.version>
+		<com.vaadin.version>13.0.13</com.vaadin.version>
 
 		<!-- com.mantledillusion dependencies -->
 		<injection.hura.version>2.0.0.ALPHA6</injection.hura.version>
-		<data.epiphy.version>3.0.0.ALPHA1</data.epiphy.version>
+		<data.epiphy.version>4.0.0.ALPHA1</data.epiphy.version>
 		<trail.metrics.version>1.0.0.ALPHA3</trail.metrics.version>
 
 		<!-- org.apache dependencies -->

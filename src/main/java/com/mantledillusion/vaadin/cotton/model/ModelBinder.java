@@ -1,28 +1,20 @@
 package com.mantledillusion.vaadin.cotton.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.mantledillusion.data.epiphy.ModelPropertyNode;
+import com.mantledillusion.data.epiphy.Property;
+import com.mantledillusion.data.epiphy.context.Context;
+import com.mantledillusion.data.epiphy.context.reference.PropertyIndex;
+import com.mantledillusion.data.epiphy.context.reference.PropertyRoute;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import org.apache.commons.lang3.ObjectUtils;
 
-import com.mantledillusion.data.epiphy.context.PropertyRoute;
-import com.mantledillusion.data.epiphy.interfaces.ReadableProperty;
-import com.mantledillusion.data.epiphy.interfaces.WriteableProperty;
-import com.mantledillusion.data.epiphy.interfaces.function.ContextableProperty;
-import com.mantledillusion.data.epiphy.interfaces.function.IdentifyableProperty;
-import com.mantledillusion.data.epiphy.interfaces.type.ListedProperty;
-import com.mantledillusion.data.epiphy.interfaces.type.NodedProperty;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
@@ -36,6 +28,9 @@ import com.vaadin.flow.shared.Registration;
 
 abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
+	private static final Procedure NOOP = () -> {};
+	private static final Consumer NOCONSUME = value -> {};
+
 	private interface Procedure {
 
 		void trigger();
@@ -43,23 +38,23 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 	private interface Binding {
 
-		void update(PropertyContext context, UpdateType type);
+		void update(Context context, UpdateType type);
 
 		void unbind();
 	}
 
-	static enum UpdateType {
+	enum UpdateType {
 		EXCHANGE, ADD, REMOVE;
 	}
 
-	private final PropertyContext context;
-	private final Map<ReadableProperty<ModelType, ?>, List<Binding>> bindings = new IdentityHashMap<>();
+	private final Context context;
+	private final Map<Property<ModelType, ?>, List<Binding>> bindings = new IdentityHashMap<>();
 
-	protected ModelBinder(PropertyContext context) {
+	protected ModelBinder(Context context) {
 		this.context = context;
 	}
 
-	protected PropertyContext getContext() {
+	protected Context getContext() {
 		return this.context;
 	}
 
@@ -76,7 +71,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		@Override
-		public void update(PropertyContext context, UpdateType type) {
+		public void update(Context context, UpdateType type) {
 			this.valueReader.trigger();
 		}
 
@@ -95,10 +90,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param consumer
 	 *            The {@link Consumer} to bind; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind to; might <b>not</b> be null.
+	 *            The {@link Property} to bind to; might <b>not</b> be null.
 	 */
-	public <FieldValueType> void bind(Consumer<FieldValueType> consumer,
-			ReadableProperty<ModelType, FieldValueType> property) {
+	public <FieldValueType> void bind(Consumer<FieldValueType> consumer, Property<ModelType, FieldValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (property == null) {
@@ -124,11 +118,11 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 *            The {@link Converter} to use for conversion between the field's
 	 *            and the properties' value types; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind to; might <b>not</b> be null.
+	 *            The {@link Property} to bind to; might <b>not</b> be null.
 	 */
 	public <FieldValueType, PropertyValueType> void bind(Consumer<FieldValueType> consumer,
-			Converter<FieldValueType, PropertyValueType> converter,
-			ReadableProperty<ModelType, PropertyValueType> property) {
+														 Converter<FieldValueType, PropertyValueType> converter,
+														 Property<ModelType, PropertyValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (converter == null) {
@@ -176,7 +170,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		@Override
-		public synchronized void update(PropertyContext context, UpdateType type) {
+		public synchronized void update(Context context, UpdateType type) {
 			if (!this.synchronizing) {
 				this.synchronizing = true;
 				this.enablementUpdater.trigger();
@@ -200,10 +194,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param hasValue
 	 *            The {@link HasValue} to bind; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind to; might <b>not</b> be null.
+	 *            The {@link Property} to bind to; might <b>not</b> be null.
 	 */
 	public <FieldValueType> void bind(HasValue<?, FieldValueType> hasValue,
-			ReadableProperty<ModelType, FieldValueType> property) {
+									  Property<ModelType, FieldValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (property == null) {
@@ -213,12 +207,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		Procedure valueReader = () -> hasValue
 				.setValue(ObjectUtils.defaultIfNull(ModelBinder.this.get(property), hasValue.getEmptyValue()));
 		Procedure valueWriter;
-		if (property instanceof WriteableProperty) {
-			valueWriter = () -> ModelBinder.this.set((WriteableProperty<ModelType, FieldValueType>) property,
-					hasValue.getValue());
+		if (property.isWritable()) {
+			valueWriter = () -> ModelBinder.this.set(property, hasValue.getValue());
 		} else {
-			valueWriter = () -> {
-			};
+			valueWriter = NOOP;
 		}
 		createHasValueBinding(property, hasValue, valueReader, valueWriter);
 	}
@@ -237,11 +229,11 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 *            The {@link Converter} to use for conversion between the field's
 	 *            and the properties' value types; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind to; might <b>not</b> be null.
+	 *            The {@link Property} to bind to; might <b>not</b> be null.
 	 */
 	public <FieldValueType, PropertyValueType> void bind(HasValue<?, FieldValueType> hasValue,
-			Converter<FieldValueType, PropertyValueType> converter,
-			ReadableProperty<ModelType, PropertyValueType> property) {
+														 Converter<FieldValueType, PropertyValueType> converter,
+														 Property<ModelType, PropertyValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (converter == null) {
@@ -253,30 +245,26 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		Procedure valueReader = () -> hasValue.setValue(
 				ObjectUtils.defaultIfNull(converter.toField(ModelBinder.this.get(property)), hasValue.getEmptyValue()));
 		Procedure valueWriter;
-		if (property instanceof WriteableProperty) {
-			valueWriter = () -> ModelBinder.this.set((WriteableProperty<ModelType, PropertyValueType>) property,
-					converter.toProperty(hasValue.getValue()));
+		if (property.isWritable()) {
+			valueWriter = () -> ModelBinder.this.set(property, converter.toProperty(hasValue.getValue()));
 		} else {
-			valueWriter = () -> {
-			};
+			valueWriter = NOOP;
 		}
 		createHasValueBinding(property, hasValue, valueReader, valueWriter);
 	}
 
-	private synchronized <FieldValueType> void createHasValueBinding(ReadableProperty<ModelType, ?> property,
+	private synchronized <FieldValueType> void createHasValueBinding(Property<ModelType, ?> property,
 			HasValue<?, FieldValueType> hasValue, Procedure valueReader, Procedure valueWriter) {
 		Consumer<Boolean> enabler;
 		if (hasValue instanceof HasEnabled) {
 			enabler = enable -> ((HasEnabled) hasValue).setEnabled(enable);
 		} else {
-			enabler = enable -> {
-			};
+			enabler = NOCONSUME;
 		}
 
-		boolean writeable = property instanceof WriteableProperty;
 		Procedure enablementSwitch = () -> {
 			boolean exists = ModelBinder.this.exists(property);
-			hasValue.setReadOnly(!writeable || !exists);
+			hasValue.setReadOnly(!property.isWritable() || !exists);
 			enabler.accept(exists);
 		};
 
@@ -291,17 +279,17 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 		private final Consumer<R> updater;
 		private final BiConsumer<R, UpdateType> modifier;
-		private final Function<PropertyContext, R> indexRetriever;
+		private final Function<Context, R> indexRetriever;
 
 		private PropertyDataProviderBinding(Consumer<R> updater, BiConsumer<R, UpdateType> modifier,
-				Function<PropertyContext, R> indexRetriever) {
+				Function<Context, R> indexRetriever) {
 			this.updater = updater;
 			this.modifier = modifier;
 			this.indexRetriever = indexRetriever;
 		}
 
 		@Override
-		public void update(PropertyContext context, UpdateType type) {
+		public void update(Context context, UpdateType type) {
 			R propertyReference = this.indexRetriever.apply(context);
 			if (type == UpdateType.EXCHANGE) {
 				this.updater.accept(propertyReference);
@@ -359,11 +347,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param <ElementType>
 	 *            The element type of the {@link DataProvider} to provide.
 	 * @param property
-	 *            The {@link ListedProperty} to bind to; might <b>not</b> be null.
-	 * @return A new {@link DataProvider} that is bound to the given
-	 *         {@link ListedProperty}; never null
+	 *            The {@link Property} to bind to; might <b>not</b> be null.
+	 * @return A new {@link DataProvider} that is bound to the given {@link Property}; never null
 	 */
-	public <ElementType> ListedPropertyDataProvider<ElementType> provide(ListedProperty<ModelType, ElementType> property) {
+	public <ElementType> ListedPropertyDataProvider<ElementType> provide(Property<ModelType, List<ElementType>> property) {
 		if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null property");
 		}
@@ -387,9 +374,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 				provider.remove(index);
 			}
 		};
-		Function<PropertyContext, Integer> indexRetriever = context -> context.getKey(property);
+		Function<Context, Integer> indexRetriever = context -> context.containsReference(property) ?
+				context.getReference(property, PropertyIndex.class).getReference() : null;
 
-		addBinding(property, new PropertyDataProviderBinding<Integer>(updater, modifier, indexRetriever));
+		addBinding(property, new PropertyDataProviderBinding<>(updater, modifier, indexRetriever));
 
 		return provider;
 	}
@@ -406,13 +394,12 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 *            The {@link Converter} to use for conversion between the provider's
 	 *            and the properties' element types; might <b>not</b> be null.
 	 * @param property
-	 *            The {@link ListedProperty} to bind to; might <b>not</b> be null.
-	 * @return A new {@link DataProvider} that is bound to the given
-	 *         {@link ListedProperty}; never null
+	 *            The {@link Property} to bind to; might <b>not</b> be null.
+	 * @return A new {@link DataProvider} that is bound to the given {@link Property}; never null
 	 */
 	public <ElementType, PropertyValueType> ListedPropertyDataProvider<ElementType> provide(
 			Converter<ElementType, PropertyValueType> converter,
-			ListedProperty<ModelType, PropertyValueType> property) {
+			Property<ModelType, List<PropertyValueType>> property) {
 		if (converter == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null converter");
 		} else if (property == null) {
@@ -445,9 +432,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 				provider.remove(index);
 			}
 		};
-		Function<PropertyContext, Integer> indexRetriever = context -> context.getKey(property);
+		Function<Context, Integer> indexRetriever = context -> context.containsReference(property) ?
+				context.getReference(property, PropertyIndex.class).getReference() : null;
 
-		addBinding(property, new PropertyDataProviderBinding<Integer>(updater, modifier, indexRetriever));
+		addBinding(property, new PropertyDataProviderBinding<>(updater, modifier, indexRetriever));
 
 		return provider;
 	}
@@ -466,7 +454,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 		
 		@SuppressWarnings("unchecked")
-		private void exchange(N root, NodedProperty<?, N> property) {
+		private void exchange(N root, ModelPropertyNode<?, N> property) {
 			this.treeData.clear();
 			if (root != null) {
 				this.treeData.addRootItems(root);
@@ -476,27 +464,23 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 		
 		@SuppressWarnings("unchecked")
-		private void add(N parent, N node, N sibling, NodedProperty<?, N> property) {
-			this.treeData.addItems(parent, node);
-			this.treeData.moveAfterSibling(node, sibling);
+		private void add(N parent, N node, ModelPropertyNode<?, N> property) {
+			this.treeData.addItem(parent, node);
+			this.treeData.moveAfterSibling(node, property.getNodeRetriever().predecessor(parent, node));
 			addChildren(node, property);
 			refreshAll();
 		}
 		
-		private void addChildren(N node, NodedProperty<?, N> property) {
-			if (node != null) {
-				List<N> leaves = property.getLeaves(node);
-				if (leaves != null) {
-					for (N leaf: leaves) {
-						this.treeData.addItem(node, leaf);
-						addChildren(leaf, property);
-					}
+		private void addChildren(N parent, ModelPropertyNode<?, N> property) {
+			if (parent != null) {
+				for (N node: property.getNodeRetriever().iterate(parent)) {
+					this.treeData.addItem(parent, node);
+					addChildren(node, property);
 				}
 			}
 		}
 		
-		private void remove(N parent, int index) {
-			N node = this.treeData.getChildren(parent).get(index);
+		private void remove(N node) {
 			this.treeData.removeItem(node);
 			refreshAll();
 		}
@@ -506,44 +490,38 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 	}
 	
-	public <ElementType> NodePropertyDataProvider<ElementType> provide(NodedProperty<ModelType, ElementType> property) {
+	public <ElementType> NodePropertyDataProvider<ElementType> provide(ModelPropertyNode<ModelType, ElementType> property) {
 		if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot create a data provider using a null property");
 		}
 
 		NodePropertyDataProvider<ElementType> provider = new NodePropertyDataProvider<>();
 
-		Consumer<int[]> updater = indices -> {
+		Consumer<Context[]> updater = indices -> {
 			if (indices == null) {
 				provider.exchange(ModelBinder.this.get(property), property);
 			} else {
-				provider.refresh(ModelBinder.this.get(property, PropertyContext.of(PropertyRoute.of(property, indices))));
+				provider.refresh(ModelBinder.this.get(property, Context.of(PropertyRoute.of(property.getNodeRetriever(), indices))));
 			}
 		};
-		BiConsumer<int[], UpdateType> modifier = (indices, type) -> {
-			PropertyContext context = null;
+		BiConsumer<Context[], UpdateType> modifier = (indices, type) -> {
+			Context context = null;
 			if (indices.length > 1) {
-				context = PropertyContext.of(PropertyRoute.of(property, Arrays.copyOf(indices, indices.length-1)));
+				context = Context.of(PropertyRoute.of(property.getNodeRetriever(), Arrays.copyOf(indices, indices.length-1)));
 			}
 			ElementType parent = ModelBinder.this.get(property, context);
-			
-			int index = indices[indices.length-1];
+
+			ElementType node = ModelBinder.this.get(property, Context.of(PropertyRoute.of(property.getNodeRetriever(), indices)));
 			if (type == UpdateType.ADD) {
-				ElementType node = ModelBinder.this.get(property, PropertyContext.of(PropertyRoute.of(property, indices)));
-				ElementType sibling = null;
-				if (index > 0) {
-					indices = indices.clone();
-					indices[indices.length-1] = index-1;
-					sibling = ModelBinder.this.get(property, PropertyContext.of(PropertyRoute.of(property, indices)));
-				}
-				provider.add(parent, node, sibling, property);
+				provider.add(parent, node, property);
 			} else if (type == UpdateType.REMOVE) {
-				provider.remove(parent, index);
+				provider.remove(node);
 			}
 		};
-		Function<PropertyContext, int[]> indexRetriever = context -> context.getKey(property);
+		Function<Context, Context[]> indexRetriever = context -> context.containsReference(property.getNodeRetriever()) ?
+				context.getReference(property.getNodeRetriever(), PropertyRoute.class).getReference() : null;
 
-		addBinding(property, new PropertyDataProviderBinding<int[]>(updater, modifier, indexRetriever));
+		addBinding(property, new PropertyDataProviderBinding<>(updater, modifier, indexRetriever));
 
 		return provider;
 	}
@@ -552,7 +530,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	// ########################################################## BINDING HANDLING ##########################################################
 	// ######################################################################################################################################
 
-	private void addBinding(ReadableProperty<ModelType, ?> property, Binding binding) {
+	private void addBinding(Property<ModelType, ?> property, Binding binding) {
 		if (!this.bindings.containsKey(property)) {
 			this.bindings.put(property, new ArrayList<>());
 		}
@@ -563,16 +541,18 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		this.bindings.forEach((property, bindings) -> bindings.forEach(binding -> binding.update(context, type)));
 	}
 
-	synchronized void update(IdentifyableProperty<ModelType> property, PropertyContext context, UpdateType type) {
+	synchronized void update(Property<ModelType, ?> property, Context context, UpdateType type) {
 		// RUN OVER ALL BINDINGS
-		boundPropertyLoop: for (ReadableProperty<ModelType, ?> boundProperty : this.bindings.keySet()) {
+		boundPropertyLoop: for (Property<ModelType, ?> boundProperty : this.bindings.keySet()) {
 			// IF THE UPDATE'S PROPERTY IS A PARENT OF THE BINDING'S PROPERTY...
-			if (boundProperty.isParent(property)) {
+			Set<Property<?, ?>> boundHierarchy = boundProperty.getHierarchy();
+			Set<Property<?, ?>> hierarchy = property.getHierarchy();
+			if (boundHierarchy.containsAll(hierarchy) || hierarchy.containsAll(boundHierarchy)) {
 				// GO OVER ALL OF THE UPDATE'S CONTEXTABLE PROPERTIES
-				for (ContextableProperty<ModelType, ?, ?> contextedProperty : property.getContext()) {
+				for (Property<?, ?> contextedProperty : property.getHierarchy()) {
 					// CHECK IF THERE IS A KEY FOR THE CONTEXTED PROPERTY THAT IS UNEQUAL TO THE ONE IN THIS BINDER'S CONTEXT
-					if (context.containsKey(contextedProperty) && this.context.containsKey(contextedProperty)
-							&& !context.getKey(contextedProperty).equals(this.context.getKey(contextedProperty))) {
+					if (context.containsReference(contextedProperty) && this.context.containsReference(contextedProperty)
+							&& !context.getReference(contextedProperty).equals(this.context.getReference(contextedProperty))) {
 						// IF THERE IS ONE, THE BINDING IS NOT AFFECTED BY THE UPDATE
 						continue boundPropertyLoop;
 					}
@@ -584,7 +564,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 	@PreDestroy
 	private synchronized void destroy() {
-		Iterator<Entry<ReadableProperty<ModelType, ?>, List<Binding>>> mapIter = this.bindings.entrySet().iterator();
+		Iterator<Entry<Property<ModelType, ?>, List<Binding>>> mapIter = this.bindings.entrySet().iterator();
 		while (mapIter.hasNext()) {
 			Iterator<Binding> bindingIter = mapIter.next().getValue().iterator();
 			while (bindingIter.hasNext()) {

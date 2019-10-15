@@ -1,6 +1,6 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.data.epiphy.interfaces.ReadableProperty;
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -36,7 +36,7 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 * currently contained {@link Configurer}s to it and returns it.
 	 * <p>
 	 * Then uses the given {@link ModelAccessor} to bind the {@link HasText} to the
-	 * given {@link ReadableProperty}.
+	 * given {@link Property}.
 	 * 
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
@@ -44,12 +44,12 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 *            The {@link ModelAccessor} to bind the {@link HasText} with; might
 	 *            <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind the {@link HasText} to; might
+	 *            The {@link Property} to bind the {@link HasText} to; might
 	 *            <b>not</b> be null.
 	 * @return A new {@link Component} instance, fully configured and bound, never
 	 *         null
 	 */
-	default <ModelType> C bind(ModelAccessor<ModelType> binder, ReadableProperty<ModelType, String> property) {
+	default <ModelType> C bind(ModelAccessor<ModelType> binder, Property<ModelType, String> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
 		} else if (property == null) {
@@ -65,7 +65,7 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 * currently contained {@link Configurer}s to it and returns it.
 	 * <p>
 	 * Then uses the given {@link ModelAccessor} to bind the {@link HasText} to the
-	 * given {@link ReadableProperty}.
+	 * given {@link Property}.
 	 * 
 	 * @param <ModelType>
 	 *            The type of the model to whose property to bind.
@@ -76,16 +76,16 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 *            <b>not</b> be null.
 	 * @param converter
 	 *            The {@link Converter} to use to convert between the value type of
-	 *            the {@link HasText} and the {@link ReadableProperty}; might
+	 *            the {@link HasText} and the {@link Property}; might
 	 *            <b>not</b> be null.
 	 * @param property
-	 *            The {@link ReadableProperty} to bind the {@link HasText} to; might
+	 *            The {@link Property} to bind the {@link HasText} to; might
 	 *            <b>not</b> be null.
 	 * @return A new {@link Component} instance, fully configured and bound, never
 	 *         null
 	 */
 	default <ModelType, PropertyValueType> C bind(ModelAccessor<ModelType> binder,
-			Converter<String, PropertyValueType> converter, ReadableProperty<ModelType, PropertyValueType> property) {
+			Converter<String, PropertyValueType> converter, Property<ModelType, PropertyValueType> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
 		} else if (converter == null) {

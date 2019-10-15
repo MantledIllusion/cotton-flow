@@ -1,14 +1,12 @@
 package com.mantledillusion.vaadin.cotton.model;
 
-import com.mantledillusion.data.epiphy.interfaces.ReadableProperty;
 import com.vaadin.flow.component.HasValue;
 
 /**
- * Interface for {@link Converter}s that might be used to convert between the
- * value types of a field and a property.
+ * Interface for {@link Converter}s that might be used to convert between the value types of a field and a property.
  * <p>
- * For example, needed when a {@link HasValue} is bound to a
- * {@link ReadableProperty} using a {@link ModelAccessor}.
+ * For example, needed when a {@link HasValue} is bound to a {@link com.mantledillusion.data.epiphy.Property} using
+ * a {@link ModelAccessor}.
  *
  * @param <FieldValueType>
  *            The value type of the field.

@@ -1,16 +1,12 @@
 package com.mantledillusion.vaadin.cotton.model;
 
+import com.mantledillusion.data.epiphy.Property;
+import com.mantledillusion.data.epiphy.context.Context;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Optional;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import org.apache.commons.lang3.ObjectUtils;
-
-import com.mantledillusion.data.epiphy.context.ContextedValue;
-import com.mantledillusion.data.epiphy.interfaces.ReadableProperty;
-import com.mantledillusion.data.epiphy.interfaces.WriteableProperty;
-import com.mantledillusion.data.epiphy.interfaces.function.ContextableProperty;
-import com.mantledillusion.data.epiphy.interfaces.function.EnumerableProperty;
 
 /**
  * {@link ModelHandler} implementation that is a child to a
@@ -25,8 +21,8 @@ public final class ModelAccessor<ModelType> extends ModelBinder<ModelType> {
 	private final ModelContainer<ModelType> parent;
 
 	private ModelAccessor(@Inject @Qualifier(ModelContainer.SID_CONTAINER) ModelContainer<ModelType> parent,
-			@Inject @Qualifier(PropertyContext.SID_PROPERTYCONTEXT) @Optional PropertyContext context) {
-		super(ObjectUtils.defaultIfNull(context, PropertyContext.EMPTY));
+			@Inject @Qualifier(ModelContainer.SID_PROPERTYCONTEXT) @Optional Context context) {
+		super(ObjectUtils.defaultIfNull(context, Context.EMPTY));
 		this.parent = parent;
 		this.parent.register(this);
 	}
@@ -40,14 +36,24 @@ public final class ModelAccessor<ModelType> extends ModelBinder<ModelType> {
 	// ########################################################### MODEL CONTROL ############################################################
 	// ######################################################################################################################################
 
+
 	@Override
-	public <PropertyValueType> boolean exists(ReadableProperty<ModelType, PropertyValueType> property) {
+	public ModelType getModel() {
+		return this.parent.getModel();
+	}
+
+	@Override
+	public void setModel(ModelType model) {
+		this.parent.setModel(model);
+	}
+
+	@Override
+	public <PropertyValueType> boolean exists(Property<ModelType, PropertyValueType> property) {
 		return this.parent.exists(property, getContext());
 	}
 
 	@Override
-	public <PropertyValueType> boolean exists(ReadableProperty<ModelType, PropertyValueType> property,
-			PropertyContext context) {
+	public <PropertyValueType> boolean exists(Property<ModelType, PropertyValueType> property, Context context) {
 		return this.parent.exists(property, getContext().union(context));
 	}
 
@@ -56,126 +62,23 @@ public final class ModelAccessor<ModelType> extends ModelBinder<ModelType> {
 	// ######################################################################################################################################
 
 	@Override
-	public <PropertyValueType> PropertyValueType get(ReadableProperty<ModelType, PropertyValueType> property) {
+	public <PropertyValueType> PropertyValueType get(Property<ModelType, PropertyValueType> property) {
 		return this.parent.get(property, getContext());
 	}
 
 	@Override
-	public <PropertyValueType> PropertyValueType get(ReadableProperty<ModelType, PropertyValueType> property,
-			PropertyContext context) {
+	public <PropertyValueType> PropertyValueType get(Property<ModelType, PropertyValueType> property, Context context) {
 		return this.parent.get(property, getContext().union(context));
 	}
 
 	@Override
-	public <PropertyValueType> void set(WriteableProperty<ModelType, PropertyValueType> property,
+	public <PropertyValueType> void set(Property<ModelType, PropertyValueType> property,
 			PropertyValueType value) {
 		this.parent.set(property, value, getContext());
 	}
 
 	@Override
-	public <PropertyValueType> void set(WriteableProperty<ModelType, PropertyValueType> property,
-			PropertyValueType value, PropertyContext context) {
+	public <PropertyValueType> void set(Property<ModelType, PropertyValueType> property, PropertyValueType value, Context context) {
 		this.parent.set(property, value, getContext().union(context));
-	}
-
-	@Override
-	public <PropertyType, ReferenceType> ReferenceType append(
-			EnumerableProperty<ModelType, PropertyType, ReferenceType> property, PropertyType element) {
-		return this.parent.append(property, element, getContext());
-	}
-
-	@Override
-	public <PropertyType, ReferenceType> ReferenceType append(
-			EnumerableProperty<ModelType, PropertyType, ReferenceType> property, PropertyType element,
-			PropertyContext context) {
-		return this.parent.append(property, element, getContext().union(context));
-	}
-
-	/**
-	 * Adds an item to a list inside the model data the given property points to.
-	 * <p>
-	 * For determining the position to add, the given context is used.
-	 * <p>
-	 * Note that if the path from the property model's root to the given property is
-	 * indexed, the used index context has an impact on the execution's result. The
-	 * index of the given property also determines what will be the index of the
-	 * given value in the list after adding.
-	 * <p>
-	 * For determining the correct property, this handler's own index context is
-	 * used.
-	 * 
-	 * @param <PropertyType>
-	 *            The type of the property to add.
-	 * @param property
-	 *            The property to set inside the model; <b>not</b> allowed to be
-	 *            null.
-	 * @param element
-	 *            The element to insert into the list; might be null.
-	 */
-	public <PropertyType> void addAt(ContextableProperty<ModelType, PropertyType, ?> property, PropertyType element) {
-		this.parent.addAt(property, element, getContext());
-	}
-
-	@Override
-	public <PropertyType> void addAt(ContextableProperty<ModelType, PropertyType, ?> property, PropertyType element,
-			PropertyContext context) {
-		this.parent.addAt(property, element, getContext().union(context));
-	}
-
-	@Override
-	public <PropertyType, ReferenceType> ContextedValue<ReferenceType, PropertyType> strip(
-			EnumerableProperty<ModelType, PropertyType, ReferenceType> property) {
-		return this.parent.strip(property, getContext());
-	}
-
-	@Override
-	public <PropertyType, ReferenceType> ContextedValue<ReferenceType, PropertyType> strip(
-			EnumerableProperty<ModelType, PropertyType, ReferenceType> property, PropertyContext context) {
-		return this.parent.strip(property, getContext().union(context));
-	}
-
-	/**
-	 * Removes an item from a list inside the model data the given property points
-	 * to.
-	 * <p>
-	 * For determining the element to remove, the element's index is used.
-	 * <p>
-	 * Note that if the path from the property model's root to the given property is
-	 * indexed, the used index context has an impact on the execution's result. The
-	 * index of the given property also determines what the index of the item will
-	 * be that is removed from the list.
-	 * <p>
-	 * For determining the correct property, this handler's own index context is
-	 * used.
-	 * 
-	 * @param <PropertyType>
-	 *            The type of the property to remove.
-	 * @param property
-	 *            The property to set inside the model; <b>not</b> allowed to be
-	 *            null.
-	 * @return The element that has been removed from the list; might be null if the
-	 *         property is null
-	 */
-	public <PropertyType> PropertyType removeAt(ContextableProperty<ModelType, PropertyType, ?> property) {
-		return this.parent.removeAt(property, getContext());
-	}
-
-	@Override
-	public <PropertyType> PropertyType removeAt(ContextableProperty<ModelType, PropertyType, ?> property,
-			PropertyContext context) {
-		return this.parent.removeAt(property, getContext().union(context));
-	}
-
-	@Override
-	public <PropertyType, ReferenceType> ReferenceType remove(
-			ContextableProperty<ModelType, PropertyType, ReferenceType> property, PropertyType element) {
-		return this.parent.remove(property, element, getContext());
-	}
-
-	@Override
-	public <PropertyType, ReferenceType> ReferenceType remove(
-			ContextableProperty<ModelType, PropertyType, ReferenceType> property, PropertyType element,
-			PropertyContext context) {
-		return this.parent.remove(property, element, getContext().union(context));
 	}
 }
