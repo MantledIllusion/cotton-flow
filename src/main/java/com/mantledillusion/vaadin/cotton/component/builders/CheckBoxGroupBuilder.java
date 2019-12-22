@@ -18,7 +18,6 @@ public class CheckBoxGroupBuilder<E> extends AbstractComponentBuilder<CheckboxGr
 		HasStyleBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
 		HasEnabledBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
 		HasItemsBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E>>,
-		HasDataProviderBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E>>,
 		HasValueBuilder<CheckboxGroup<E>, Set<E>, CheckBoxGroupBuilder<E>>,
 		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>> {
 

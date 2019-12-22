@@ -17,7 +17,6 @@ public class RadioButtonGroupBuilder<E> extends AbstractComponentBuilder<RadioBu
 		implements HasStyleBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>,
 		HasEnabledBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>,
 		HasItemsBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>>,
-		HasDataProviderBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>>,
 		HasValueBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>>,
 		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>> {
 

@@ -26,15 +26,15 @@ public final class ModelContainer<ModelType> implements ModelHandler<ModelType> 
 
 	final void register(ModelAccessor<ModelType> childAccessor) {
 		this.children.add(childAccessor);
-		childAccessor.update(UpdateType.ADD);
+		childAccessor.updateAll(UpdateType.ADD);
 	}
 
 	final void unregister(ModelAccessor<ModelType> childAccessor) {
 		this.children.remove(childAccessor);
 	}
 
-	private void update(UpdateType type) {
-		this.children.forEach(child -> child.update(type));
+	private void updateAll(UpdateType type) {
+		this.children.forEach(child -> child.updateAll(type));
 	}
 
 	private void update(Property<ModelType, ?> property, Context context, UpdateType type) {
@@ -53,7 +53,7 @@ public final class ModelContainer<ModelType> implements ModelHandler<ModelType> 
 	@Override
 	public void setModel(ModelType model) {
 		this.model = model;
-		update(UpdateType.EXCHANGE);
+		updateAll(UpdateType.EXCHANGE);
 	}
 
 	@Override

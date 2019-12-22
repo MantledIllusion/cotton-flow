@@ -1,24 +1,17 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
-import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.FocusableBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasEnabledBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasFilterableDataProviderBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasItemsBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasValueBuilder;
-import com.mantledillusion.vaadin.cotton.model.Converter;
-import com.mantledillusion.vaadin.cotton.model.ModelAccessor;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.data.binder.HasFilterableDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -30,7 +23,6 @@ public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, Co
 		implements HasSizeBuilder<ComboBox<E>, ComboBoxBuilder<E>>, HasStyleBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
 		FocusableBuilder<ComboBox<E>, ComboBoxBuilder<E>>, HasEnabledBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
 		HasItemsBuilder<ComboBox<E>, E, ComboBoxBuilder<E>>,
-		HasFilterableDataProviderBuilder<ComboBox<E>, E, String, ComboBoxBuilder<E>>,
 		HasValueBuilder<ComboBox<E>, E, ComboBoxBuilder<E>> {
 
 	private final SerializableFunction<String, SerializablePredicate<E>> stringFilterFunction = s -> (element -> String
@@ -166,49 +158,5 @@ public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, Co
 	 */
 	public ComboBoxBuilder<E> setSelectableElementRenderer(Renderer<E> renderer) {
 		return configure(comboBox -> comboBox.setRenderer(renderer));
-	}
-
-	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
-	 * <p>
-	 * Uses a {@link Object#toString()} based filter converter.
-	 * 
-	 * @see HasFilterableDataProvider#setDataProvider(DataProvider, SerializableFunction)
-	 * @param <ModelType>
-	 *            The type of the model to whose property to bind.
-	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
-	 * @param property
-	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
-	 * @return this
-	 */
-	public <ModelType> ComboBoxBuilder<E> setDataProvider(ModelAccessor<ModelType> binder,
-														  Property<ModelType, List<E>> property) {
-		return HasFilterableDataProviderBuilder.super.setDataProvider(binder, property, this.stringFilterFunction);
-	}
-
-	/**
-	 * Builder method, configures a {@link DataProvider} that is receiving its values from a binding to a {@link Property}.
-	 * <p>
-	 * Uses a {@link Object#toString()} based filter converter.
-	 * 
-	 * @see HasFilterableDataProvider#setDataProvider(DataProvider, SerializableFunction)
-	 * @param <ModelType>
-	 *            The type of the model to whose property to bind.
-	 * @param <PropertyValueType>
-	 *            The type of the properties' value to convert from/to.
-	 * @param binder
-	 *            The {@link ModelAccessor} to bind the {@link DataProvider} with; might <b>not</b> be null.
-	 * @param converter
-	 *            The {@link Converter} to use to convert between the value type of the {@link DataProvider} and the
-	 *            {@link Property}; might <b>not</b> be null.
-	 * @param property
-	 *            The {@link Property} to bind the {@link DataProvider} to; might <b>not</b> be null.
-	 * @return this
-	 */
-	public <ModelType, PropertyValueType> ComboBoxBuilder<E> setDataProvider(ModelAccessor<ModelType> binder,
-																			 Converter<E, PropertyValueType> converter,
-																			 Property<ModelType, List<PropertyValueType>> property) {
-		return HasFilterableDataProviderBuilder.super.setDataProvider(binder, converter, property, this.stringFilterFunction);
 	}
 }

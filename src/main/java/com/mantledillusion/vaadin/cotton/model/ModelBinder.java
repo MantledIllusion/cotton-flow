@@ -2,16 +2,10 @@ package com.mantledillusion.vaadin.cotton.model;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import com.mantledillusion.data.epiphy.ModelPropertyNode;
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
-import com.mantledillusion.data.epiphy.context.reference.PropertyIndex;
-import com.mantledillusion.data.epiphy.context.reference.PropertyRoute;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -20,10 +14,6 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.shared.Registration;
 
 abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
@@ -272,261 +262,6 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	}
 
 	// ######################################################################################################################################
-	// ######################################################## DATAPROVIDER BINDING ########################################################
-	// ######################################################################################################################################
-
-	private static final class PropertyDataProviderBinding<R> implements Binding {
-
-		private final Consumer<R> updater;
-		private final BiConsumer<R, UpdateType> modifier;
-		private final Function<Context, R> indexRetriever;
-
-		private PropertyDataProviderBinding(Consumer<R> updater, BiConsumer<R, UpdateType> modifier,
-				Function<Context, R> indexRetriever) {
-			this.updater = updater;
-			this.modifier = modifier;
-			this.indexRetriever = indexRetriever;
-		}
-
-		@Override
-		public void update(Context context, UpdateType type) {
-			R propertyReference = this.indexRetriever.apply(context);
-			if (type == UpdateType.EXCHANGE) {
-				this.updater.accept(propertyReference);
-			} else {
-				this.modifier.accept(propertyReference, type);
-			}
-		}
-
-		@Override
-		public void unbind() {
-			// not required
-		}
-	}
-	
-	// ListedProperty
-
-	public static final class ListedPropertyDataProvider<E> extends ListDataProvider<E> {
-
-		private static final long serialVersionUID = 1L;
-
-		private final List<E> elements;
-
-		private ListedPropertyDataProvider() {
-			super(new ArrayList<>());
-			this.elements = (List<E>) getItems();
-		}
-
-		private void exchange(List<E> elements) {
-			this.elements.clear();
-			if (elements != null) {
-				this.elements.addAll(elements);
-			}
-			refreshAll();
-		}
-
-		private void add(E element, int index) {
-			this.elements.add(index, element);
-			this.refreshItem(element);
-		}
-
-		private void remove(int index) {
-			E element = this.elements.remove(index);
-			this.refreshItem(element);
-		}
-
-		private void refresh(E element) {
-			this.refreshItem(element);
-		}
-	}
-
-	/**
-	 * Builds and binds a {@link DataProvider} to the given property of this
-	 * {@link ModelHandler}.
-	 * 
-	 * @param <ElementType>
-	 *            The element type of the {@link DataProvider} to provide.
-	 * @param property
-	 *            The {@link Property} to bind to; might <b>not</b> be null.
-	 * @return A new {@link DataProvider} that is bound to the given {@link Property}; never null
-	 */
-	public <ElementType> ListedPropertyDataProvider<ElementType> provide(Property<ModelType, List<ElementType>> property) {
-		if (property == null) {
-			throw new Http901IllegalArgumentException("Cannot create a data provider using a null property");
-		}
-
-		ListedPropertyDataProvider<ElementType> provider = new ListedPropertyDataProvider<>();
-
-		Consumer<Integer> updater = index -> {
-			List<ElementType> elements = ModelBinder.this.get(property);
-			if (index == null) {
-				provider.exchange(elements);
-			} else {
-				provider.refresh(elements.get(index));
-			}
-		};
-		BiConsumer<Integer, UpdateType> modifier = (index, type) -> {
-			if (type == UpdateType.ADD) {
-				List<ElementType> elements = ModelBinder.this.get(property);
-				ElementType element = elements.get(index);
-				provider.add(element, index);
-			} else if (type == UpdateType.REMOVE) {
-				provider.remove(index);
-			}
-		};
-		Function<Context, Integer> indexRetriever = context -> context.containsReference(property) ?
-				context.getReference(property, PropertyIndex.class).getReference() : null;
-
-		addBinding(property, new PropertyDataProviderBinding<>(updater, modifier, indexRetriever));
-
-		return provider;
-	}
-
-	/**
-	 * Builds and binds a {@link DataProvider} to the given property of this
-	 * {@link ModelHandler}.
-	 * 
-	 * @param <ElementType>
-	 *            The element type of the {@link DataProvider} to provide.
-	 * @param <PropertyValueType>
-	 *            The value type of the property to bind.
-	 * @param converter
-	 *            The {@link Converter} to use for conversion between the provider's
-	 *            and the properties' element types; might <b>not</b> be null.
-	 * @param property
-	 *            The {@link Property} to bind to; might <b>not</b> be null.
-	 * @return A new {@link DataProvider} that is bound to the given {@link Property}; never null
-	 */
-	public <ElementType, PropertyValueType> ListedPropertyDataProvider<ElementType> provide(
-			Converter<ElementType, PropertyValueType> converter,
-			Property<ModelType, List<PropertyValueType>> property) {
-		if (converter == null) {
-			throw new Http901IllegalArgumentException("Cannot create a data provider using a null converter");
-		} else if (property == null) {
-			throw new Http901IllegalArgumentException("Cannot create a data provider using a null property");
-		}
-
-		ListedPropertyDataProvider<ElementType> provider = new ListedPropertyDataProvider<>();
-
-		Consumer<Integer> updater = index -> {
-			@SuppressWarnings("unchecked")
-			List<ElementType> elements = ObjectUtils
-					.defaultIfNull(ModelBinder.this.get(property), (List<PropertyValueType>) Collections.emptyList())
-					.stream().map(converter::toField).collect(Collectors.toList());
-			if (index == null) {
-				provider.exchange(elements);
-			} else {
-				provider.refresh(elements.get(index));
-			}
-		};
-		BiConsumer<Integer, UpdateType> modifier = (index, type) -> {
-			if (type == UpdateType.ADD) {
-				@SuppressWarnings("unchecked")
-				List<ElementType> elements = ObjectUtils
-						.defaultIfNull(ModelBinder.this.get(property),
-								(List<PropertyValueType>) Collections.emptyList())
-						.stream().map(converter::toField).collect(Collectors.toList());
-				ElementType element = elements.get(index);
-				provider.add(element, index);
-			} else if (type == UpdateType.REMOVE) {
-				provider.remove(index);
-			}
-		};
-		Function<Context, Integer> indexRetriever = context -> context.containsReference(property) ?
-				context.getReference(property, PropertyIndex.class).getReference() : null;
-
-		addBinding(property, new PropertyDataProviderBinding<>(updater, modifier, indexRetriever));
-
-		return provider;
-	}
-	
-	// NodedProperty
-	
-	public static final class NodePropertyDataProvider<N> extends TreeDataProvider<N> {
-
-		private static final long serialVersionUID = 1L;
-		
-		private final TreeData<N> treeData;
-		
-		public NodePropertyDataProvider() {
-			super(new TreeData<>());
-			this.treeData = getTreeData();
-		}
-		
-		@SuppressWarnings("unchecked")
-		private void exchange(N root, ModelPropertyNode<?, N> property) {
-			this.treeData.clear();
-			if (root != null) {
-				this.treeData.addRootItems(root);
-				addChildren(root, property);
-			}
-			refreshAll();
-		}
-		
-		@SuppressWarnings("unchecked")
-		private void add(N parent, N node, ModelPropertyNode<?, N> property) {
-			this.treeData.addItem(parent, node);
-			this.treeData.moveAfterSibling(node, property.getNodeRetriever().predecessor(parent, node));
-			addChildren(node, property);
-			refreshAll();
-		}
-		
-		private void addChildren(N parent, ModelPropertyNode<?, N> property) {
-			if (parent != null) {
-				for (N node: property.getNodeRetriever().iterate(parent)) {
-					this.treeData.addItem(parent, node);
-					addChildren(node, property);
-				}
-			}
-		}
-		
-		private void remove(N node) {
-			this.treeData.removeItem(node);
-			refreshAll();
-		}
-
-		private void refresh(N node) {
-			this.refreshItem(node);
-		}
-	}
-	
-	public <ElementType> NodePropertyDataProvider<ElementType> provide(ModelPropertyNode<ModelType, ElementType> property) {
-		if (property == null) {
-			throw new Http901IllegalArgumentException("Cannot create a data provider using a null property");
-		}
-
-		NodePropertyDataProvider<ElementType> provider = new NodePropertyDataProvider<>();
-
-		Consumer<Context[]> updater = indices -> {
-			if (indices == null) {
-				provider.exchange(ModelBinder.this.get(property), property);
-			} else {
-				provider.refresh(ModelBinder.this.get(property, Context.of(PropertyRoute.of(property.getNodeRetriever(), indices))));
-			}
-		};
-		BiConsumer<Context[], UpdateType> modifier = (indices, type) -> {
-			Context context = null;
-			if (indices.length > 1) {
-				context = Context.of(PropertyRoute.of(property.getNodeRetriever(), Arrays.copyOf(indices, indices.length-1)));
-			}
-			ElementType parent = ModelBinder.this.get(property, context);
-
-			ElementType node = ModelBinder.this.get(property, Context.of(PropertyRoute.of(property.getNodeRetriever(), indices)));
-			if (type == UpdateType.ADD) {
-				provider.add(parent, node, property);
-			} else if (type == UpdateType.REMOVE) {
-				provider.remove(node);
-			}
-		};
-		Function<Context, Context[]> indexRetriever = context -> context.containsReference(property.getNodeRetriever()) ?
-				context.getReference(property.getNodeRetriever(), PropertyRoute.class).getReference() : null;
-
-		addBinding(property, new PropertyDataProviderBinding<>(updater, modifier, indexRetriever));
-
-		return provider;
-	}
-
-	// ######################################################################################################################################
 	// ########################################################## BINDING HANDLING ##########################################################
 	// ######################################################################################################################################
 
@@ -537,7 +272,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		this.bindings.get(property).add(binding);
 	}
 
-	synchronized void update(UpdateType type) {
+	synchronized void updateAll(UpdateType type) {
 		this.bindings.forEach((property, bindings) -> bindings.forEach(binding -> binding.update(context, type)));
 	}
 
