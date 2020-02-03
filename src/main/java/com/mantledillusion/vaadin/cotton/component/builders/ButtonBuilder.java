@@ -2,11 +2,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.FocusableBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasEnabledBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasTextBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 
@@ -16,7 +12,7 @@ import com.vaadin.flow.component.button.Button;
 public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilder>
 		implements HasSizeBuilder<Button, ButtonBuilder>, HasStyleBuilder<Button, ButtonBuilder>,
 		HasTextBuilder<Button, ButtonBuilder>, HasEnabledBuilder<Button, ButtonBuilder>,
-		FocusableBuilder<Button, ButtonBuilder> {
+		FocusableBuilder<Button, ButtonBuilder>, ClickableBuilder<Button, ButtonBuilder> {
 
 	@Override
 	public Button instantiate() {

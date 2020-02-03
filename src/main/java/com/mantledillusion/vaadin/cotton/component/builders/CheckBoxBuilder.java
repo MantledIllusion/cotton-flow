@@ -2,11 +2,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.FocusableBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasEnabledBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasValueBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.checkbox.Checkbox;
 
 /**
@@ -15,7 +11,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 public class CheckBoxBuilder extends AbstractComponentBuilder<Checkbox, CheckBoxBuilder>
 		implements HasSizeBuilder<Checkbox, CheckBoxBuilder>, HasStyleBuilder<Checkbox, CheckBoxBuilder>,
 		FocusableBuilder<Checkbox, CheckBoxBuilder>, HasEnabledBuilder<Checkbox, CheckBoxBuilder>,
-		HasValueBuilder<Checkbox, Boolean, CheckBoxBuilder> {
+		HasValueBuilder<Checkbox, Boolean, CheckBoxBuilder>, ClickableBuilder<Checkbox, CheckBoxBuilder> {
 
 	@Override
 	public Checkbox instantiate() {
