@@ -205,7 +205,7 @@ class CottonServletService extends VaadinServletService {
 	@Override
 	protected VaadinSession createVaadinSession(VaadinRequest request) {
 		return this.serviceInjector.instantiate(CottonSession.class,
-				Blueprint.SingletonAllocation.of(CottonServletService.SID_SERVLETSERVICE, this),
+				Blueprint.SingletonAllocation.allocateToInstance(CottonServletService.SID_SERVLETSERVICE, this),
 				Blueprint.PropertyAllocation.of(Bus.PROPERTY_BUS_ISOLATION, Boolean.TRUE.toString()));
 	}
 

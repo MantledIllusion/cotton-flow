@@ -77,7 +77,7 @@ public final class CottonEnvironment {
             throw new Http901IllegalArgumentException(
                     "Cannot set the application's login provider to a null instance.");
         }
-        return Blueprint.SingletonAllocation.of(SID_LOGIN_PROVIDER, loginProvider);
+        return Blueprint.SingletonAllocation.allocateToInstance(SID_LOGIN_PROVIDER, loginProvider);
     }
 
     // #################################################################################################################
@@ -187,15 +187,15 @@ public final class CottonEnvironment {
                         addedLocales.add(loc);
                     } else {
                         throw new Http901IllegalArgumentException(
-                                "The localization resource '" + baseName + '_' + Localizer.toLang(loc) + '.' + fileExtension
-                                        + "' for locale " + loc
-                                        + " differs from the resources of the already analyzed locales "
-                                        + addedLocales + " regarding the message ids " + difference
+                                "The localization resource '" + baseName + '_' + Localizer.toLang(loc) + '.'
+                                        + fileExtension + "' for locale " + loc
+                                        + " differs from the resources of the already analyzed locales " + addedLocales
+                                        + " regarding the message ids " + difference
                                         + "; on differently localed resources of the same base resource, all message id sets have to be equal.");
                     }
                 }
 
-                registrations.add(Blueprint.SingletonAllocation.of(new LocalizationRegistration(loc, bundleKeys, bundle)));
+                registrations.add(Blueprint.SingletonAllocation.allocateToInstance(new LocalizationRegistration(loc, bundleKeys, bundle)));
             }
         }
 
@@ -229,6 +229,6 @@ public final class CottonEnvironment {
      */
     public static Blueprint.SingletonAllocation forMetricsConsumer(String consumerId, MetricsConsumer consumer,
                                                                    MetricsPredicate gate, MetricsPredicate filter) {
-        return Blueprint.SingletonAllocation.of(MetricsTrailConsumer.from(consumerId, consumer, gate, filter));
+        return Blueprint.SingletonAllocation.allocateToInstance(MetricsTrailConsumer.from(consumerId, consumer, gate, filter));
     }
 }

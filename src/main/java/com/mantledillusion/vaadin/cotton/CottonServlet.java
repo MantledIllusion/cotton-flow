@@ -90,11 +90,12 @@ public class CottonServlet extends VaadinServlet {
         VaadinServletService service;
         try {
             // SERVLET
-            Blueprint.SingletonAllocation servlet = Blueprint.SingletonAllocation.of(SID_SERVLET, this);
+            Blueprint.SingletonAllocation servlet = Blueprint.SingletonAllocation.
+                    allocateToInstance(SID_SERVLET, this);
 
             // DEPLOYMENT CONFIG
-            Blueprint.SingletonAllocation deploymentConfig = Blueprint.SingletonAllocation.of(SID_DEPLOYMENTCONFIG,
-                    deploymentConfiguration);
+            Blueprint.SingletonAllocation deploymentConfig = Blueprint.SingletonAllocation.
+                    allocateToInstance(SID_DEPLOYMENTCONFIG, deploymentConfiguration);
 
             // LOCALIZER
             Map<String, Localizer.LocalizationResource> resourceBundleRegistry = new HashMap<>();
@@ -115,8 +116,8 @@ public class CottonServlet extends VaadinServlet {
             Localizer.checkLocale(defaultLocale);
             supportedLocales2.sort((o1, o2) -> defaultLocale.equals(o1) ? -1 : 0);
 
-            Blueprint.SingletonAllocation localizer = Blueprint.SingletonAllocation.of(Localizer.SID_LOCALIZER,
-                    new Localizer(resourceBundleRegistry, supportedLocales2));
+            Blueprint.SingletonAllocation localizer = Blueprint.SingletonAllocation.
+                    allocateToInstance(Localizer.SID_LOCALIZER, new Localizer(resourceBundleRegistry, supportedLocales2));
 
             // APPLICATION
             Blueprint.PropertyAllocation initializerClass = Blueprint.PropertyAllocation.of(PID_INITIALIZERCLASS, this.applicationInitializerClass);
