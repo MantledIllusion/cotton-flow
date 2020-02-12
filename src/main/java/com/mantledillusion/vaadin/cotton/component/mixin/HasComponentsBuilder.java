@@ -18,6 +18,7 @@ public interface HasComponentsBuilder<C extends HasComponents, B extends HasComp
      * Builder method, configures the {@link Component}'s child {@link Component}s.
      *
      * @see HasComponents#add(Component...)
+     * @param components The {@link Component}s to add; might be null, might <b>not</b> contain nulls.
      * @return this
      */
     default B add(Component... components) {
@@ -28,6 +29,8 @@ public interface HasComponentsBuilder<C extends HasComponents, B extends HasComp
      * Builder method, configures the {@link Component}'s nth child {@link Component}.
      *
      * @see HasComponents#addComponentAtIndex(int, Component)
+     * @param index The index to add the {@link Component} at.
+     * @param component The {@link Component} to add; might <b>not</b> be null.
      * @return this
      */
     default B addComponentAtIndex(int index, Component component) {

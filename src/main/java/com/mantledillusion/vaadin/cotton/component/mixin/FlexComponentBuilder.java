@@ -19,6 +19,7 @@ public interface FlexComponentBuilder<C extends FlexComponent, B extends FlexCom
      * Builder method, configures the {@link Component}'s item alignment.
      *
      * @see FlexComponent#setAlignItems(FlexComponent.Alignment)
+     * @param alignment The {@link FlexComponent.Alignment} to align all {@link Component}s to; might <b>not</b> be null.
      * @return this
      */
     default B setAlignItems(FlexComponent.Alignment alignment) {
@@ -29,6 +30,8 @@ public interface FlexComponentBuilder<C extends FlexComponent, B extends FlexCom
      * Builder method, configures the {@link Component}'s own alignment.
      *
      * @see FlexComponent#setAlignSelf(FlexComponent.Alignment, HasElement...)
+     * @param alignment The {@link FlexComponent.Alignment} to align {@link Component}s to; might <b>not</b> be null.
+     * @param elementContainers The {@link HasElement}s to align; might be null, might <b>not</b> contain nulls.
      * @return this
      */
     default B setAlignSelf(FlexComponent.Alignment alignment, HasElement... elementContainers) {
@@ -39,6 +42,8 @@ public interface FlexComponentBuilder<C extends FlexComponent, B extends FlexCom
      * Builder method, configures the {@link Component}'s flex grow.
      *
      * @see FlexComponent#setFlexGrow(double, HasElement...)
+     * @param flexGrow The proportion of the available space the element container should take up.
+     * @param elementContainers The {@link HasElement}s to align; might be null, might <b>not</b> contain nulls.
      * @return this
      */
     default B setFlexGrow(double flexGrow, HasElement... elementContainers) {
@@ -49,6 +54,7 @@ public interface FlexComponentBuilder<C extends FlexComponent, B extends FlexCom
      * Builder method, configures the {@link Component}'s {@link FlexComponent.JustifyContentMode}.
      *
      * @see FlexComponent#setJustifyContentMode(FlexComponent.JustifyContentMode)
+     * @param justifyContentMode The {@link FlexComponent.JustifyContentMode} of the layout; might <b>not</b> be null.
      * @return this
      */
     default B setJustifyContentMode(FlexComponent.JustifyContentMode justifyContentMode) {

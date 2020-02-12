@@ -19,6 +19,7 @@ public interface ThemableLayoutBuilder<C extends ThemableLayout, B extends Thema
      * Builder method, configures the {@link Component} to be margined.
      *
      * @see ThemableLayout#setMargin(boolean)
+     * @param margin True if there should be a margin, false otherwise.
      * @return this
      */
     default B setMargin(boolean margin) {
@@ -29,6 +30,7 @@ public interface ThemableLayoutBuilder<C extends ThemableLayout, B extends Thema
      * Builder method, configures the {@link Component} to be padded.
      *
      * @see ThemableLayout#setPadding(boolean)
+     * @param padding True if there should be padding, false otherwise.
      * @return this
      */
     default B setPadding(boolean padding) {
@@ -39,6 +41,7 @@ public interface ThemableLayoutBuilder<C extends ThemableLayout, B extends Thema
      * Builder method, configures the {@link Component}'s inner component to be spaced from each other.
      *
      * @see ThemableLayout#setSpacing(boolean)
+     * @param spacing True if there should be spacing, false otherwise.
      * @return this
      */
     default B setSpacing(boolean spacing) {
@@ -49,6 +52,7 @@ public interface ThemableLayoutBuilder<C extends ThemableLayout, B extends Thema
      * Builder method, configures the {@link Component}'s box sizing.
      *
      * @see ThemableLayout#setBoxSizing(BoxSizing)
+     * @param boxSizing The {@link BoxSizing} of the layout; might be null, interpreted as {@link BoxSizing#UNDEFINED}.
      * @return this
      */
     default B setBoxSizing(BoxSizing boxSizing) {

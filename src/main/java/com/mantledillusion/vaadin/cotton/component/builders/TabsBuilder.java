@@ -26,6 +26,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder>
      * Builder method, configures the {@link Component}'s {@link Tab}s.
      *
      * @see Tabs#add(Tab...)
+     * @param tabs The tabs to enclose; might be null, might <b>not</b> contain nulls.
      * @return this
      */
     public TabsBuilder add(Tab... tabs) {
