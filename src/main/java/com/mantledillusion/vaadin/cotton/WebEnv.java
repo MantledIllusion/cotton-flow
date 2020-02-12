@@ -1,13 +1,8 @@
 package com.mantledillusion.vaadin.cotton;
 
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
-import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
-import com.mantledillusion.vaadin.cotton.exception.http900.Http902IllegalStateException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -154,23 +149,21 @@ public final class WebEnv {
     /**
      * Will log in the given {@link User}.
      * <p>
-     * Another {@link User} possibly logged in currently will be logged out if the two are not
-     * {@link User#equals(Object)}.
+     * Another {@link User} possibly logged in at the moment will automatically be attempted to be logged out if its
+     * not equal to the given one.
      *
      * @param user The {@link User} to log in; might be null.
-     * @return False if there is a {@link User} currently locked in whose {@link BeforeLogoutEvent} is not being
+     * @return False if there is a {@link User} currently logged in whose {@link BeforeLogoutEvent} has not being
      * accepted, true otherwise
      */
     public static boolean logIn(User user) {
-        if (isLoggedIn()) {
-            if (!getLoggedInUser().equals(user)) {
-                if (!logOut()) {
-                    return false;
-                }
+        if (!Objects.equals(user, getLoggedInUser())) {
+            if (isLoggedIn() && !logOut()) {
+                return false;
             }
-        }
-        if (user != null && !user.equals(getLoggedInUser())) {
-            CottonServletService.SessionBean.current(LoginHandler.class).login(user);
+            if (user != null) {
+                CottonServletService.SessionBean.current(LoginHandler.class).login(user);
+            }
         }
         return true;
     }
