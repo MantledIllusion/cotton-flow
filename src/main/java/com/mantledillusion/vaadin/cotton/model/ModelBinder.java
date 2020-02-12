@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
+import com.vaadin.flow.component.Component;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -19,18 +20,10 @@ import com.vaadin.flow.shared.Registration;
 abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 	private static final Procedure NOOP = () -> {};
-	private static final Consumer NOCONSUME = value -> {};
 
 	private interface Procedure {
 
 		void trigger();
-	}
-
-	private interface Binding {
-
-		void update(Context context, UpdateType type);
-
-		void unbind();
 	}
 
 	enum UpdateType {
@@ -52,22 +45,29 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	// ########################################################## CONSUMER BINDING ##########################################################
 	// ######################################################################################################################################
 
-	private static final class ConsumerBinding implements Binding {
-
+	private class ConsumerBinding extends Binding {
 		private final Procedure valueReader;
+		private final Procedure valueResetter;
 
-		private ConsumerBinding(Procedure valueReader) {
+		private ConsumerBinding(Procedure valueReader, Procedure valueResetter) {
 			this.valueReader = valueReader;
+			this.valueResetter = valueResetter;
+
+			refreshAccessMode();
 		}
 
 		@Override
-		public void update(Context context, UpdateType type) {
+		public void accessModeChanged(boolean couple) {
+			if (couple) {
+				this.valueReader.trigger();
+			} else{
+				this.valueResetter.trigger();
+			}
+		}
+
+		@Override
+		public void valueChanged(Context context, UpdateType type) {
 			this.valueReader.trigger();
-		}
-
-		@Override
-		public void unbind() {
-			// Not required
 		}
 	}
 
@@ -75,14 +75,13 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * Binds the given {@link Consumer} to the given property of this
 	 * {@link ModelHandler}.
 	 * 
-	 * @param <FieldValueType>
-	 *            The value type of the {@link Consumer} to bind.
-	 * @param consumer
-	 *            The {@link Consumer} to bind; might <b>not</b> be null.
-	 * @param property
-	 *            The {@link Property} to bind to; might <b>not</b> be null.
+	 * @param <FieldValueType> The value type of the {@link Consumer} to bind.
+	 * @param consumer The {@link Consumer} to bind; might <b>not</b> be null.
+	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
+	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType> void bind(Consumer<FieldValueType> consumer, Property<ModelType, FieldValueType> property) {
+	public <FieldValueType> Binding bind(Consumer<FieldValueType> consumer,
+										 Property<ModelType, FieldValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (property == null) {
@@ -90,29 +89,26 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		Procedure valueReader = () -> consumer.accept(ModelBinder.this.get(property));
+		Procedure valueResetter = () -> consumer.accept(null);
 
-		addBinding(property, new ConsumerBinding(valueReader));
+		return addBinding(property, new ConsumerBinding(valueReader, valueResetter));
 	}
 
 	/**
 	 * Binds the given {@link Consumer} to the given property of this
 	 * {@link ModelHandler}.
 	 * 
-	 * @param <FieldValueType>
-	 *            The value type of the {@link Consumer} to bind.
-	 * @param <PropertyValueType>
-	 *            The value type of the property to bind with.
-	 * @param consumer
-	 *            The {@link Consumer} to bind; might <b>not</b> be null.
-	 * @param converter
-	 *            The {@link Converter} to use for conversion between the field's
-	 *            and the properties' value types; might <b>not</b> be null.
-	 * @param property
-	 *            The {@link Property} to bind to; might <b>not</b> be null.
+	 * @param <FieldValueType> The value type of the {@link Consumer} to bind.
+	 * @param <PropertyValueType> The value type of the property to bind with.
+	 * @param consumer The {@link Consumer} to bind; might <b>not</b> be null.
+	 * @param converter The {@link Converter} to use for conversion between the field's and the properties' value
+	 *                  types; might <b>not</b> be null.
+	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
+	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType, PropertyValueType> void bind(Consumer<FieldValueType> consumer,
-														 Converter<FieldValueType, PropertyValueType> converter,
-														 Property<ModelType, PropertyValueType> property) {
+	public <FieldValueType, PropertyValueType> Binding bind(Consumer<FieldValueType> consumer,
+															Converter<FieldValueType, PropertyValueType> converter,
+															Property<ModelType, PropertyValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (converter == null) {
@@ -122,32 +118,51 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		Procedure valueReader = () -> consumer.accept(converter.toField(ModelBinder.this.get(property)));
+		Procedure valueResetter = () -> consumer.accept(null);
 
-		addBinding(property, new ConsumerBinding(valueReader));
+		return addBinding(property, new ConsumerBinding(valueReader, valueResetter));
 	}
 
 	// ######################################################################################################################################
 	// ########################################################## HASVALUE BINDING ##########################################################
 	// ######################################################################################################################################
 
-	@SuppressWarnings("rawtypes")
-	private static final class HasValueBinding implements Binding, ValueChangeListener {
+	private final class HasValueBinding extends Binding implements ValueChangeListener {
 
-		private static final long serialVersionUID = 1L;
-
+		private final HasValue<?, ?> hasValue;
+		private final Property<ModelType, ?> property;
 		private final Procedure valueReader;
 		private final Procedure valueWriter;
-		private final Procedure enablementUpdater;
-		private final Registration registration;
+		private final Procedure valueResetter;
+
+		private Registration registration;
 		private boolean synchronizing = false;
 
-		@SuppressWarnings("unchecked")
-		private HasValueBinding(HasValue<?, ?> hasValue, Procedure valueReader, Procedure valueWriter,
-				Procedure enablementSwitch) {
+		public HasValueBinding(HasValue<?, ?> hasValue, Property<ModelType, ?> property,
+							   Procedure valueReader, Procedure valueWriter, Procedure valueResetter) {
+			this.hasValue = hasValue;
+			this.property = property;
 			this.valueReader = valueReader;
 			this.valueWriter = valueWriter;
-			this.enablementUpdater = enablementSwitch;
-			this.registration = hasValue.addValueChangeListener(this);
+			this.valueResetter = valueResetter;
+
+			refreshAccessMode();
+		}
+
+		@Override
+		public synchronized void accessModeChanged(boolean couple) {
+			if (couple && this.registration == null) {
+				this.registration = this.hasValue.addValueChangeListener(this);
+				this.valueReader.trigger();
+			} else if (!couple && this.registration != null) {
+				this.registration.remove();
+				this.registration = null;
+				this.valueResetter.trigger();
+			}
+
+			if (this.hasValue instanceof Component) {
+				((Component) this.hasValue).setVisible(getAccessMode() != AccessMode.PROHIBIT);
+			}
 		}
 
 		@Override
@@ -160,18 +175,18 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		@Override
-		public synchronized void update(Context context, UpdateType type) {
-			if (!this.synchronizing) {
+		public synchronized void valueChanged(Context context, UpdateType type) {
+			if (!this.synchronizing && this.registration != null) {
 				this.synchronizing = true;
-				this.enablementUpdater.trigger();
+				boolean exists = ModelBinder.this.exists(property);
+				this.hasValue.setReadOnly(this.property.isWritable() && exists &&
+						getAccessMode() == AccessMode.READ_ONLY);
+				if (this.hasValue instanceof HasEnabled) {
+					((HasEnabled) this.hasValue).setEnabled(exists);
+				}
 				this.valueReader.trigger();
 				this.synchronizing = false;
 			}
-		}
-
-		@Override
-		public void unbind() {
-			this.registration.remove();
 		}
 	}
 
@@ -179,15 +194,13 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * Binds the given {@link HasValue} to the given property of this
 	 * {@link ModelHandler}.
 	 * 
-	 * @param <FieldValueType>
-	 *            The value type of the {@link HasValue} to bind.
-	 * @param hasValue
-	 *            The {@link HasValue} to bind; might <b>not</b> be null.
-	 * @param property
-	 *            The {@link Property} to bind to; might <b>not</b> be null.
+	 * @param <FieldValueType> The value type of the {@link HasValue} to bind.
+	 * @param hasValue The {@link HasValue} to bind; might <b>not</b> be null.
+	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
+	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType> void bind(HasValue<?, FieldValueType> hasValue,
-									  Property<ModelType, FieldValueType> property) {
+	public <FieldValueType> Binding bind(HasValue<?, FieldValueType> hasValue,
+													  Property<ModelType, FieldValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (property == null) {
@@ -202,28 +215,26 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		} else {
 			valueWriter = NOOP;
 		}
-		createHasValueBinding(property, hasValue, valueReader, valueWriter);
+		Procedure valueResetter = () -> hasValue.setValue(hasValue.getEmptyValue());
+
+		return addBinding(property, new HasValueBinding(hasValue, property, valueReader, valueWriter, valueResetter));
 	}
 
 	/**
 	 * Binds the given {@link HasValue} to the given property of this
 	 * {@link ModelHandler}.
 	 * 
-	 * @param <FieldValueType>
-	 *            The value type of the {@link HasValue} to bind.
-	 * @param <PropertyValueType>
-	 *            The value type of the property to bind with.
-	 * @param hasValue
-	 *            The {@link HasValue} to bind; might <b>not</b> be null.
-	 * @param converter
-	 *            The {@link Converter} to use for conversion between the field's
-	 *            and the properties' value types; might <b>not</b> be null.
-	 * @param property
-	 *            The {@link Property} to bind to; might <b>not</b> be null.
+	 * @param <FieldValueType> The value type of the {@link HasValue} to bind.
+	 * @param <PropertyValueType> The value type of the property to bind with.
+	 * @param hasValue The {@link HasValue} to bind; might <b>not</b> be null.
+	 * @param converter The {@link Converter} to use for conversion between the field's and the properties' value
+	 *                  types; might <b>not</b> be null.
+	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
+	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType, PropertyValueType> void bind(HasValue<?, FieldValueType> hasValue,
-														 Converter<FieldValueType, PropertyValueType> converter,
-														 Property<ModelType, PropertyValueType> property) {
+	public <FieldValueType, PropertyValueType> Binding bind(HasValue<?, FieldValueType> hasValue,
+															Converter<FieldValueType, PropertyValueType> converter,
+															Property<ModelType, PropertyValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (converter == null) {
@@ -240,40 +251,25 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		} else {
 			valueWriter = NOOP;
 		}
-		createHasValueBinding(property, hasValue, valueReader, valueWriter);
-	}
+		Procedure valueResetter = () -> hasValue.setValue(hasValue.getEmptyValue());
 
-	private synchronized <FieldValueType> void createHasValueBinding(Property<ModelType, ?> property,
-			HasValue<?, FieldValueType> hasValue, Procedure valueReader, Procedure valueWriter) {
-		Consumer<Boolean> enabler;
-		if (hasValue instanceof HasEnabled) {
-			enabler = enable -> ((HasEnabled) hasValue).setEnabled(enable);
-		} else {
-			enabler = NOCONSUME;
-		}
-
-		Procedure enablementSwitch = () -> {
-			boolean exists = ModelBinder.this.exists(property);
-			hasValue.setReadOnly(!property.isWritable() || !exists);
-			enabler.accept(exists);
-		};
-
-		addBinding(property, new HasValueBinding(hasValue, valueReader, valueWriter, enablementSwitch));
+		return addBinding(property, new HasValueBinding(hasValue, property, valueReader, valueWriter, valueResetter));
 	}
 
 	// ######################################################################################################################################
 	// ########################################################## BINDING HANDLING ##########################################################
 	// ######################################################################################################################################
 
-	private void addBinding(Property<ModelType, ?> property, Binding binding) {
+	private Binding addBinding(Property<ModelType, ?> property, Binding binding) {
 		if (!this.bindings.containsKey(property)) {
 			this.bindings.put(property, new ArrayList<>());
 		}
 		this.bindings.get(property).add(binding);
+		return binding;
 	}
 
 	synchronized void updateAll(UpdateType type) {
-		this.bindings.forEach((property, bindings) -> bindings.forEach(binding -> binding.update(context, type)));
+		this.bindings.forEach((property, bindings) -> bindings.forEach(binding -> binding.valueChanged(context, type)));
 	}
 
 	synchronized void update(Property<ModelType, ?> property, Context context, UpdateType type) {
@@ -292,7 +288,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 						continue boundPropertyLoop;
 					}
 				}
-				this.bindings.get(boundProperty).forEach(binding -> binding.update(context, type));
+				this.bindings.get(boundProperty).forEach(binding -> binding.valueChanged(context, type));
 			}
 		}
 	}
@@ -303,7 +299,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		while (mapIter.hasNext()) {
 			Iterator<Binding> bindingIter = mapIter.next().getValue().iterator();
 			while (bindingIter.hasNext()) {
-				bindingIter.next().unbind();
+				bindingIter.next().accessModeChanged(false);
 				bindingIter.remove();
 			}
 			mapIter.remove();

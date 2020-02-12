@@ -50,14 +50,30 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 *         null
 	 */
 	default <ModelType> C bind(ModelAccessor<ModelType> binder, Property<ModelType, String> property) {
+		return bindAndConfigure(binder, property).bind();
+	}
+
+	/**
+	 * Uses the given {@link ModelAccessor} to bind the {@link HasText} to the given {@link Property} and starts a
+	 * new {@link BindingBuilder} to configure that binding.
+	 *
+	 * @param <ModelType>
+	 *            The type of the model to whose property to bind.
+	 * @param binder
+	 *            The {@link ModelAccessor} to bind the {@link HasText} with; might
+	 *            <b>not</b> be null.
+	 * @param property
+	 *            The {@link Property} to bind the {@link HasText} to; might
+	 *            <b>not</b> be null.
+	 * @return A new {@link BindingBuilder} instance, never null
+	 */
+	default <ModelType> BindingBuilder<C> bindAndConfigure(ModelAccessor<ModelType> binder, Property<ModelType, String> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
 		} else if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
 		}
-		C hasText = build();
-		binder.bind(text -> hasText.setText(text), property);
-		return hasText;
+		return new BindingBuilder<>(this, c -> binder.bind(text -> c.setText(text), property));
 	}
 
 	/**
@@ -85,7 +101,34 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 *         null
 	 */
 	default <ModelType, PropertyValueType> C bind(ModelAccessor<ModelType> binder,
-			Converter<String, PropertyValueType> converter, Property<ModelType, PropertyValueType> property) {
+												  Converter<String, PropertyValueType> converter,
+												  Property<ModelType, PropertyValueType> property) {
+		return bindAndConfigure(binder, converter, property).bind();
+	}
+
+	/**
+	 * Uses the given {@link ModelAccessor} to bind the {@link HasText} to the given {@link Property} and starts a
+	 * new {@link BindingBuilder} to configure that binding.
+	 *
+	 * @param <ModelType>
+	 *            The type of the model to whose property to bind.
+	 * @param <PropertyValueType>
+	 *            The type of the properties' value to convert from/to.
+	 * @param binder
+	 *            The {@link ModelAccessor} to bind the {@link HasText} with; might
+	 *            <b>not</b> be null.
+	 * @param converter
+	 *            The {@link Converter} to use to convert between the value type of
+	 *            the {@link HasText} and the {@link Property}; might
+	 *            <b>not</b> be null.
+	 * @param property
+	 *            The {@link Property} to bind the {@link HasText} to; might
+	 *            <b>not</b> be null.
+	 * @return A new {@link BindingBuilder} instance, never null
+	 */
+	default <ModelType, PropertyValueType> BindingBuilder<C> bindAndConfigure(ModelAccessor<ModelType> binder,
+																			  Converter<String, PropertyValueType> converter,
+																			  Property<ModelType, PropertyValueType> property) {
 		if (binder == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
 		} else if (converter == null) {
@@ -93,8 +136,6 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 		} else if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
 		}
-		C hasText = build();
-		binder.bind(text -> hasText.setText(text), converter, property);
-		return hasText;
+		return new BindingBuilder<>(this, c -> binder.bind(text -> c.setText(text), converter, property));
 	}
 }

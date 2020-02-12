@@ -1,7 +1,11 @@
 package com.mantledillusion.vaadin.cotton;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import com.mantledillusion.vaadin.cotton.model.Binding;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
 
 /**
@@ -9,6 +13,68 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
  * {@link CottonUI}.
  */
 public interface User {
+
+	/**
+	 * A binding auditor determining {@link Binding.AccessMode}s in relation to the current {@link User}'s rights, ready
+	 * to be used at {@link Binding#withRestriction(Supplier)}.
+	 * <p>
+	 * Instantiate using...<br>
+	 * - {@link #readWrite(String...)}<br>
+	 * - {@link #readOnly(String...)}<br>
+	 */
+	final class UserRightBindingAuditor implements Supplier<Binding.AccessMode> {
+
+		private final Binding.AccessMode mode;
+		private final Set<String> rightIds;
+
+		private UserRightBindingAuditor(Binding.AccessMode mode, Set<String> rightIds) {
+			this.mode = mode;
+			this.rightIds = rightIds;
+		}
+
+		/**
+		 * Returns whether the currently logged in {@link User} has sufficient rights for the {@link Binding.AccessMode}
+		 * of this binding auditor.
+		 *
+		 * @return The {@link Binding.AccessMode} of this auditor, or {@link Binding.AccessMode#PROHIBIT}, if the
+		 * currently logged in {@link User} has insufficient rights, never null
+		 */
+		@Override
+		public Binding.AccessMode get() {
+			return WebEnv.isLoggedIn() && WebEnv.getLoggedInUser().hasRights(this.rightIds) ?
+					this.mode : Binding.AccessMode.PROHIBIT;
+		}
+
+		/**
+		 * Factory method.
+		 *
+		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_WRITE} to be available to {@link User}s
+		 * with the given rights.
+		 *
+		 * @param rightIds  The IDs of the rights the {@link User} has to have to be allowed
+		 *                  {@link Binding.AccessMode#READ_WRITE}; might <b>not</b> be null, empty means the {@link User}
+		 *                  being logged in is enough.
+		 * @return A new {@link UserRightBindingAuditor} instance, never null
+		 */
+		public static UserRightBindingAuditor readWrite(String... rightIds) {
+			return new UserRightBindingAuditor(Binding.AccessMode.READ_WRITE, new HashSet<>(Arrays.asList(rightIds)));
+		}
+
+		/**
+		 * Factory method.
+		 *
+		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_ONLY} to be available to {@link User}s
+		 * with the given rights.
+		 *
+		 * @param rightIds  The IDs of the rights the {@link User} has to have to be allowed
+		 *                  {@link Binding.AccessMode#READ_ONLY}; might <b>not</b> be null, empty means the {@link User}
+		 *                  being logged in is enough.
+		 * @return A new {@link UserRightBindingAuditor} instance, never null
+		 */
+		public static UserRightBindingAuditor readOnly(String... rightIds) {
+			return new UserRightBindingAuditor(Binding.AccessMode.READ_ONLY, new HashSet<>(Arrays.asList(rightIds)));
+		}
+	}
 
 	/**
 	 * Has to return whether this {@link User} instance owns the rights of the given
