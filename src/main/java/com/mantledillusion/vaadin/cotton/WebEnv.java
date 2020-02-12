@@ -14,8 +14,7 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.QueryParameters;
 
 /**
- * Offers static methods in the web environment context of the current
- * {@link CottonUI} instance.
+ * Offers static methods in the web environment context of the current {@link CottonUI} instance.
  */
 public final class WebEnv {
 
@@ -40,8 +39,7 @@ public final class WebEnv {
      * Navigates to the given location.
      *
      * @param location        The location to navigate to; might <b>not</b> be null.
-     * @param queryParameters The {@link QueryParameters} to set; might <b>not</b>
-     *                        be null.
+     * @param queryParameters The {@link QueryParameters} to set; might <b>not</b> be null.
      * @see UI#navigate(String, QueryParameters)
      */
     public static void navigateTo(String location, QueryParameters queryParameters) {
@@ -51,8 +49,7 @@ public final class WebEnv {
     /**
      * Navigates to the given location.
      *
-     * @param navigationTarget The view to whose location to navigate to; might
-     *                         <b>not</b> be null.
+     * @param navigationTarget The view to whose location to navigate to; might <b>not</b> be null.
      * @see UI#navigate(Class)
      */
     public static void navigateTo(Class<? extends Component> navigationTarget) {
@@ -64,8 +61,7 @@ public final class WebEnv {
      *
      * @param <T>              url parameter type
      * @param <C>              navigation target type
-     * @param navigationTarget The view to whose location to navigate to; might
-     *                         <b>not</b> be null.
+     * @param navigationTarget The view to whose location to navigate to; might <b>not</b> be null.
      * @param parameter        The navigation parameter to pass; might be null.
      * @see UI#navigate(Class, Object)
      */
@@ -79,8 +75,8 @@ public final class WebEnv {
     // #########################################################################################################################################
 
     /**
-     * Checks whether there is a localization present for the given msgId in the
-     * {@link ResourceBundle} of the current session's locale.
+     * Checks whether there is a localization present for the given msgId in the {@link ResourceBundle} of the current
+     * session's locale.
      *
      * @param msgId The message if to check; might be null
      * @return True if there is a localization for the given id, false otherwise
@@ -90,20 +86,17 @@ public final class WebEnv {
     }
 
     /**
-     * Localizes the given message identifier with the current session's locale
-     * using the {@link ResourceBundle}s configured at the {@link CottonServlet} for
-     * that language.
+     * Localizes the given message identifier with the current session's locale using the {@link ResourceBundle}s
+     * configured at the {@link CottonServlet} for that language.
      * <p>
      * No message parameters will be injected.
      * <p>
-     * Depending on the current language's {@link Locale}, the given message
-     * parameters may also be localized during insertion into the message.
+     * Depending on the current language's {@link Locale}, the given message parameters may also be localized during
+     * insertion into the message.
      *
      * @param <T>   The message parameter type
-     * @param msgId The message id to localize; might be null or not even a message
-     *              id.
-     * @return A localized and parameter filled message, or the given msgId if
-     * localization was not possible
+     * @param msgId The message id to localize; might be null or not even a message id.
+     * @return A localized and parameter filled message, or the given msgId if localization was not possible
      */
     public static <T> String getTranslation(String msgId) {
         return CottonServletService.SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
@@ -111,25 +104,20 @@ public final class WebEnv {
     }
 
     /**
-     * Localizes the given message identifier with the current session's locale
-     * using the {@link ResourceBundle}s configured at the {@link CottonServlet} for
-     * that language.
+     * Localizes the given message identifier with the current session's locale using the {@link ResourceBundle}s
+     * configured at the {@link CottonServlet} for that language.
      * <p>
-     * The given message parameters will be injected by their index, so a
-     * <code>{0}</code> block in the message will be replaced with the first given
-     * parameter.
+     * The given message parameters will be injected by their index, so a <code>{0}</code> block in the message will be
+     * replaced with the first given parameter.
      * <p>
-     * Depending on the current language's {@link Locale}, the given message
-     * parameters may also be localized during insertion into the message.
+     * Depending on the current language's {@link Locale}, the given message parameters may also be localized during
+     * insertion into the message.
      *
      * @param <T>                      The message parameter type
-     * @param msgId                    The message id to localize; may be null or
-     *                                 not even a message id.
-     * @param indexedMessageParameters The parameters to inject into the localized
-     *                                 message. Will only be used if the message id
-     *                                 could be localized.
-     * @return A localized and parameter filled message, or the given msgId if
-     * localization was not possible
+     * @param msgId                    The message id to localize; may be null or not even a message id.
+     * @param indexedMessageParameters The parameters to inject into the localized message. Will only be used if the
+     *                                 message id could be localized.
+     * @return A localized and parameter filled message, or the given msgId if localization was not possible
      */
     @SafeVarargs
     public static <T> String getTranslation(String msgId, T... indexedMessageParameters) {
@@ -138,25 +126,20 @@ public final class WebEnv {
     }
 
     /**
-     * Localizes the given message identifier with the current session's locale
-     * using the {@link ResourceBundle}s configured at the {@link CottonServlet} for
-     * that language.
+     * Localizes the given message identifier with the current session's locale using the {@link ResourceBundle}s
+     * configured at the {@link CottonServlet} for that language.
      * <p>
-     * The given message parameters will be injected by their name, so a
-     * <code>{foobar}</code> block in the message will be replaced with the message
-     * parameter whose key is 'foobar'.
+     * The given message parameters will be injected by their name, so a <code>{foobar}</code> block in the message
+     * will be replaced with the message parameter whose key is 'foobar'.
      * <p>
-     * Depending on the current language's {@link Locale}, the given message
-     * parameters may also be localized during insertion into the message.
+     * Depending on the current language's {@link Locale}, the given message parameters may also be localized during
+     * insertion into the message.
      *
      * @param <T>               The message parameter type
-     * @param msgId             The message id to localize; may be null or not even
-     *                          a message id.
-     * @param messageParameters The parameters to inject into the localized message.
-     *                          Will only be used if the message id could be
-     *                          localized.
-     * @return A localized and parameter filled message, or the given msgId if
-     * localization was not possible
+     * @param msgId             The message id to localize; may be null or not even a message id.
+     * @param messageParameters The parameters to inject into the localized message. Will only be used if the message
+     *                          id could be localized.
+     * @return A localized and parameter filled message, or the given msgId if localization was not possible
      */
     @SuppressWarnings("unchecked")
     public static <T> String getTranslation(String msgId, Map<String, T> messageParameters) {
@@ -170,23 +153,32 @@ public final class WebEnv {
 
     /**
      * Will log in the given {@link User}.
+     * <p>
+     * Another {@link User} possibly logged in currently will be logged out if the two are not
+     * {@link User#equals(Object)}.
      *
-     * @param user The {@link User} to log in; might <b>not</b> be null.
+     * @param user The {@link User} to log in; might be null.
+     * @return False if there is a {@link User} currently locked in whose {@link BeforeLogoutEvent} is not being
+     * accepted, true otherwise
      */
-    public static void logIn(User user) {
-        if (user == null) {
-            throw new Http901IllegalArgumentException("Unable to log in a null user.");
-        } else if (isLoggedIn()) {
-            throw new Http902IllegalStateException("Unable to log in a user while another is already logged in.");
+    public static boolean logIn(User user) {
+        if (isLoggedIn()) {
+            if (!getLoggedInUser().equals(user)) {
+                if (!logOut()) {
+                    return false;
+                }
+            }
         }
-        CottonServletService.SessionBean.current(LoginHandler.class).login(user);
+        if (user != null && !user.equals(getLoggedInUser())) {
+            CottonServletService.SessionBean.current(LoginHandler.class).login(user);
+        }
+        return true;
     }
 
     /**
      * Will log out the current {@link User} if there is one.
      *
-     * @return True if the {@link BeforeLogoutEvent} is accepted and the log out
-     * was successful, false otherwise
+     * @return True if the {@link BeforeLogoutEvent} is accepted and the log out was successful, false otherwise
      */
     public static boolean logOut() {
         if (isLoggedIn()) {
