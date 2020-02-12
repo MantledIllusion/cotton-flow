@@ -40,7 +40,7 @@
 
 		<!-- com.mantledillusion dependencies -->
 		<injection.hura.version>2.0.0.ALPHA8</injection.hura.version>
-		<data.epiphy.version>4.0.0.ALPHA2</data.epiphy.version>
+		<data.epiphy.version>4.0.0.ALPHA3</data.epiphy.version>
 		<trail.metrics.version>1.0.0.ALPHA4</trail.metrics.version>
 
 		<!-- org.apache dependencies -->
