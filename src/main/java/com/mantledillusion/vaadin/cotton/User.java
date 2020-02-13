@@ -1,6 +1,7 @@
 package com.mantledillusion.vaadin.cotton;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -25,10 +26,12 @@ public interface User {
 	final class UserRightBindingAuditor implements Supplier<Binding.AccessMode> {
 
 		private final Binding.AccessMode mode;
+		private final boolean loggedIn;
 		private final Set<String> rightIds;
 
-		private UserRightBindingAuditor(Binding.AccessMode mode, Set<String> rightIds) {
+		private UserRightBindingAuditor(Binding.AccessMode mode, boolean loggedIn, Set<String> rightIds) {
 			this.mode = mode;
+			this.loggedIn = loggedIn;
 			this.rightIds = rightIds;
 		}
 
@@ -41,8 +44,8 @@ public interface User {
 		 */
 		@Override
 		public Binding.AccessMode get() {
-			return WebEnv.isLoggedIn() && WebEnv.getLoggedInUser().hasRights(this.rightIds) ?
-					this.mode : Binding.AccessMode.PROHIBIT;
+			return this.loggedIn ? (WebEnv.isLoggedIn() && WebEnv.getLoggedInUser().hasRights(this.rightIds) ?
+					this.mode : Binding.AccessMode.PROHIBIT) : this.mode;
 		}
 
 		/**
@@ -57,7 +60,19 @@ public interface User {
 		 * @return A new {@link UserRightBindingAuditor} instance, never null
 		 */
 		public static UserRightBindingAuditor readWrite(String... rightIds) {
-			return new UserRightBindingAuditor(Binding.AccessMode.READ_WRITE, new HashSet<>(Arrays.asList(rightIds)));
+			return new UserRightBindingAuditor(Binding.AccessMode.READ_WRITE, true, new HashSet<>(Arrays.asList(rightIds)));
+		}
+
+		/**
+		 * Factory method.
+		 *
+		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_WRITE} to be available to anonymous
+		 * visitors that are <b>not</b> logged in as a {@link User}.
+		 *
+		 * @return A new {@link UserRightBindingAuditor} instance, never null
+		 */
+		public static UserRightBindingAuditor anonymousReadWrite() {
+			return new UserRightBindingAuditor(Binding.AccessMode.READ_WRITE, false, Collections.emptySet());
 		}
 
 		/**
@@ -72,7 +87,19 @@ public interface User {
 		 * @return A new {@link UserRightBindingAuditor} instance, never null
 		 */
 		public static UserRightBindingAuditor readOnly(String... rightIds) {
-			return new UserRightBindingAuditor(Binding.AccessMode.READ_ONLY, new HashSet<>(Arrays.asList(rightIds)));
+			return new UserRightBindingAuditor(Binding.AccessMode.READ_ONLY, true, new HashSet<>(Arrays.asList(rightIds)));
+		}
+
+		/**
+		 * Factory method.
+		 *
+		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_ONLY} to be available to anonymous
+		 * visitors that are <b>not</b> logged in as a {@link User}.
+		 *
+		 * @return A new {@link UserRightBindingAuditor} instance, never null
+		 */
+		public static UserRightBindingAuditor anonymousReadOnly() {
+			return new UserRightBindingAuditor(Binding.AccessMode.READ_ONLY, false, Collections.emptySet());
 		}
 	}
 
