@@ -20,8 +20,8 @@ public interface User {
 	 * to be used at {@link Binding#withRestriction(Supplier)}.
 	 * <p>
 	 * Instantiate using...<br>
-	 * - {@link #readWrite(String...)}<br>
-	 * - {@link #readOnly(String...)}<br>
+	 * - {@link #forAnonymous(Binding.AccessMode)}<br>
+	 * - {@link #forUser(Binding.AccessMode, String...)}<br>
 	 */
 	final class UserRightBindingAuditor implements Supplier<Binding.AccessMode> {
 
@@ -39,67 +39,41 @@ public interface User {
 		 * Returns whether the currently logged in {@link User} has sufficient rights for the {@link Binding.AccessMode}
 		 * of this binding auditor.
 		 *
-		 * @return The {@link Binding.AccessMode} of this auditor, or {@link Binding.AccessMode#PROHIBIT}, if the
+		 * @return The {@link Binding.AccessMode} of this auditor, or {@link Binding.AccessMode#HIDDEN}, if the
 		 * currently logged in {@link User} has insufficient rights, never null
 		 */
 		@Override
 		public Binding.AccessMode get() {
 			return this.loggedIn ? (WebEnv.isLoggedIn() && WebEnv.getLoggedInUser().hasRights(this.rightIds) ?
-					this.mode : Binding.AccessMode.PROHIBIT) : this.mode;
+					this.mode : Binding.AccessMode.HIDDEN) : this.mode;
 		}
 
 		/**
 		 * Factory method.
-		 *
-		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_WRITE} to be available to {@link User}s
-		 * with the given rights.
-		 *
-		 * @param rightIds  The IDs of the rights the {@link User} has to have to be allowed
-		 *                  {@link Binding.AccessMode#READ_WRITE}; might <b>not</b> be null, empty means the {@link User}
-		 *                  being logged in is enough.
-		 * @return A new {@link UserRightBindingAuditor} instance, never null
-		 */
-		public static UserRightBindingAuditor readWrite(String... rightIds) {
-			return new UserRightBindingAuditor(Binding.AccessMode.READ_WRITE, true, new HashSet<>(Arrays.asList(rightIds)));
-		}
-
-		/**
-		 * Factory method.
-		 *
-		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_WRITE} to be available to anonymous
+		 * <p>
+		 * Creates a new binding auditor for the given {@link Binding.AccessMode} to be available to anonymous 
 		 * visitors that are <b>not</b> logged in as a {@link User}.
 		 *
+		 * @param mode 		The {@link Binding.AccessMode} to allow
 		 * @return A new {@link UserRightBindingAuditor} instance, never null
 		 */
-		public static UserRightBindingAuditor anonymousReadWrite() {
-			return new UserRightBindingAuditor(Binding.AccessMode.READ_WRITE, false, Collections.emptySet());
+		public static UserRightBindingAuditor forAnonymous(Binding.AccessMode mode) {
+			return new UserRightBindingAuditor(mode, false, Collections.emptySet());
 		}
 
 		/**
 		 * Factory method.
+		 * <p>
+		 * Creates a new binding auditor for the given {@link Binding.AccessMode} to be available to a logged in 
+		 * {@link User} with the given rights.
 		 *
-		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_ONLY} to be available to {@link User}s
-		 * with the given rights.
-		 *
-		 * @param rightIds  The IDs of the rights the {@link User} has to have to be allowed
-		 *                  {@link Binding.AccessMode#READ_ONLY}; might <b>not</b> be null, empty means the {@link User}
-		 *                  being logged in is enough.
+		 * @param mode 		The {@link Binding.AccessMode} to allow
+		 * @param rightIds  The IDs of the rights the {@link User} has to have to be allowed having the given mode; 
+		 *                  might <b>not</b> be null, empty means the {@link User} being logged in is enough.
 		 * @return A new {@link UserRightBindingAuditor} instance, never null
 		 */
-		public static UserRightBindingAuditor readOnly(String... rightIds) {
-			return new UserRightBindingAuditor(Binding.AccessMode.READ_ONLY, true, new HashSet<>(Arrays.asList(rightIds)));
-		}
-
-		/**
-		 * Factory method.
-		 *
-		 * Creates a new binding auditor for the {@link Binding.AccessMode#READ_ONLY} to be available to anonymous
-		 * visitors that are <b>not</b> logged in as a {@link User}.
-		 *
-		 * @return A new {@link UserRightBindingAuditor} instance, never null
-		 */
-		public static UserRightBindingAuditor anonymousReadOnly() {
-			return new UserRightBindingAuditor(Binding.AccessMode.READ_ONLY, false, Collections.emptySet());
+		public static UserRightBindingAuditor forUser(Binding.AccessMode mode, String... rightIds) {
+			return new UserRightBindingAuditor(mode, true, new HashSet<>(Arrays.asList(rightIds)));
 		}
 	}
 

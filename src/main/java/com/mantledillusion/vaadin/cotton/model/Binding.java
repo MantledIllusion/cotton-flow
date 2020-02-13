@@ -17,19 +17,30 @@ public abstract class Binding {
     public enum AccessMode {
 
         /**
-         * Full access, reading and writing.
+         * Full access to the property, reading and writing.
          */
-        READ_WRITE,
+        READ_WRITE(true),
 
         /**
-         * Reading access only.
+         * Reading access on the property only, no writing.
          */
-        READ_ONLY,
+        READ_ONLY(true),
 
         /**
-         * No access at all.
+         * Neither reading nor writing access, but the properties' existence is not denied.
          */
-        PROHIBIT;
+        MASKED(false),
+
+        /**
+         * Neither reading nor writing access, even the properties' existence is denied.
+         */
+        HIDDEN(false);
+
+        private final boolean coupled;
+
+        AccessMode(boolean coupled) {
+            this.coupled = coupled;
+        }
 
         private AccessMode or(AccessMode other) {
             return ordinal() < other.ordinal() ? this : other;
@@ -47,7 +58,7 @@ public abstract class Binding {
 
     protected final void refreshAccessMode() {
         this.accessMode = this.bindingAuditor.get();
-        accessModeChanged(this.accessMode != AccessMode.PROHIBIT);
+        accessModeChanged(this.accessMode.coupled);
     }
 
     /**

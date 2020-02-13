@@ -161,7 +161,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			}
 
 			if (this.hasValue instanceof Component) {
-				((Component) this.hasValue).setVisible(getAccessMode() != AccessMode.PROHIBIT);
+				((Component) this.hasValue).setVisible(getAccessMode() != AccessMode.HIDDEN);
 			}
 		}
 
@@ -176,15 +176,17 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 		@Override
 		public synchronized void valueChanged(Context context, UpdateType type) {
-			if (!this.synchronizing && this.registration != null) {
+			if (!this.synchronizing) {
 				this.synchronizing = true;
 				boolean exists = ModelBinder.this.exists(property);
 				this.hasValue.setReadOnly(this.property.isWritable() && exists &&
-						getAccessMode() == AccessMode.READ_ONLY);
+						getAccessMode() != AccessMode.READ_WRITE);
 				if (this.hasValue instanceof HasEnabled) {
 					((HasEnabled) this.hasValue).setEnabled(exists);
 				}
-				this.valueReader.trigger();
+				if (this.registration != null) {
+					this.valueReader.trigger();
+				}
 				this.synchronizing = false;
 			}
 		}
