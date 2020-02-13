@@ -18,11 +18,11 @@ import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.exception.http400.Http403UnauthorizedException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterListener;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.BeforeLeaveListener;
 import org.apache.commons.lang3.ArrayUtils;
 
-class LoginHandler implements CottonServletService.SessionBean, BeforeEnterListener {
+class LoginHandler implements CottonServletService.SessionBean, BeforeLeaveListener {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -70,7 +70,12 @@ class LoginHandler implements CottonServletService.SessionBean, BeforeEnterListe
 	}
 
 	@Override
-	public void beforeEnter(BeforeEnterEvent event) {
+	public void beforeLeave(BeforeLeaveEvent event) {
+		if (this.provider != null && this.provider.loginView != null &&
+				this.provider.loginView == event.getNavigationTarget()) {
+			return;
+		}
+
 		List<Class<?>> restrictions = TypeEssentials.getSuperClassesAnnotatedWith(event.getNavigationTarget(),
 				Restricted.class);
 		
