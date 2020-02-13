@@ -1,6 +1,7 @@
 package com.mantledillusion.vaadin.cotton.model;
 
 import com.mantledillusion.data.epiphy.context.Context;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.function.Supplier;
 
@@ -8,8 +9,6 @@ import java.util.function.Supplier;
  * Represents the configurable binding of a property.
  */
 public abstract class Binding {
-
-    private static final Supplier<AccessMode> DEFAULT_AUDITOR = () -> AccessMode.READ_WRITE;
 
     /**
      * Represents the modes a {@link Binding} can allow access of a properties data to.
@@ -42,22 +41,28 @@ public abstract class Binding {
             this.coupled = coupled;
         }
 
-        private AccessMode or(AccessMode other) {
-            return ordinal() < other.ordinal() ? this : other;
+        static Supplier<AccessMode> chain(Supplier<AccessMode> auditor1, Supplier<AccessMode> auditor2) {
+            return () -> or(auditor1.get(), auditor2.get());
+        }
+
+        private static AccessMode or(AccessMode mode1, AccessMode mode2) {
+            return mode1 == null ? mode2 : (mode2 == null ? mode1 : (mode1.ordinal() < mode2.ordinal() ? mode1 : mode2));
         }
     }
 
-    private Supplier<AccessMode> bindingAuditor = DEFAULT_AUDITOR;
     private AccessMode accessMode;
+    private Supplier<AccessMode> bindingAuditor;
 
-    Binding() {}
+    Binding(Supplier<AccessMode> bindingAuditor) {
+        this.bindingAuditor = bindingAuditor;
+    }
 
     protected final AccessMode getAccessMode() {
         return this.accessMode;
     }
 
     protected final void refreshAccessMode() {
-        this.accessMode = this.bindingAuditor.get();
+        this.accessMode = ObjectUtils.defaultIfNull(this.bindingAuditor.get(), AccessMode.READ_WRITE);
         accessModeChanged(this.accessMode.coupled);
     }
 
@@ -79,12 +84,7 @@ public abstract class Binding {
      * @return this
      */
     public final Binding withRestriction(Supplier<AccessMode> bindingAuditor) {
-        if (this.bindingAuditor == DEFAULT_AUDITOR) {
-            this.bindingAuditor = bindingAuditor;
-        } else {
-            Supplier<AccessMode> current = this.bindingAuditor;
-            this.bindingAuditor = () -> current.get().or(bindingAuditor.get());
-        }
+        this.bindingAuditor = AccessMode.chain(this.bindingAuditor, bindingAuditor);
         refreshAccessMode();
         return this;
     }

@@ -3,6 +3,7 @@ package com.mantledillusion.vaadin.cotton.model;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
@@ -20,6 +21,7 @@ import com.vaadin.flow.shared.Registration;
 abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 	private static final Procedure NOOP = () -> {};
+	private static final Supplier<Binding.AccessMode> NOAUDIT = () -> null;
 
 	private interface Procedure {
 
@@ -33,12 +35,34 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	private final Context context;
 	private final Map<Property<ModelType, ?>, List<Binding>> bindings = new IdentityHashMap<>();
 
+	private Supplier<Binding.AccessMode> baseBindingAuditor = NOAUDIT;
+
 	protected ModelBinder(Context context) {
 		this.context = context;
 	}
 
 	protected Context getContext() {
 		return this.context;
+	}
+
+	/**
+	 * BAdds the given binding auditor to all bound bindings to restrict them.
+	 * <p>
+	 * The given {@link Supplier}'s result will be used to determine at which {@link Binding.AccessMode} created
+	 * bindings are expected to allow access to the data of their respective bound properties.
+	 * <p>
+	 * When this method is never used so no binding auditor is ever specified, a default auditor will allow general
+	 * {@link Binding.AccessMode#READ_WRITE} access to properties, as long as the individual {@link Binding}s do not
+	 * have their own restrictions.
+	 * <p>
+	 * When multiple binding auditors are specified using this method, the most generous {@link Binding.AccessMode}
+	 * determined by the auditors (and the possible other auditors of the {@link Binding}s) will be used.
+	 *
+	 * @param baseBindingAuditor The binding auditor; might <b>not</b> be null.
+	 */
+	public final void withBaseRestriction(Supplier<Binding.AccessMode> baseBindingAuditor) {
+		this.baseBindingAuditor = Binding.AccessMode.chain(this.baseBindingAuditor, baseBindingAuditor);
+		this.bindings.values().stream().flatMap(List::stream).forEach(Binding::refreshAccessMode);
 	}
 
 	// ######################################################################################################################################
@@ -50,6 +74,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		private final Procedure valueResetter;
 
 		private ConsumerBinding(Procedure valueReader, Procedure valueResetter) {
+			super(() -> ModelBinder.this.baseBindingAuditor.get());
 			this.valueReader = valueReader;
 			this.valueResetter = valueResetter;
 
@@ -127,7 +152,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	// ########################################################## HASVALUE BINDING ##########################################################
 	// ######################################################################################################################################
 
-	private final class HasValueBinding extends Binding implements ValueChangeListener {
+	private class HasValueBinding extends Binding implements ValueChangeListener {
 
 		private final HasValue<?, ?> hasValue;
 		private final Property<ModelType, ?> property;
@@ -140,6 +165,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 		public HasValueBinding(HasValue<?, ?> hasValue, Property<ModelType, ?> property,
 							   Procedure valueReader, Procedure valueWriter, Procedure valueResetter) {
+			super(() -> ModelBinder.this.baseBindingAuditor.get());
 			this.hasValue = hasValue;
 			this.property = property;
 			this.valueReader = valueReader;
