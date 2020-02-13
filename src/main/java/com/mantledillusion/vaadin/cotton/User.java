@@ -44,8 +44,9 @@ public interface User {
 		 */
 		@Override
 		public Binding.AccessMode get() {
-			return this.loggedIn ? (WebEnv.isLoggedIn() && WebEnv.getLoggedInUser().hasRights(this.rightIds) ?
-					this.mode : Binding.AccessMode.HIDDEN) : this.mode;
+			return this.loggedIn ?
+					(WebEnv.isLoggedIn() && WebEnv.getLoggedInUser().hasRights(this.rightIds) ? this.mode : Binding.AccessMode.HIDDEN) :
+					(WebEnv.isLoggedIn() ? Binding.AccessMode.HIDDEN : this.mode);
 		}
 
 		/**
