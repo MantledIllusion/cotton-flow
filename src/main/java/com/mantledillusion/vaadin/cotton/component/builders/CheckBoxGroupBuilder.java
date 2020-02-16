@@ -19,7 +19,8 @@ public class CheckBoxGroupBuilder<E> extends AbstractComponentBuilder<CheckboxGr
 		HasEnabledBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
 		HasItemsBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E>>,
 		HasValueBuilder<CheckboxGroup<E>, Set<E>, CheckBoxGroupBuilder<E>>,
-		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>> {
+		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
+		HasDataProviderBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E>> {
 
 	@Override
 	public CheckboxGroup<E> instantiate() {

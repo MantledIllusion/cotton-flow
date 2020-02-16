@@ -123,16 +123,7 @@ public interface HasValueBuilder<C extends HasValue<?, V>, V, B extends HasValue
 	default <ModelType, PropertyValueType> C bind(ModelAccessor<ModelType> binder,
 												  Converter<V, PropertyValueType> converter,
 												  Property<ModelType, PropertyValueType> property) {
-		if (binder == null) {
-			throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
-		} else if (converter == null) {
-			throw new Http901IllegalArgumentException("Cannot bind using a null converter.");
-		} else if (property == null) {
-			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
-		}
-		C hasValue = build();
-		binder.bindHasValue(hasValue, converter, property);
-		return hasValue;
+		return bindAndConfigure(binder, converter, property).bind();
 	}
 
 	/**

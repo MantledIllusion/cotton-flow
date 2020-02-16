@@ -18,7 +18,8 @@ public class RadioButtonGroupBuilder<E> extends AbstractComponentBuilder<RadioBu
 		HasEnabledBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>,
 		HasItemsBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>>,
 		HasValueBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>>,
-		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>> {
+		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>,
+		HasDataProviderBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>> {
 
 	@Override
 	public RadioButtonGroup<E> instantiate() {
