@@ -4,11 +4,19 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.TreeData;
+import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -105,8 +113,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType> Binding bind(Consumer<FieldValueType> consumer,
-										 Property<ModelType, FieldValueType> property) {
+	public <FieldValueType> Binding bindConsumer(Consumer<FieldValueType> consumer,
+												 Property<ModelType, FieldValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (property == null) {
@@ -131,9 +139,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType, PropertyValueType> Binding bind(Consumer<FieldValueType> consumer,
-															Converter<FieldValueType, PropertyValueType> converter,
-															Property<ModelType, PropertyValueType> property) {
+	public <FieldValueType, PropertyValueType> Binding bindConsumer(Consumer<FieldValueType> consumer,
+																	Converter<FieldValueType, PropertyValueType> converter,
+																	Property<ModelType, PropertyValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (converter == null) {
@@ -204,7 +212,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		public synchronized void valueChanged(Context context, UpdateType type) {
 			if (!this.synchronizing) {
 				this.synchronizing = true;
-				boolean exists = ModelBinder.this.exists(property);
+				boolean exists = ModelBinder.this.exists(this.property);
 				this.hasValue.setReadOnly(this.property.isWritable() && exists &&
 						getAccessMode() != AccessMode.READ_WRITE);
 				if (this.hasValue instanceof HasEnabled) {
@@ -227,8 +235,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType> Binding bind(HasValue<?, FieldValueType> hasValue,
-													  Property<ModelType, FieldValueType> property) {
+	public <FieldValueType> Binding bindHasValue(HasValue<?, FieldValueType> hasValue,
+												 Property<ModelType, FieldValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (property == null) {
@@ -260,9 +268,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType, PropertyValueType> Binding bind(HasValue<?, FieldValueType> hasValue,
-															Converter<FieldValueType, PropertyValueType> converter,
-															Property<ModelType, PropertyValueType> property) {
+	public <FieldValueType, PropertyValueType> Binding bindHasValue(HasValue<?, FieldValueType> hasValue,
+																	Converter<FieldValueType, PropertyValueType> converter,
+																	Property<ModelType, PropertyValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (converter == null) {
@@ -282,6 +290,142 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		Procedure valueResetter = () -> hasValue.setValue(hasValue.getEmptyValue());
 
 		return addBinding(property, new HasValueBinding(hasValue, property, valueReader, valueWriter, valueResetter));
+	}
+
+	// ######################################################################################################################################
+	// ###################################################### HASDATAPROVIDER BINDING #######################################################
+	// ######################################################################################################################################
+
+	private interface ElementHandle<ElementType> {
+
+		boolean contains(ElementType element);
+
+		Iterable<ElementType> get();
+
+		void add(ElementType parent, ElementType element, ElementType sibling);
+
+		void remove(ElementType element);
+	}
+
+	private class DataProviderBinding<ElementType> extends Binding {
+
+		private final Property<ModelType, ElementType> property;
+		private final DataProvider<ElementType, ?> dataProvider;
+		private final ElementHandle<ElementType> elementHandle;
+
+		private DataProviderBinding(Supplier<AccessMode> bindingAuditor,
+									Property<ModelType, ElementType> property,
+									DataProvider<ElementType, ?> dataProvider,
+									ElementHandle<ElementType> elementHandle) {
+			super(bindingAuditor);
+			this.property = property;
+			this.dataProvider = dataProvider;
+			this.elementHandle = elementHandle;
+		}
+
+		@Override
+		void valueChanged(Context context, UpdateType type) {
+			Set<ElementType> elements = Collections.newSetFromMap(new IdentityHashMap<>());
+			boolean changed = false;
+
+			if (type != UpdateType.REMOVE) {
+				ElementType sibling = null;
+				for (ElementType element: this.property.iterate(ModelBinder.this.getModel(), context)) {
+					if (!this.elementHandle.contains(element)) {
+						this.elementHandle.add(null, element, sibling);
+						changed = true;
+					}
+					elements.add(element);
+					sibling = element;
+				}
+			} else {
+				this.property.stream(ModelBinder.this.getModel(), context).forEach(elements::add);
+			}
+
+			if (type != UpdateType.ADD) {
+				for (ElementType element: this.elementHandle.get()) {
+					if (!elements.contains(element)) {
+						this.elementHandle.remove(element);
+						changed = true;
+					}
+				}
+			}
+
+			if (changed) {
+				this.dataProvider.refreshAll();
+			}
+		}
+	}
+
+	public <ElementType> Binding bindHasDataProvider(HasDataProvider<ElementType> hasDataProvider,
+													 Property<ModelType, ElementType> property) {
+		List<ElementType> elements = new ArrayList<>();
+		ListDataProvider<ElementType> dataProvider = new ListDataProvider<>(Collections.unmodifiableList(elements));
+		hasDataProvider.setDataProvider(dataProvider);
+
+		return addBinding(property, new DataProviderBinding<>(() -> ModelBinder.this.baseBindingAuditor.get(),
+				property, dataProvider, new ElementHandle<ElementType>() {
+
+			@Override
+			public boolean contains(ElementType element) {
+				return elements.contains(element);
+			}
+
+			@Override
+			public Iterable<ElementType> get() {
+				return new ArrayList<>(elements);
+			}
+
+			@Override
+			public void add(ElementType parent, ElementType element, ElementType sibling) {
+				elements.add(elements.indexOf(sibling)+1, element);
+			}
+
+			@Override
+			public void remove(ElementType element) {
+				elements.remove(element);
+			}
+		}));
+	}
+
+	public <ElementType> Binding bindHasHierarchicalDataProvider(HasHierarchicalDataProvider<ElementType> hasDataProvider,
+																 Property<ModelType, ElementType> property) {
+		TreeData<ElementType> elements = new TreeData<>();
+		TreeDataProvider<ElementType> dataProvider = new TreeDataProvider<>(elements);
+		hasDataProvider.setDataProvider(dataProvider);
+
+		return addBinding(property, new DataProviderBinding<>(() -> ModelBinder.this.baseBindingAuditor.get(),
+				property, dataProvider, new ElementHandle<ElementType>() {
+
+			@Override
+			public boolean contains(ElementType element) {
+				return elements.contains(element);
+			}
+
+			@Override
+			public Iterable<ElementType> get() {
+				return toStream(elements.getRootItems()).collect(Collectors.toList());
+			}
+
+			private Stream<ElementType> toStream(List<ElementType> elements) {
+				return elements.stream().flatMap(this::toStream);
+			}
+
+			private Stream<ElementType> toStream(ElementType element) {
+				return Stream.concat(Stream.of(element), toStream(elements.getChildren(element)));
+			}
+
+			@Override
+			public void add(ElementType parent, ElementType element, ElementType sibling) {
+				elements.addItem(parent, element);
+				elements.moveAfterSibling(element, sibling);
+			}
+
+			@Override
+			public void remove(ElementType element) {
+				elements.removeItem(element);
+			}
+		}));
 	}
 
 	// ######################################################################################################################################

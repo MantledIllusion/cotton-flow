@@ -2,6 +2,8 @@ package com.mantledillusion.vaadin.cotton.model;
 
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
+import com.mantledillusion.data.epiphy.context.function.*;
+import com.mantledillusion.data.epiphy.context.reference.ReferencedValue;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Optional;
@@ -80,5 +82,55 @@ public final class ModelAccessor<ModelType> extends ModelBinder<ModelType> {
 	@Override
 	public <PropertyValueType> void set(Property<ModelType, PropertyValueType> property, PropertyValueType value, Context context) {
 		this.parent.set(property, value, getContext().union(context));
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType include(IncludableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element) {
+		return this.parent.include(property, element, getContext());
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType include(IncludableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, Context context) {
+		return this.parent.include(property, element, getContext().union(context));
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> void insert(InsertableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, ReferenceType reference) {
+		this.parent.insert(property, element, reference, getContext());
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> void insert(InsertableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, ReferenceType reference, Context context) {
+		this.parent.insert(property, element, reference, getContext().union(context));
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferencedValue<ReferenceType, PropertyElementType> strip(StripableProperty<ModelType, ?, PropertyElementType, ReferenceType> property) {
+		return this.parent.strip(property, getContext());
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferencedValue<ReferenceType, PropertyElementType> strip(StripableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, Context context) {
+		return this.parent.strip(property, getContext().union(context));
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType drop(DropableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element) {
+		return this.parent.drop(property, element, getContext());
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType drop(DropableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, Context context) {
+		return this.parent.drop(property, element, getContext().union(context));
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> PropertyElementType extract(ExtractableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, ReferenceType reference) {
+		return this.parent.extract(property, reference, getContext());
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> PropertyElementType extract(ExtractableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, ReferenceType reference, Context context) {
+		return this.parent.extract(property, reference, getContext().union(context));
 	}
 }

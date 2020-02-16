@@ -98,7 +98,7 @@ public interface HasValueBuilder<C extends HasValue<?, V>, V, B extends HasValue
 		} else if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
 		}
-		return new BindingBuilder<>(this, c -> binder.bind(c, property));
+		return new BindingBuilder<>(this, c -> binder.bindHasValue(c, property));
 	}
 
 	/**
@@ -131,7 +131,7 @@ public interface HasValueBuilder<C extends HasValue<?, V>, V, B extends HasValue
 			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
 		}
 		C hasValue = build();
-		binder.bind(hasValue, converter, property);
+		binder.bindHasValue(hasValue, converter, property);
 		return hasValue;
 	}
 
@@ -162,6 +162,6 @@ public interface HasValueBuilder<C extends HasValue<?, V>, V, B extends HasValue
 		} else if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
 		}
-		return new BindingBuilder<>(this, c -> binder.bind(c, converter, property));
+		return new BindingBuilder<>(this, c -> binder.bindHasValue(c, converter, property));
 	}
 }

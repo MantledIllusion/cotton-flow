@@ -1,10 +1,13 @@
 package com.mantledillusion.vaadin.cotton.model;
 
+import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
+import com.mantledillusion.data.epiphy.context.function.*;
+import com.mantledillusion.data.epiphy.context.reference.ReferencedValue;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.vaadin.cotton.model.ModelBinder.UpdateType;
@@ -26,7 +29,7 @@ public final class ModelContainer<ModelType> implements ModelHandler<ModelType> 
 
 	final void register(ModelAccessor<ModelType> childAccessor) {
 		this.children.add(childAccessor);
-		childAccessor.updateAll(UpdateType.ADD);
+		childAccessor.updateAll(UpdateType.EXCHANGE);
 	}
 
 	final void unregister(ModelAccessor<ModelType> childAccessor) {
@@ -93,5 +96,69 @@ public final class ModelContainer<ModelType> implements ModelHandler<ModelType> 
 		context = ObjectUtils.defaultIfNull(context, Context.EMPTY);
 		property.set(this.model, value, context);
 		update(property, context, UpdateType.EXCHANGE);
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType include(IncludableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element) {
+		return include(property, element, Context.EMPTY);
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType include(IncludableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, Context context) {
+		context = ObjectUtils.defaultIfNull(context, Context.EMPTY);
+		ReferenceType reference = property.include(this.model, element, context);
+		update(property, context, UpdateType.ADD);
+		return reference;
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> void insert(InsertableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, ReferenceType reference) {
+		this.insert(property, element, reference, Context.EMPTY);
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> void insert(InsertableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, ReferenceType reference, Context context) {
+		context = ObjectUtils.defaultIfNull(context, Context.EMPTY);
+		property.insert(this.model, element, reference, context);
+		update(property, context, UpdateType.ADD);
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferencedValue<ReferenceType, PropertyElementType> strip(StripableProperty<ModelType, ?, PropertyElementType, ReferenceType> property) {
+		return strip(property, Context.EMPTY);
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferencedValue<ReferenceType, PropertyElementType> strip(StripableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, Context context) {
+		context = ObjectUtils.defaultIfNull(context, Context.EMPTY);
+		ReferencedValue<ReferenceType, PropertyElementType> referencedValue = property.strip(this.model, context);
+		update(property, context, UpdateType.REMOVE);
+		return referencedValue;
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType drop(DropableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element) {
+		return drop(property, element, Context.EMPTY);
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> ReferenceType drop(DropableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, Context context) {
+		context = ObjectUtils.defaultIfNull(context, Context.EMPTY);
+		ReferenceType reference = property.drop(this.model, element, context);
+		update(property, context, UpdateType.REMOVE);
+		return reference;
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> PropertyElementType extract(ExtractableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, ReferenceType reference) {
+		return extract(property, reference, Context.EMPTY);
+	}
+
+	@Override
+	public <PropertyElementType, ReferenceType> PropertyElementType extract(ExtractableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, ReferenceType reference, Context context) {
+		context = ObjectUtils.defaultIfNull(context, Context.EMPTY);
+		PropertyElementType element = property.extract(this.model, reference, context);
+		update(property, context, UpdateType.REMOVE);
+		return element;
 	}
 }
