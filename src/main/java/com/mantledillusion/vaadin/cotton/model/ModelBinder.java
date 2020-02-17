@@ -77,11 +77,11 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	// ########################################################## CONSUMER BINDING ##########################################################
 	// ######################################################################################################################################
 
-	private class ConsumerBinding extends Binding {
+	private class ConsumerBinding<V> extends Binding<V> {
 		private final Procedure valueReader;
-		private final Procedure valueResetter;
+		private final Consumer<V> valueResetter;
 
-		private ConsumerBinding(Procedure valueReader, Procedure valueResetter) {
+		private ConsumerBinding(Procedure valueReader, Consumer<V> valueResetter) {
 			super(() -> ModelBinder.this.baseBindingAuditor.get());
 			this.valueReader = valueReader;
 			this.valueResetter = valueResetter;
@@ -94,7 +94,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			if (couple) {
 				this.valueReader.trigger();
 			} else{
-				this.valueResetter.trigger();
+				this.valueResetter.accept(getMaskedValue());
 			}
 		}
 
@@ -107,14 +107,14 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	/**
 	 * Binds the given {@link Consumer} to the given property of this
 	 * {@link ModelHandler}.
-	 * 
+	 *
 	 * @param <FieldValueType> The value type of the {@link Consumer} to bind.
 	 * @param consumer The {@link Consumer} to bind; might <b>not</b> be null.
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType> Binding bindConsumer(Consumer<FieldValueType> consumer,
-												 Property<ModelType, FieldValueType> property) {
+	public <FieldValueType> Binding<FieldValueType> bindConsumer(Consumer<FieldValueType> consumer,
+																 Property<ModelType, FieldValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (property == null) {
@@ -122,15 +122,15 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		Procedure valueReader = () -> consumer.accept(ModelBinder.this.get(property));
-		Procedure valueResetter = () -> consumer.accept(null);
+		Consumer<FieldValueType> valueResetter = consumer::accept;
 
-		return addBinding(property, new ConsumerBinding(valueReader, valueResetter));
+		return addBinding(property, new ConsumerBinding<>(valueReader, valueResetter));
 	}
 
 	/**
 	 * Binds the given {@link Consumer} to the given property of this
 	 * {@link ModelHandler}.
-	 * 
+	 *
 	 * @param <FieldValueType> The value type of the {@link Consumer} to bind.
 	 * @param <PropertyValueType> The value type of the property to bind with.
 	 * @param consumer The {@link Consumer} to bind; might <b>not</b> be null.
@@ -139,9 +139,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType, PropertyValueType> Binding bindConsumer(Consumer<FieldValueType> consumer,
-																	Converter<FieldValueType, PropertyValueType> converter,
-																	Property<ModelType, PropertyValueType> property) {
+	public <FieldValueType, PropertyValueType> Binding<FieldValueType> bindConsumer(Consumer<FieldValueType> consumer,
+																					Converter<FieldValueType, PropertyValueType> converter,
+																					Property<ModelType, PropertyValueType> property) {
 		if (consumer == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + Consumer.class.getSimpleName());
 		} else if (converter == null) {
@@ -151,28 +151,28 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		Procedure valueReader = () -> consumer.accept(converter.toField(ModelBinder.this.get(property)));
-		Procedure valueResetter = () -> consumer.accept(null);
+		Consumer<FieldValueType> valueResetter = consumer::accept;
 
-		return addBinding(property, new ConsumerBinding(valueReader, valueResetter));
+		return addBinding(property, new ConsumerBinding<>(valueReader, valueResetter));
 	}
 
 	// ######################################################################################################################################
 	// ########################################################## HASVALUE BINDING ##########################################################
 	// ######################################################################################################################################
 
-	private class HasValueBinding extends Binding implements ValueChangeListener {
+	private class HasValueBinding<FieldValueType> extends Binding<FieldValueType> implements ValueChangeListener {
 
 		private final HasValue<?, ?> hasValue;
 		private final Property<ModelType, ?> property;
 		private final Procedure valueReader;
 		private final Procedure valueWriter;
-		private final Procedure valueResetter;
+		private final Consumer<FieldValueType> valueResetter;
 
 		private Registration registration;
 		private boolean synchronizing = false;
 
 		public HasValueBinding(HasValue<?, ?> hasValue, Property<ModelType, ?> property,
-							   Procedure valueReader, Procedure valueWriter, Procedure valueResetter) {
+							   Procedure valueReader, Procedure valueWriter, Consumer<FieldValueType> valueResetter) {
 			super(() -> ModelBinder.this.baseBindingAuditor.get());
 			this.hasValue = hasValue;
 			this.property = property;
@@ -185,13 +185,17 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 		@Override
 		public synchronized void accessModeChanged(boolean couple) {
-			if (couple && this.registration == null) {
-				this.registration = this.hasValue.addValueChangeListener(this);
+			if (couple) {
+				if (this.registration == null) {
+					this.registration = this.hasValue.addValueChangeListener(this);
+				}
 				this.valueReader.trigger();
-			} else if (!couple && this.registration != null) {
-				this.registration.remove();
-				this.registration = null;
-				this.valueResetter.trigger();
+			} else {
+				if (this.registration != null) {
+					this.registration.remove();
+					this.registration = null;
+				}
+				this.valueResetter.accept(getMaskedValue());
 			}
 
 			if (this.hasValue instanceof Component) {
@@ -229,14 +233,14 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	/**
 	 * Binds the given {@link HasValue} to the given property of this
 	 * {@link ModelHandler}.
-	 * 
+	 *
 	 * @param <FieldValueType> The value type of the {@link HasValue} to bind.
 	 * @param hasValue The {@link HasValue} to bind; might <b>not</b> be null.
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType> Binding bindHasValue(HasValue<?, FieldValueType> hasValue,
-												 Property<ModelType, FieldValueType> property) {
+	public <FieldValueType> Binding<FieldValueType> bindHasValue(HasValue<?, FieldValueType> hasValue,
+																 Property<ModelType, FieldValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (property == null) {
@@ -251,15 +255,16 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		} else {
 			valueWriter = NOOP;
 		}
-		Procedure valueResetter = () -> hasValue.setValue(hasValue.getEmptyValue());
+		Consumer<FieldValueType> valueResetter = maskedValue ->
+				hasValue.setValue(maskedValue == null ? hasValue.getEmptyValue() : maskedValue);
 
-		return addBinding(property, new HasValueBinding(hasValue, property, valueReader, valueWriter, valueResetter));
+		return addBinding(property, new HasValueBinding<>(hasValue, property, valueReader, valueWriter, valueResetter));
 	}
 
 	/**
 	 * Binds the given {@link HasValue} to the given property of this
 	 * {@link ModelHandler}.
-	 * 
+	 *
 	 * @param <FieldValueType> The value type of the {@link HasValue} to bind.
 	 * @param <PropertyValueType> The value type of the property to bind with.
 	 * @param hasValue The {@link HasValue} to bind; might <b>not</b> be null.
@@ -268,9 +273,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	 * @param property The {@link Property} to bind to; might <b>not</b> be null.
 	 * @return The {@link Binding} to further configure the binding with, never null
 	 */
-	public <FieldValueType, PropertyValueType> Binding bindHasValue(HasValue<?, FieldValueType> hasValue,
-																	Converter<FieldValueType, PropertyValueType> converter,
-																	Property<ModelType, PropertyValueType> property) {
+	public <FieldValueType, PropertyValueType> Binding<FieldValueType> bindHasValue(HasValue<?, FieldValueType> hasValue,
+																					Converter<FieldValueType, PropertyValueType> converter,
+																					Property<ModelType, PropertyValueType> property) {
 		if (hasValue == null) {
 			throw new Http901IllegalArgumentException("Cannot bind a null " + HasValue.class.getSimpleName());
 		} else if (converter == null) {
@@ -287,9 +292,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		} else {
 			valueWriter = NOOP;
 		}
-		Procedure valueResetter = () -> hasValue.setValue(hasValue.getEmptyValue());
+		Consumer<FieldValueType> valueResetter = maskedValue ->
+				hasValue.setValue(maskedValue == null ? hasValue.getEmptyValue() : maskedValue);
 
-		return addBinding(property, new HasValueBinding(hasValue, property, valueReader, valueWriter, valueResetter));
+		return addBinding(property, new HasValueBinding<>(hasValue, property, valueReader, valueWriter, valueResetter));
 	}
 
 	// ######################################################################################################################################
@@ -307,7 +313,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		void remove(ElementType element);
 	}
 
-	private class DataProviderBinding<ElementType> extends Binding {
+	private class DataProviderBinding<ElementType> extends Binding<ElementType> {
 
 		private final Property<ModelType, ElementType> property;
 		private final DataProvider<ElementType, ?> dataProvider;
@@ -357,8 +363,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 	}
 
-	public <ElementType> Binding bindHasDataProvider(HasDataProvider<ElementType> hasDataProvider,
-													 Property<ModelType, ElementType> property) {
+	public <ElementType> Binding<ElementType> bindHasDataProvider(HasDataProvider<ElementType> hasDataProvider,
+																  Property<ModelType, ElementType> property) {
 		List<ElementType> elements = new ArrayList<>();
 		ListDataProvider<ElementType> dataProvider = new ListDataProvider<>(Collections.unmodifiableList(elements));
 		hasDataProvider.setDataProvider(dataProvider);
@@ -388,8 +394,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}));
 	}
 
-	public <ElementType> Binding bindHasHierarchicalDataProvider(HasHierarchicalDataProvider<ElementType> hasDataProvider,
-																 Property<ModelType, ElementType> property) {
+	public <ElementType> Binding<ElementType> bindHasHierarchicalDataProvider(HasHierarchicalDataProvider<ElementType> hasDataProvider,
+																			  Property<ModelType, ElementType> property) {
 		TreeData<ElementType> elements = new TreeData<>();
 		TreeDataProvider<ElementType> dataProvider = new TreeDataProvider<>(elements);
 		hasDataProvider.setDataProvider(dataProvider);
@@ -432,7 +438,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	// ########################################################## BINDING HANDLING ##########################################################
 	// ######################################################################################################################################
 
-	private Binding addBinding(Property<ModelType, ?> property, Binding binding) {
+	private <FieldValueType> Binding<FieldValueType> addBinding(Property<ModelType, ?> property, Binding<FieldValueType> binding) {
 		if (!this.bindings.containsKey(property)) {
 			this.bindings.put(property, new ArrayList<>());
 		}

@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 /**
  * Represents the configurable binding of a property.
  */
-public abstract class Binding {
+public abstract class Binding<FieldValueType> {
 
     /**
      * Represents the modes a {@link Binding} can allow access of a properties data to.
@@ -52,6 +52,7 @@ public abstract class Binding {
 
     private AccessMode accessMode;
     private Supplier<AccessMode> bindingAuditor;
+    private FieldValueType maskedValue;
 
     Binding(Supplier<AccessMode> bindingAuditor) {
         this.bindingAuditor = bindingAuditor;
@@ -67,9 +68,7 @@ public abstract class Binding {
     }
 
     /**
-     * Builder method.
-     * <p>
-     * Adds the given binding auditor to the binding to restrict it.
+     * Builder method, adds the given binding auditor to the binding to restrict it.
      * <p>
      * The given {@link Supplier}'s result will be used to determine at which {@link AccessMode} this binding is
      * expected to allow access to the data of its bound property.
@@ -83,8 +82,26 @@ public abstract class Binding {
      * @param bindingAuditor The binding auditor; might <b>not</b> be null.
      * @return this
      */
-    public final Binding withRestriction(Supplier<AccessMode> bindingAuditor) {
+    public final Binding<FieldValueType> withRestriction(Supplier<AccessMode> bindingAuditor) {
         this.bindingAuditor = AccessMode.chain(this.bindingAuditor, bindingAuditor);
+        refreshAccessMode();
+        return this;
+    }
+
+    protected FieldValueType getMaskedValue() {
+        return maskedValue;
+    }
+
+    /**
+     * Builder method, sets the value to use when the {@link Binding} is {@link AccessMode#MASKED}.
+     * <p>
+     * Note that different types of {@link Binding} implementations might handle using this value differently.
+     *
+     * @param maskedValue The value to use instead of the bound one; might be null.
+     * @return this
+     */
+    public final Binding<FieldValueType> withMaskedValue(FieldValueType maskedValue) {
+        this.maskedValue = maskedValue;
         refreshAccessMode();
         return this;
     }
