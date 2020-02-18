@@ -81,8 +81,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		private final Procedure valueReader;
 		private final Consumer<V> valueResetter;
 
-		private ConsumerBinding(Procedure valueReader, Consumer<V> valueResetter) {
-			super(() -> ModelBinder.this.baseBindingAuditor.get());
+		private ConsumerBinding(Supplier<AccessMode> bindingAuditor, Procedure valueReader, Consumer<V> valueResetter) {
+			super(bindingAuditor);
 			this.valueReader = valueReader;
 			this.valueResetter = valueResetter;
 
@@ -121,10 +121,11 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
+		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> consumer.accept(ModelBinder.this.get(property));
 		Consumer<FieldValueType> valueResetter = consumer::accept;
 
-		return addBinding(property, new ConsumerBinding<>(valueReader, valueResetter));
+		return addBinding(property, new ConsumerBinding<>(bindingAuditor, valueReader, valueResetter));
 	}
 
 	/**
@@ -150,10 +151,11 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
+		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> consumer.accept(converter.toField(ModelBinder.this.get(property)));
 		Consumer<FieldValueType> valueResetter = consumer::accept;
 
-		return addBinding(property, new ConsumerBinding<>(valueReader, valueResetter));
+		return addBinding(property, new ConsumerBinding<>(bindingAuditor, valueReader, valueResetter));
 	}
 
 	// ######################################################################################################################################
@@ -171,9 +173,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		private Registration registration;
 		private boolean synchronizing = false;
 
-		public HasValueBinding(HasValue<?, ?> hasValue, Property<ModelType, ?> property,
+		public HasValueBinding(Supplier<AccessMode> bindingAuditor, HasValue<?, ?> hasValue, Property<ModelType, ?> property,
 							   Procedure valueReader, Procedure valueWriter, Consumer<FieldValueType> valueResetter) {
-			super(() -> ModelBinder.this.baseBindingAuditor.get());
+			super(bindingAuditor);
 			this.hasValue = hasValue;
 			this.property = property;
 			this.valueReader = valueReader;
@@ -247,6 +249,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
+		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> hasValue
 				.setValue(ObjectUtils.defaultIfNull(ModelBinder.this.get(property), hasValue.getEmptyValue()));
 		Procedure valueWriter;
@@ -258,7 +261,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		Consumer<FieldValueType> valueResetter = maskedValue ->
 				hasValue.setValue(maskedValue == null ? hasValue.getEmptyValue() : maskedValue);
 
-		return addBinding(property, new HasValueBinding<>(hasValue, property, valueReader, valueWriter, valueResetter));
+		return addBinding(property, new HasValueBinding<>(bindingAuditor, hasValue, property, valueReader, valueWriter, valueResetter));
 	}
 
 	/**
@@ -284,6 +287,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
+		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> hasValue.setValue(
 				ObjectUtils.defaultIfNull(converter.toField(ModelBinder.this.get(property)), hasValue.getEmptyValue()));
 		Procedure valueWriter;
@@ -295,7 +299,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		Consumer<FieldValueType> valueResetter = maskedValue ->
 				hasValue.setValue(maskedValue == null ? hasValue.getEmptyValue() : maskedValue);
 
-		return addBinding(property, new HasValueBinding<>(hasValue, property, valueReader, valueWriter, valueResetter));
+		return addBinding(property, new HasValueBinding<>(bindingAuditor, hasValue, property, valueReader, valueWriter, valueResetter));
 	}
 
 	// ######################################################################################################################################
