@@ -219,7 +219,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			if (!this.synchronizing) {
 				this.synchronizing = true;
 				boolean exists = ModelBinder.this.exists(this.property);
-				this.hasValue.setReadOnly(this.property.isWritable() && exists &&
+				this.hasValue.setReadOnly(!this.property.isWritable() || !exists ||
 						getAccessMode() != AccessMode.READ_WRITE);
 				if (this.hasValue instanceof HasEnabled) {
 					((HasEnabled) this.hasValue).setEnabled(exists);
