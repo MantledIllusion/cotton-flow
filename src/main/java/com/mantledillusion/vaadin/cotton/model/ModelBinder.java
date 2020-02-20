@@ -20,7 +20,6 @@ import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
-import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
@@ -187,6 +186,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 		@Override
 		public synchronized void accessModeChanged(boolean couple) {
+			refreshEnablement();
 			if (couple) {
 				if (this.registration == null) {
 					this.registration = this.hasValue.addValueChangeListener(this);
@@ -198,10 +198,6 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 					this.registration = null;
 				}
 				this.valueResetter.accept(getMaskedValue());
-			}
-
-			if (this.hasValue instanceof Component) {
-				((Component) this.hasValue).setVisible(getAccessMode() != AccessMode.HIDDEN);
 			}
 		}
 
@@ -218,16 +214,21 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		public synchronized void valueChanged(Context context, UpdateType type) {
 			if (!this.synchronizing) {
 				this.synchronizing = true;
-				boolean exists = ModelBinder.this.exists(this.property);
-				this.hasValue.setReadOnly(!this.property.isWritable() || !exists ||
-						getAccessMode() != AccessMode.READ_WRITE);
-				if (this.hasValue instanceof HasEnabled) {
-					((HasEnabled) this.hasValue).setEnabled(exists);
-				}
+				refreshEnablement();
 				if (this.registration != null) {
 					this.valueReader.trigger();
 				}
 				this.synchronizing = false;
+			}
+		}
+
+		private void refreshEnablement() {
+			boolean exists = ModelBinder.this.exists(this.property);
+			this.hasValue.setReadOnly(!this.property.isWritable() || !exists ||
+					getAccessMode() != AccessMode.READ_WRITE);
+
+			if (this.hasValue instanceof Component) {
+				((Component) this.hasValue).setVisible(exists && getAccessMode() != AccessMode.HIDDEN);
 			}
 		}
 	}
