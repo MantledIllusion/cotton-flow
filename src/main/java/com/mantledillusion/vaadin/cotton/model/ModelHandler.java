@@ -253,6 +253,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <PropertyElementType> The type of element to drop.
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to drop from the model; <b>not</b> allowed to be null.
+	 * @param element The element to drop from the model; might be null.
 	 * @return The reference of the dropped value, never null
 	 */
 	<PropertyElementType, ReferenceType> ReferenceType drop(DropableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element);
@@ -269,6 +270,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <PropertyElementType> The type of element to drop.
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to drop from the model; <b>not</b> allowed to be null.
+	 * @param element The element to drop from the model; might be null.
 	 * @param context The context which is used for determining the correct property; might be null.
 	 * @return The reference of the dropped value, never null
 	 */
@@ -285,6 +287,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <PropertyElementType> The type of element to extract.
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to extract from the model; <b>not</b> allowed to be null.
+	 * @param reference The reference to the element to drop from the model; might <b>not</b> be null.
 	 * @return The reference of the extracted value, never null
 	 */
 	<PropertyElementType, ReferenceType> PropertyElementType extract(ExtractableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, ReferenceType reference);
@@ -301,6 +304,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <PropertyElementType> The type of element to extract.
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to extract from the model; <b>not</b> allowed to be null.
+	 * @param reference The reference to the element to drop from the model; might <b>not</b> be null.
 	 * @param context The context which is used for determining the correct property; might be null.
 	 * @return The reference of the extracted value, never null
 	 */
