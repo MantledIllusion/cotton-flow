@@ -154,6 +154,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to include inside the model; <b>not</b> allowed to be null.
 	 * @param element The element to include into the model; might be null.
+	 * @return The reference of the included value, never null
 	 */
 	<PropertyElementType, ReferenceType> ReferenceType include(IncludableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element);
 
@@ -171,6 +172,7 @@ public interface ModelHandler<ModelType> {
 	 * @param property The property to include inside the model; <b>not</b> allowed to be null.
 	 * @param element The element to include into the model; might be null.
 	 * @param context The context which is used for determining the correct property; might be null.
+	 * @return The reference of the included value, never null
 	 */
 	<PropertyElementType, ReferenceType> ReferenceType include(IncludableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, Context context);
 
@@ -219,6 +221,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <PropertyElementType> The type of element to strip.
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to strip from the model; <b>not</b> allowed to be null.
+	 * @return The reference of the stripped value, never null
 	 */
 	<PropertyElementType, ReferenceType> ReferencedValue<ReferenceType, PropertyElementType> strip(StripableProperty<ModelType, ?, PropertyElementType, ReferenceType> property);
 
@@ -235,6 +238,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to strip from the model; <b>not</b> allowed to be null.
 	 * @param context The context which is used for determining the correct property; might be null.
+	 * @return The reference of the stripped value, never null
 	 */
 	<PropertyElementType, ReferenceType> ReferencedValue<ReferenceType, PropertyElementType> strip(StripableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, Context context);
 
@@ -249,6 +253,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <PropertyElementType> The type of element to drop.
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to drop from the model; <b>not</b> allowed to be null.
+	 * @return The reference of the dropped value, never null
 	 */
 	<PropertyElementType, ReferenceType> ReferenceType drop(DropableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element);
 
@@ -265,6 +270,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to drop from the model; <b>not</b> allowed to be null.
 	 * @param context The context which is used for determining the correct property; might be null.
+	 * @return The reference of the dropped value, never null
 	 */
 	<PropertyElementType, ReferenceType> ReferenceType drop(DropableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, PropertyElementType element, Context context);
 
@@ -279,6 +285,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <PropertyElementType> The type of element to extract.
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to extract from the model; <b>not</b> allowed to be null.
+	 * @return The reference of the extracted value, never null
 	 */
 	<PropertyElementType, ReferenceType> PropertyElementType extract(ExtractableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, ReferenceType reference);
 
@@ -295,6 +302,7 @@ public interface ModelHandler<ModelType> {
 	 * @param <ReferenceType> The type that references the element.
 	 * @param property The property to extract from the model; <b>not</b> allowed to be null.
 	 * @param context The context which is used for determining the correct property; might be null.
+	 * @return The reference of the extracted value, never null
 	 */
 	<PropertyElementType, ReferenceType> PropertyElementType extract(ExtractableProperty<ModelType, ?, PropertyElementType, ReferenceType> property, ReferenceType reference, Context context);
 }
