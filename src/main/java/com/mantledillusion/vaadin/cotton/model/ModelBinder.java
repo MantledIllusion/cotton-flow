@@ -11,6 +11,7 @@ import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -187,6 +188,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		@Override
 		public synchronized void accessModeChanged(boolean couple) {
 			refreshEnablement();
+			if (this.hasValue instanceof Component) {
+				((Component) this.hasValue).setVisible(getAccessMode() != AccessMode.HIDDEN);
+			}
+
 			if (couple) {
 				if (this.registration == null) {
 					this.registration = this.hasValue.addValueChangeListener(this);
@@ -226,9 +231,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			boolean exists = ModelBinder.this.exists(this.property);
 			this.hasValue.setReadOnly(!this.property.isWritable() || !exists ||
 					getAccessMode() != AccessMode.READ_WRITE);
-
-			if (this.hasValue instanceof Component) {
-				((Component) this.hasValue).setVisible(exists && getAccessMode() != AccessMode.HIDDEN);
+			if (this.hasValue instanceof HasEnabled) {
+				((HasEnabled) this.hasValue).setEnabled(exists);
 			}
 		}
 	}
