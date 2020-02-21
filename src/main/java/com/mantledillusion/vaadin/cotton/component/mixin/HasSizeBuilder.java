@@ -111,7 +111,7 @@ public interface HasSizeBuilder<C extends HasSize, B extends HasSizeBuilder<C, B
 	 * @see HasSize#setHeight(String)
 	 * @return this
 	 */
-	default B setHeightFull(int pct) {
+	default B setHeightFull() {
 		return configure(hasSize -> hasSize.setHeightFull());
 	}
 
