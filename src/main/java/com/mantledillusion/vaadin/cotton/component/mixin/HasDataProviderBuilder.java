@@ -31,7 +31,7 @@ public interface HasDataProviderBuilder<C extends HasDataProvider<E>, E, B exten
      *            The {@link Property} to bind the {@link HasDataProvider} to; might <b>not</b> be null.
      * @return A new {@link HasDataProvider} instance, fully configured and bound, never null
      */
-    default <ModelType> B provide(ModelAccessor<ModelType> binder, Property<ModelType, E> property) {
-        return configure(grid -> binder.bindHasDataProvider(grid, property));
+    default <ModelType> B setDataProvider(ModelAccessor<ModelType> binder, Property<ModelType, E> property) {
+        return configure(hasDataProvider -> binder.bindHasDataProvider(hasDataProvider, property));
     }
 }

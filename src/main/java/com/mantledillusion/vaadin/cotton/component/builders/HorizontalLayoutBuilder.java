@@ -5,7 +5,6 @@ import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 /**
  * {@link ComponentBuilder} for {@link HorizontalLayout}s.

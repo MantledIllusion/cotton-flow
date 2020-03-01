@@ -40,7 +40,7 @@ public final class BindingBuilder<C> {
     }
 
     /**
-     * Creates a new {@link Component} instance using {@link ComponentBuilder#instantiate()}, applies all currently
+     * Creates a new {@link Component} instance using {@link ComponentBuilder#build()}, applies all currently
      * contained {@link Configurer}s to it and returns it.
      *
      * @see ComponentBuilder#build()

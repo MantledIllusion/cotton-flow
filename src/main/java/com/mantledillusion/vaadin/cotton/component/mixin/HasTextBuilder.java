@@ -1,6 +1,7 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
 import com.mantledillusion.data.epiphy.Property;
+import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -23,12 +24,12 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 * Builder method, configures the initial text of the component after building.
 	 * 
 	 * @see HasText#setText(String)
-	 * @param text
-	 *            The initial text; might be null.
+	 * @param msgId
+	 *            The initial text, or a message id to localize; might be null.
 	 * @return this
 	 */
-	default B setValue(String text) {
-		return configure(hasValue -> hasValue.setText(text));
+	default B setValue(String msgId) {
+		return configure(hasValue -> hasValue.setText(WebEnv.getTranslation(msgId)));
 	}
 
 	/**
