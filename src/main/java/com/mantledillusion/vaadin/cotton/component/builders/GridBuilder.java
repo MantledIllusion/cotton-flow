@@ -1,5 +1,6 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
@@ -295,6 +296,20 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
     @Override
     protected Grid<E> instantiate() {
         return new Grid<>();
+    }
+
+    /**
+     * Builder method, configures a new column.
+     *
+     * @see Grid#addColumn(ValueProvider, String...)
+     * @param property
+     *            The {@link Property}; might <b>not</b> be null.
+     * @return this
+     */
+    public <V extends Comparable<? super V>> GridColumnBuilder configureColumn(Property<E, V> property) {
+        GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(property::get, property.getId()));
+        configure(columnBuilder);
+        return columnBuilder;
     }
 
     /**
