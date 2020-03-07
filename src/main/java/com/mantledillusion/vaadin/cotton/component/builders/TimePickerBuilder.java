@@ -18,7 +18,7 @@ public class TimePickerBuilder extends AbstractComponentBuilder<TimePicker, Time
 		HasValueBuilder<TimePicker, LocalTime, TimePickerBuilder> {
 
 	@Override
-	public TimePicker instantiate() {
+	protected TimePicker instantiate() {
 		return new TimePicker();
 	}
 

@@ -15,7 +15,7 @@ public class TabBuilder extends AbstractComponentBuilder<Tab, TabBuilder>
         HasComponentsBuilder<Tab, TabBuilder> {
 
     @Override
-    public Tab instantiate() {
+    protected Tab instantiate() {
         return new Tab();
     }
 

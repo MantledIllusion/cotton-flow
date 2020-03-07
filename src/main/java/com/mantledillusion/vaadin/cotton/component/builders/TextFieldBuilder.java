@@ -26,7 +26,7 @@ public class TextFieldBuilder extends AbstractComponentBuilder<TextField, TextFi
 		HasValueBuilder<TextField, String, TextFieldBuilder> {
 
 	@Override
-	public TextField instantiate() {
+	protected TextField instantiate() {
 		return new TextField();
 	}
 

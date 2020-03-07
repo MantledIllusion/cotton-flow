@@ -15,7 +15,7 @@ public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilde
 		FocusableBuilder<Button, ButtonBuilder>, ClickableBuilder<Button, ButtonBuilder> {
 
 	@Override
-	public Button instantiate() {
+	protected Button instantiate() {
 		return new Button();
 	}
 

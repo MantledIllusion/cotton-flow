@@ -16,7 +16,7 @@ public class LabelBuilder extends AbstractComponentBuilder<Label, LabelBuilder>
 		HasEnabledBuilder<Label, LabelBuilder>, HasTextBuilder<Label, LabelBuilder> {
 
 	@Override
-	public Label instantiate() {
+	protected Label instantiate() {
 		return new Label();
 	}
 

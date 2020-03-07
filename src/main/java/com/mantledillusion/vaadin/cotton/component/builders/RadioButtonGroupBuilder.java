@@ -22,7 +22,7 @@ public class RadioButtonGroupBuilder<E> extends AbstractComponentBuilder<RadioBu
 		HasDataProviderBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>> {
 
 	@Override
-	public RadioButtonGroup<E> instantiate() {
+	protected RadioButtonGroup<E> instantiate() {
 		return new RadioButtonGroup<>();
 	}
 

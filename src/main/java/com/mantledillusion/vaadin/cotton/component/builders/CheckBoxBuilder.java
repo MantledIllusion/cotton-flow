@@ -14,7 +14,7 @@ public class CheckBoxBuilder extends AbstractComponentBuilder<Checkbox, CheckBox
 		HasValueBuilder<Checkbox, Boolean, CheckBoxBuilder>, ClickableBuilder<Checkbox, CheckBoxBuilder> {
 
 	@Override
-	public Checkbox instantiate() {
+	protected Checkbox instantiate() {
 		return new Checkbox();
 	}
 

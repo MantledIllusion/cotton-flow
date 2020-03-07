@@ -18,7 +18,7 @@ public class HorizontalLayoutBuilder extends AbstractComponentBuilder<Horizontal
         FlexComponentBuilder<HorizontalLayout, HorizontalLayoutBuilder> {
 
     @Override
-    public HorizontalLayout instantiate() {
+    protected HorizontalLayout instantiate() {
         return new HorizontalLayout();
     }
 

@@ -29,7 +29,7 @@ public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, Co
 			.valueOf(s).equals(String.valueOf(element)));
 
 	@Override
-	public ComboBox<E> instantiate() {
+	protected ComboBox<E> instantiate() {
 		return new ComboBox<>();
 	}
 

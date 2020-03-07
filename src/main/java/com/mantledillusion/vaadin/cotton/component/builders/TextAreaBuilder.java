@@ -16,7 +16,7 @@ public class TextAreaBuilder extends AbstractComponentBuilder<TextArea, TextArea
 		HasValueBuilder<TextArea, String, TextAreaBuilder> {
 
 	@Override
-	public TextArea instantiate() {
+	protected TextArea instantiate() {
 		return new TextArea();
 	}
 

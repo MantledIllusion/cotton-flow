@@ -16,7 +16,7 @@ public class FlexLayoutBuilder extends AbstractComponentBuilder<FlexLayout, Flex
         FlexComponentBuilder<FlexLayout, FlexLayoutBuilder> {
 
     @Override
-    public FlexLayout instantiate() {
+    protected FlexLayout instantiate() {
         return new FlexLayout();
     }
 

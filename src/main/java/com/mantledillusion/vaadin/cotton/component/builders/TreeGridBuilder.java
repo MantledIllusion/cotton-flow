@@ -14,7 +14,7 @@ public class TreeGridBuilder<E> extends AbstractComponentBuilder<TreeGrid<E>, Tr
         HasHierarchicalDataProviderBuilder<TreeGrid<E>, E, TreeGridBuilder<E>> {
 
     @Override
-    public TreeGrid<E> instantiate() {
+    protected TreeGrid<E> instantiate() {
         return new TreeGrid<>();
     }
 }

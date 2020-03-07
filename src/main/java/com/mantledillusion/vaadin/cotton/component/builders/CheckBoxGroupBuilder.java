@@ -23,7 +23,7 @@ public class CheckBoxGroupBuilder<E> extends AbstractComponentBuilder<CheckboxGr
 		HasDataProviderBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E>> {
 
 	@Override
-	public CheckboxGroup<E> instantiate() {
+	protected CheckboxGroup<E> instantiate() {
 		return new CheckboxGroup<>();
 	}
 

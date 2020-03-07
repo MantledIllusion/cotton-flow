@@ -18,7 +18,7 @@ public class VerticalLayoutBuilder extends AbstractComponentBuilder<VerticalLayo
         FlexComponentBuilder<VerticalLayout, VerticalLayoutBuilder> {
 
     @Override
-    public VerticalLayout instantiate() {
+    protected VerticalLayout instantiate() {
         return new VerticalLayout();
     }
 

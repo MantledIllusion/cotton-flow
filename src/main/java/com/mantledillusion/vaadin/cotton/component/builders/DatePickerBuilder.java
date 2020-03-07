@@ -22,7 +22,7 @@ public class DatePickerBuilder extends AbstractComponentBuilder<DatePicker, Date
 		HasValueBuilder<DatePicker, LocalDate, DatePickerBuilder> {
 
 	@Override
-	public DatePicker instantiate() {
+	protected DatePicker instantiate() {
 		return new DatePicker();
 	}
 

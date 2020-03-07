@@ -6,7 +6,6 @@ import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.SortOrderProvider;
@@ -14,7 +13,6 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.function.Function;
 
@@ -295,7 +293,7 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
     }
 
     @Override
-    public Grid<E> instantiate() {
+    protected Grid<E> instantiate() {
         return new Grid<>();
     }
 
