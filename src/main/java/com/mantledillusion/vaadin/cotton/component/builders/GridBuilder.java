@@ -6,7 +6,9 @@ import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.mantledillusion.vaadin.cotton.exception.http900.Http902IllegalStateException;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.SortOrderProvider;
@@ -15,15 +17,21 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 
 import java.util.Comparator;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * {@link ComponentBuilder} for {@link Grid}s.
+ *
+ * @param <E> The element type of the {@link Grid}
+ * @param <F> The filter type of the {@link Grid}
  */
-public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilder<E>>
-        implements HasSizeBuilder<Grid<E>, GridBuilder<E>>, HasStyleBuilder<Grid<E>, GridBuilder<E>>,
-        FocusableBuilder<Grid<E>, GridBuilder<E>>, HasEnabledBuilder<Grid<E>, GridBuilder<E>>,
-        HasItemsBuilder<Grid<E>, E, GridBuilder<E>>, HasDataProviderBuilder<Grid<E>, E, GridBuilder<E>> {
+public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
+        AbstractComponentBuilder<Grid<E>, GridBuilder<E, F>> implements
+        HasSizeBuilder<Grid<E>, GridBuilder<E, F>>, HasStyleBuilder<Grid<E>, GridBuilder<E, F>>,
+        FocusableBuilder<Grid<E>, GridBuilder<E, F>>, HasEnabledBuilder<Grid<E>, GridBuilder<E, F>>,
+        HasItemsBuilder<Grid<E>, E, GridBuilder<E, F>>, HasDataProviderBuilder<Grid<E>, E, F, GridBuilder<E, F>> {
 
     /**
      * {@link EntityBuilder} for {@link Grid.Column}s.
@@ -33,6 +41,7 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
         private final Function<Grid<E>, Grid.Column<E>> columnSupplier;
 
         private GridColumnBuilder(Function<Grid<E>, Grid.Column<E>> columnSupplier) {
+            super(GridBuilder.this);
             this.columnSupplier = columnSupplier;
         }
 
@@ -61,6 +70,113 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
          */
         public GridColumnBuilder setTextAlign(ColumnTextAlign textAlign) {
             return configure(column -> column.setTextAlign(textAlign));
+        }
+
+        /**
+         * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
+         * to the {@link Grid}'s filter.
+         *
+         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <V> The {@link HasValue}'s value type.
+         * @param hasValue The @link HasValue}; might <b>not</b> be null.
+         * @param filterProperty A {@link Property} to adopt a change to the {@link HasValue}'s value into the
+         *                       {@link Grid}'s filter; might <b>not</b> be null.
+         * @return this
+         */
+        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(C hasValue,
+                                                                                     Property<F, V> filterProperty) {
+            return setFilter((Supplier<C>) () -> hasValue, filterProperty::set);
+        }
+
+        /**
+         * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
+         * to the {@link Grid}'s filter.
+         *
+         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <V> The {@link HasValue}'s value type.
+         * @param hasValueBuilder A {@link ComponentBuilder} for {@link HasValue}s; might <b>not</b> be null.
+         * @param filterProperty A {@link Property} to adopt a change to the {@link HasValue}'s value into the
+         *                       {@link Grid}'s filter; might <b>not</b> be null.
+         * @return this
+         */
+        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(ComponentBuilder<C ,?> hasValueBuilder,
+                                                                                     Property<F, V> filterProperty) {
+            return setFilter((Supplier<C>) hasValueBuilder::build, filterProperty::set);
+        }
+
+        /**
+         * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
+         * to the {@link Grid}'s filter.
+         *
+         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <V> The {@link HasValue}'s value type.
+         * @param hasValueSupplier A supplier for {@link HasValue}s; might <b>not</b> be null.
+         * @param filterProperty A {@link Property} to adopt a change to the {@link HasValue}'s value into the
+         *                       {@link Grid}'s filter; might <b>not</b> be null.
+         * @return this
+         */
+        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(Supplier<C> hasValueSupplier,
+                                                                                     Property<F, V> filterProperty) {
+            return setFilter(hasValueSupplier, filterProperty::set);
+        }
+
+        /**
+         * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
+         * to the {@link Grid}'s filter.
+         *
+         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <V> The {@link HasValue}'s value type.
+         * @param hasValue The @link HasValue}; might <b>not</b> be null.
+         * @param filterChangeConsumer A {@link BiConsumer} to adopt a change to the {@link HasValue}'s value into the
+         *                             {@link Grid}'s filter; might <b>not</b> be null.
+         * @return this
+         */
+        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(C hasValue,
+                                                                                     BiConsumer<F, V> filterChangeConsumer) {
+            return setFilter((Supplier<C>) () -> hasValue, filterChangeConsumer);
+        }
+
+        /**
+         * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
+         * to the {@link Grid}'s filter.
+         *
+         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <V> The {@link HasValue}'s value type.
+         * @param hasValueBuilder A {@link ComponentBuilder} for {@link HasValue}s; might <b>not</b> be null.
+         * @param filterChangeConsumer A {@link BiConsumer} to adopt a change to the {@link HasValue}'s value into the
+         *                             {@link Grid}'s filter; might <b>not</b> be null.
+         * @return this
+         */
+        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(ComponentBuilder<C ,?> hasValueBuilder,
+                                                                                     BiConsumer<F, V> filterChangeConsumer) {
+            return setFilter((Supplier<C>) hasValueBuilder::build, filterChangeConsumer);
+        }
+
+        /**
+         * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
+         * to the {@link Grid}'s filter.
+         *
+         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <V> The {@link HasValue}'s value type.
+         * @param hasValueSupplier A supplier for {@link HasValue}s; might <b>not</b> be null.
+         * @param filterChangeConsumer A {@link BiConsumer} to adopt a change to the {@link HasValue}'s value into the
+         *                             {@link Grid}'s filter; might <b>not</b> be null.
+         * @return this
+         */
+        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(Supplier<C> hasValueSupplier,
+                                                                                     BiConsumer<F, V> filterChangeConsumer) {
+            return configure(column -> {
+                if (!contains(ConfigurableFilter.class)) {
+                    throw new Http902IllegalStateException("Cannot configure a filter column without a data provider " +
+                            "with filter being configured.");
+                }
+                F filter = (F) get(ConfigurableFilter.class);
+                C hasValue = hasValueSupplier.get();
+                hasValue.addValueChangeListener(event -> {
+                    filterChangeConsumer.accept(filter, event.getValue());
+                });
+                column.setHeader(hasValue);
+            });
         }
 
         /**
@@ -221,6 +337,7 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
          * Builder method, configures an element comparator for the {@link Grid.Column}.
          *
          * @see Grid.Column#setComparator(ValueProvider)
+         * @param <V> The value type of the column.
          * @param keyExtractor The comparator; might <b>not</b> be null.
          * @return this
          */
@@ -288,7 +405,7 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
          *
          * @return The {@link GridBuilder} that started this {@link GridColumnBuilder}, never null
          */
-        public GridBuilder<E> add() {
+        public GridBuilder<E, F> add() {
             return GridBuilder.this;
         }
     }
@@ -302,6 +419,7 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
      * Builder method, configures a new column.
      *
      * @see Grid#addColumn(ValueProvider, String...)
+     * @param <V> The value type of the column.
      * @param property
      *            The {@link Property}; might <b>not</b> be null.
      * @return this
@@ -374,6 +492,7 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
      * Builder method, configures a new column.
      *
      * @see Grid#addColumn(ValueProvider)
+     * @param <V> The value type of the column.
      * @param valueProvider
      *            The value provider; might <b>not</b> be null.
      * @param sortingProperties
@@ -390,6 +509,7 @@ public class GridBuilder<E> extends AbstractComponentBuilder<Grid<E>, GridBuilde
      * Builder method, configures a new column.
      *
      * @see Grid#addColumn(ValueProvider)
+     * @param <V> The value type of the column.
      * @param valueProvider
      *            The component provider; might <b>not</b> be null.
      * @return this

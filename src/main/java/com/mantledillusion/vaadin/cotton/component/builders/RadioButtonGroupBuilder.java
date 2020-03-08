@@ -12,14 +12,18 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * {@link ComponentBuilder} for {@link RadioButtonGroup}s.
+ *
+ * @param <E> The element type of the {@link RadioButtonGroup}
+ * @param <F> The filter type of the {@link RadioButtonGroup}
  */
-public class RadioButtonGroupBuilder<E> extends AbstractComponentBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>
-		implements HasStyleBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>,
-		HasEnabledBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>,
-		HasItemsBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>>,
-		HasValueBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>>,
-		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E>>,
-		HasDataProviderBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E>> {
+public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
+		AbstractComponentBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>> implements
+		HasStyleBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
+		HasEnabledBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
+		HasItemsBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E, F>>,
+		HasValueBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E, F>>,
+		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
+		HasDataProviderBuilder<RadioButtonGroup<E>, E, F, RadioButtonGroupBuilder<E, F>> {
 
 	@Override
 	protected RadioButtonGroup<E> instantiate() {

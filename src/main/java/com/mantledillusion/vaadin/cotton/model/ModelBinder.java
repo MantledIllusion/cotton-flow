@@ -13,11 +13,12 @@ import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDest
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.data.binder.HasDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.function.SerializablePredicate;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -322,19 +323,17 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		void remove(ElementType element);
 	}
 
-	private class DataProviderBinding<ElementType> extends Binding<ElementType> {
+	private class DataProviderBinding<ElementType> extends InMemoryDataProviderBinding<ElementType> {
 
 		private final Property<ModelType, ElementType> property;
-		private final DataProvider<ElementType, ?> dataProvider;
 		private final ElementHandle<ElementType> elementHandle;
 
 		private DataProviderBinding(Supplier<AccessMode> bindingAuditor,
 									Property<ModelType, ElementType> property,
-									DataProvider<ElementType, ?> dataProvider,
+									InMemoryDataProvider<ElementType> dataProvider,
 									ElementHandle<ElementType> elementHandle) {
-			super(bindingAuditor);
+			super(bindingAuditor, dataProvider);
 			this.property = property;
-			this.dataProvider = dataProvider;
 			this.elementHandle = elementHandle;
 		}
 
@@ -367,15 +366,22 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			}
 
 			if (changed) {
-				this.dataProvider.refreshAll();
+				getDataProvider().refreshAll();
 			}
 		}
 	}
 
-	public <ElementType> Binding<ElementType> bindHasDataProvider(HasDataProvider<ElementType> hasDataProvider,
-																  Property<ModelType, ElementType> property) {
+	public <ElementType> InMemoryDataProviderBinding<ElementType> bindHasDataProvider(HasDataProvider<ElementType> hasDataProvider,
+																					  Property<ModelType, ElementType> property) {
+		return bindHasDataProvider(hasDataProvider, property, null);
+	}
+
+	public <ElementType> InMemoryDataProviderBinding<ElementType> bindHasDataProvider(HasDataProvider<ElementType> hasDataProvider,
+																					  Property<ModelType, ElementType> property,
+																					  SerializablePredicate<ElementType> filter) {
 		List<ElementType> elements = new ArrayList<>();
 		ListDataProvider<ElementType> dataProvider = new ListDataProvider<>(Collections.unmodifiableList(elements));
+		dataProvider.setFilter(filter);
 		hasDataProvider.setDataProvider(dataProvider);
 
 		return addBinding(property, new DataProviderBinding<>(() -> ModelBinder.this.baseBindingAuditor.get(),
@@ -403,10 +409,17 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}));
 	}
 
-	public <ElementType> Binding<ElementType> bindHasHierarchicalDataProvider(HasHierarchicalDataProvider<ElementType> hasDataProvider,
-																			  Property<ModelType, ElementType> property) {
+	public <ElementType> InMemoryDataProviderBinding<ElementType> bindHasHierarchicalDataProvider(HasHierarchicalDataProvider<ElementType> hasDataProvider,
+																								  Property<ModelType, ElementType> property) {
+		return bindHasHierarchicalDataProvider(hasDataProvider, property, null);
+	}
+
+	public <ElementType> InMemoryDataProviderBinding<ElementType> bindHasHierarchicalDataProvider(HasHierarchicalDataProvider<ElementType> hasDataProvider,
+																								  Property<ModelType, ElementType> property,
+																								  SerializablePredicate<ElementType> filter) {
 		TreeData<ElementType> elements = new TreeData<>();
 		TreeDataProvider<ElementType> dataProvider = new TreeDataProvider<>(elements);
+		dataProvider.setFilter(filter);
 		hasDataProvider.setDataProvider(dataProvider);
 
 		return addBinding(property, new DataProviderBinding<>(() -> ModelBinder.this.baseBindingAuditor.get(),
@@ -447,7 +460,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	// ########################################################## BINDING HANDLING ##########################################################
 	// ######################################################################################################################################
 
-	private <FieldValueType> Binding<FieldValueType> addBinding(Property<ModelType, ?> property, Binding<FieldValueType> binding) {
+	private <FieldValueType, BindingType extends Binding<FieldValueType>> BindingType addBinding(Property<ModelType, ?> property, BindingType binding) {
 		if (!this.bindings.containsKey(property)) {
 			this.bindings.put(property, new ArrayList<>());
 		}

@@ -12,15 +12,19 @@ import java.util.Set;
 
 /**
  * {@link ComponentBuilder} for {@link CheckboxGroup}s.
+ *
+ * @param <E> The element type of the {@link CheckboxGroup}
+ * @param <F> The filter type of the {@link CheckboxGroup}
  */
-public class CheckBoxGroupBuilder<E> extends AbstractComponentBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>
-		implements HasSizeBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
-		HasStyleBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
-		HasEnabledBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
-		HasItemsBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E>>,
-		HasValueBuilder<CheckboxGroup<E>, Set<E>, CheckBoxGroupBuilder<E>>,
-		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E>>,
-		HasDataProviderBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E>> {
+public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
+		AbstractComponentBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>> implements
+		HasSizeBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
+		HasStyleBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
+		HasEnabledBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
+		HasItemsBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E, F>>,
+		HasValueBuilder<CheckboxGroup<E>, Set<E>, CheckBoxGroupBuilder<E, F>>,
+		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
+		HasDataProviderBuilder<CheckboxGroup<E>, E, F, CheckBoxGroupBuilder<E, F>> {
 
 	@Override
 	protected CheckboxGroup<E> instantiate() {

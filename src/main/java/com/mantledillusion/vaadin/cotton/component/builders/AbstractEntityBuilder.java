@@ -4,9 +4,7 @@ import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Base implementation of {@link ComponentBuilder} that provides all of the base functionality.;
@@ -18,12 +16,46 @@ import java.util.List;
  *            non-final implementations to return the builder instance in the correct type.
  */
 abstract class AbstractEntityBuilder<C, B extends AbstractEntityBuilder<C, B>> implements EntityBuilder<C, B> {
-	
+
+	private final AbstractEntityBuilder<?, ?> parent;
+	private final Map<Class<?>, Object> context = new HashMap<>();
 	private final List<Configurer<C>> configurators = new ArrayList<>();
-	
+
+	AbstractEntityBuilder() {
+		this.parent = null;
+	}
+
+	AbstractEntityBuilder(AbstractEntityBuilder<?, ?> parent) {
+		this.parent = parent;
+	}
+
 	@Override
-	public B configure(Configurer<C> configurer) {
-		this.configurators.add(configurer);
+	public <V> boolean contains(Class<V> valueType) {
+		return (this.parent != null && this.parent.contains(valueType)) || this.context.containsKey(valueType);
+	}
+
+	@Override
+	public <V> V get(Class<V> valueType) {
+		return this.parent != null && this.parent.contains(valueType) ? this.parent.get (valueType) :
+				(V) this.context.get(valueType);
+	}
+
+	@Override
+	public <V, V2 extends V> void set(Class<V> valueType, V2 value) {
+		if (value == null) {
+			return;
+		}
+		if (this.context.containsKey(valueType)) {
+			throw new IllegalStateException("Configuration tried to configure a second instance of the type " +
+					value.getClass().getSimpleName() + " for the type " + valueType.getSimpleName() +
+					", which would cause the configuration context to become inconsistent.");
+		}
+		this.context.put(valueType, value);
+	}
+
+	@Override
+	public B configure(Configurer<C> configurer, boolean prepend) {
+		this.configurators.add(prepend ? 0 : this.configurators.size(), configurer);
 		return getThis();
 	}
 	
@@ -39,6 +71,7 @@ abstract class AbstractEntityBuilder<C, B extends AbstractEntityBuilder<C, B>> i
 	}
 
 	protected void apply(C entity) {
+		this.context.clear();
 		this.configurators.forEach(configuration -> configuration.configure(entity));
 	}
 }
