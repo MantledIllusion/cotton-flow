@@ -26,6 +26,42 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
 		HasDataProviderBuilder<CheckboxGroup<E>, E, F, CheckBoxGroupBuilder<E, F>> {
 
+	private CheckBoxGroupBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static CheckBoxGroupBuilder<Object, ConfigurableFilter<Object>> create() {
+		return new CheckBoxGroupBuilder();
+	}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @param <E> The element type.
+	 * @param elementType The class type of the element; might be null.
+	 * @return A new instance, never null.
+	 */
+	public static <E> CheckBoxGroupBuilder<E, ConfigurableFilter<E>> create(Class<E> elementType) {
+		return new CheckBoxGroupBuilder();
+	}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @param <E> The element type.
+	 * @param <F> The filter type.
+	 * @param elementType The class type of the element; might be null.
+	 * @param filterType The class type of the filter; might be null.
+	 * @return A new instance, never null.
+	 */
+	public static <E, F extends ConfigurableFilter<E>> CheckBoxGroupBuilder<E, F> create(Class<E> elementType,
+																						 Class<F> filterType) {
+		return new CheckBoxGroupBuilder();
+	}
+
 	@Override
 	protected CheckboxGroup<E> instantiate() {
 		return new CheckboxGroup<>();

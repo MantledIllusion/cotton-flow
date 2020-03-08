@@ -17,6 +17,17 @@ public class HorizontalLayoutBuilder extends AbstractComponentBuilder<Horizontal
         ThemableLayoutBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
         FlexComponentBuilder<HorizontalLayout, HorizontalLayoutBuilder> {
 
+    private HorizontalLayoutBuilder() {}
+
+    /**
+     * Factory method for a new instance.
+     *
+     * @return A new instance, never null.
+     */
+    public static HorizontalLayoutBuilder create() {
+        return new HorizontalLayoutBuilder();
+    }
+
     @Override
     protected HorizontalLayout instantiate() {
         return new HorizontalLayout();

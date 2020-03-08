@@ -14,6 +14,17 @@ public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilde
 		HasTextBuilder<Button, ButtonBuilder>, HasEnabledBuilder<Button, ButtonBuilder>,
 		FocusableBuilder<Button, ButtonBuilder>, ClickableBuilder<Button, ButtonBuilder> {
 
+	private ButtonBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static ButtonBuilder create() {
+		return new ButtonBuilder();
+	}
+
 	@Override
 	protected Button instantiate() {
 		return new Button();

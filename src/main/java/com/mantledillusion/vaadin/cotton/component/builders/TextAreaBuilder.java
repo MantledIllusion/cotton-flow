@@ -15,6 +15,17 @@ public class TextAreaBuilder extends AbstractComponentBuilder<TextArea, TextArea
 		FocusableBuilder<TextArea, TextAreaBuilder>, HasEnabledBuilder<TextArea, TextAreaBuilder>,
 		HasValueBuilder<TextArea, String, TextAreaBuilder> {
 
+	private TextAreaBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static TextAreaBuilder create() {
+		return new TextAreaBuilder();
+	}
+
 	@Override
 	protected TextArea instantiate() {
 		return new TextArea();

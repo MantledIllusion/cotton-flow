@@ -15,6 +15,17 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder>
         HasEnabledBuilder<Tabs, TabsBuilder>,
         HasComponentsBuilder<Tabs, TabsBuilder> {
 
+    private TabsBuilder() {}
+
+    /**
+     * Factory method for a new instance.
+     *
+     * @return A new instance, never null.
+     */
+    public static TabsBuilder create() {
+        return new TabsBuilder();
+    }
+
     @Override
     protected Tabs instantiate() {
         return new Tabs();

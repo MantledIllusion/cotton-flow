@@ -25,6 +25,17 @@ public class TextFieldBuilder extends AbstractComponentBuilder<TextField, TextFi
 		FocusableBuilder<TextField, TextFieldBuilder>, HasEnabledBuilder<TextField, TextFieldBuilder>,
 		HasValueBuilder<TextField, String, TextFieldBuilder> {
 
+	private TextFieldBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static TextFieldBuilder create() {
+		return new TextFieldBuilder();
+	}
+
 	@Override
 	protected TextField instantiate() {
 		return new TextField();

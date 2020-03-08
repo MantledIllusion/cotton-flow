@@ -14,6 +14,17 @@ public class TabBuilder extends AbstractComponentBuilder<Tab, TabBuilder>
         implements HasStyleBuilder<Tab, TabBuilder>, HasEnabledBuilder<Tab, TabBuilder>,
         HasComponentsBuilder<Tab, TabBuilder> {
 
+    private TabBuilder() {}
+
+    /**
+     * Factory method for a new instance.
+     *
+     * @return A new instance, never null.
+     */
+    public static TabBuilder create() {
+        return new TabBuilder();
+    }
+
     @Override
     protected Tab instantiate() {
         return new Tab();

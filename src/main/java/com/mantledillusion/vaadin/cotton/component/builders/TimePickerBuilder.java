@@ -17,6 +17,17 @@ public class TimePickerBuilder extends AbstractComponentBuilder<TimePicker, Time
 		FocusableBuilder<TimePicker, TimePickerBuilder>, HasEnabledBuilder<TimePicker, TimePickerBuilder>,
 		HasValueBuilder<TimePicker, LocalTime, TimePickerBuilder> {
 
+	private TimePickerBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static TimePickerBuilder create() {
+		return new TimePickerBuilder();
+	}
+
 	@Override
 	protected TimePicker instantiate() {
 		return new TimePicker();

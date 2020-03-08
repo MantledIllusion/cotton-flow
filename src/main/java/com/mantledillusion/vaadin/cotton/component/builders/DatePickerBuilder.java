@@ -21,6 +21,17 @@ public class DatePickerBuilder extends AbstractComponentBuilder<DatePicker, Date
 		FocusableBuilder<DatePicker, DatePickerBuilder>, HasEnabledBuilder<DatePicker, DatePickerBuilder>,
 		HasValueBuilder<DatePicker, LocalDate, DatePickerBuilder> {
 
+	private DatePickerBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static DatePickerBuilder create() {
+		return new DatePickerBuilder();
+	}
+
 	@Override
 	protected DatePicker instantiate() {
 		return new DatePicker();

@@ -28,6 +28,28 @@ public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, Co
 	private final SerializableFunction<String, SerializablePredicate<E>> stringFilterFunction = s -> (element -> String
 			.valueOf(s).equals(String.valueOf(element)));
 
+	private ComboBoxBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static ComboBoxBuilder<Object> create() {
+		return new ComboBoxBuilder<>();
+	}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @param <E> The element type.
+	 * @param elementType The class type of the element; might be null.
+	 * @return A new instance, never null.
+	 */
+	public static <E> ComboBoxBuilder<E> create(Class<E> elementType) {
+		return new ComboBoxBuilder<>();
+	}
+
 	@Override
 	protected ComboBox<E> instantiate() {
 		return new ComboBox<>();

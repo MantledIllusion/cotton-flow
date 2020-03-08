@@ -15,6 +15,17 @@ public class FlexLayoutBuilder extends AbstractComponentBuilder<FlexLayout, Flex
         HasComponentsBuilder<FlexLayout, FlexLayoutBuilder>,
         FlexComponentBuilder<FlexLayout, FlexLayoutBuilder> {
 
+    private FlexLayoutBuilder() {}
+
+    /**
+     * Factory method for a new instance.
+     *
+     * @return A new instance, never null.
+     */
+    public static FlexLayoutBuilder create() {
+        return new FlexLayoutBuilder();
+    }
+
     @Override
     protected FlexLayout instantiate() {
         return new FlexLayout();

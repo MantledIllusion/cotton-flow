@@ -17,6 +17,17 @@ public class VerticalLayoutBuilder extends AbstractComponentBuilder<VerticalLayo
         ThemableLayoutBuilder<VerticalLayout, VerticalLayoutBuilder>,
         FlexComponentBuilder<VerticalLayout, VerticalLayoutBuilder> {
 
+    private VerticalLayoutBuilder() {}
+
+    /**
+     * Factory method for a new instance.
+     *
+     * @return A new instance, never null.
+     */
+    public static VerticalLayoutBuilder create() {
+        return new VerticalLayoutBuilder();
+    }
+
     @Override
     protected VerticalLayout instantiate() {
         return new VerticalLayout();

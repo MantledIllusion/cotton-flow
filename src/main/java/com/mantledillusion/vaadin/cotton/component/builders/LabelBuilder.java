@@ -15,6 +15,17 @@ public class LabelBuilder extends AbstractComponentBuilder<Label, LabelBuilder>
 		implements HasSizeBuilder<Label, LabelBuilder>, HasStyleBuilder<Label, LabelBuilder>,
 		HasEnabledBuilder<Label, LabelBuilder>, HasTextBuilder<Label, LabelBuilder> {
 
+	private LabelBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static LabelBuilder create() {
+		return new LabelBuilder();
+	}
+
 	@Override
 	protected Label instantiate() {
 		return new Label();

@@ -25,6 +25,42 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
 		HasDataProviderBuilder<RadioButtonGroup<E>, E, F, RadioButtonGroupBuilder<E, F>> {
 
+	private RadioButtonGroupBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static RadioButtonGroupBuilder<Object, ConfigurableFilter<Object>> create() {
+		return new RadioButtonGroupBuilder<>();
+	}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @param <E> The element type.
+	 * @param elementType The class type of the element; might be null.
+	 * @return A new instance, never null.
+	 */
+	public static <E> RadioButtonGroupBuilder<E, ConfigurableFilter<E>> create(Class<E> elementType) {
+		return new RadioButtonGroupBuilder<>();
+	}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @param <E> The element type.
+	 * @param <F> The filter type.
+	 * @param elementType The class type of the element; might be null.
+	 * @param filterType The class type of the filter; might be null.
+	 * @return A new instance, never null.
+	 */
+	public static <E, F extends ConfigurableFilter<E>> RadioButtonGroupBuilder<E, F> create(Class<E> elementType,
+																							Class<F> filterType) {
+		return new RadioButtonGroupBuilder<>();
+	}
+
 	@Override
 	protected RadioButtonGroup<E> instantiate() {
 		return new RadioButtonGroup<>();

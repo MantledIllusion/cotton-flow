@@ -13,6 +13,17 @@ public class CheckBoxBuilder extends AbstractComponentBuilder<Checkbox, CheckBox
 		FocusableBuilder<Checkbox, CheckBoxBuilder>, HasEnabledBuilder<Checkbox, CheckBoxBuilder>,
 		HasValueBuilder<Checkbox, Boolean, CheckBoxBuilder>, ClickableBuilder<Checkbox, CheckBoxBuilder> {
 
+	private CheckBoxBuilder() {}
+
+	/**
+	 * Factory method for a new instance.
+	 *
+	 * @return A new instance, never null.
+	 */
+	public static CheckBoxBuilder create() {
+		return new CheckBoxBuilder();
+	}
+
 	@Override
 	protected Checkbox instantiate() {
 		return new Checkbox();
