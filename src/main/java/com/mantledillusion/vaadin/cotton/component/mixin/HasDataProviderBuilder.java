@@ -135,6 +135,7 @@ public interface HasDataProviderBuilder<C extends HasDataProvider<E>, E, F exten
          */
         public <V> void set(String key, V value) {
             this.filter.put(key, value);
+            notifyConfigurationChanged();
         }
     }
 
