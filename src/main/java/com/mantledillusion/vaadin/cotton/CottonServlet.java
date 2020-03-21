@@ -29,6 +29,12 @@ public class CottonServlet extends VaadinServlet {
     private static final String PKEY_HURAWEB_INITIALIZER = "hura.web.application.initializerClass";
     private static final String PKEY_HURAWEB_BASEPACKAGE = "hura.web.application.basePackage";
 
+    /*
+    Vaadin14 uses NPM for frontend web jar assembly instead of Maven/Bower (Vaadin13). To have the ease of running
+    without NPM, the Vaadin13 compatibility mode is set by default as long as no other configuration is used.
+     */
+    private static final String PROPERTY_VAADIN14_COMPATIBILITY_MODE = "compatibilityMode";
+
     static final String SID_SERVLET = "_servlet";
     static final String SID_DEPLOYMENTCONFIG = "_deploymentConfig";
     static final String PID_INITIALIZERCLASS = "_initializerClass";
@@ -82,7 +88,9 @@ public class CottonServlet extends VaadinServlet {
 
     @Override
     protected final DeploymentConfiguration createDeploymentConfiguration(Properties initParameters) {
-        initParameters.setProperty("compatibilityMode", "true");
+        if (initParameters.getProperty(PROPERTY_VAADIN14_COMPATIBILITY_MODE) == null) {
+            initParameters.setProperty(PROPERTY_VAADIN14_COMPATIBILITY_MODE, "true");
+        }
         return new CottonDeploymentConfiguration(((Object) this).getClass(), initParameters);
     }
 
