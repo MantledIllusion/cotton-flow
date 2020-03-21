@@ -82,6 +82,7 @@ public class CottonServlet extends VaadinServlet {
 
     @Override
     protected final DeploymentConfiguration createDeploymentConfiguration(Properties initParameters) {
+        initParameters.setProperty("compatibilityMode", "true");
         return new CottonDeploymentConfiguration(((Object) this).getClass(), initParameters);
     }
 

@@ -36,15 +36,16 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- maven dependency versions -->
-		<com.vaadin.version>13.0.13</com.vaadin.version>
+		<vaadin-core.version>14.1.20</vaadin-core.version>
+		<vaadin-compatibility-mode.version>2.1.6</vaadin-compatibility-mode.version>
 
 		<!-- com.mantledillusion dependencies -->
-		<injection.hura.version>2.0.0.ALPHA8</injection.hura.version>
-		<data.epiphy.version>4.0.0.ALPHA6</data.epiphy.version>
-		<trail.metrics.version>1.0.0.ALPHA4</trail.metrics.version>
+		<hura.version>2.0.0.ALPHA8</hura.version>
+		<epiphy.version>4.0.0.ALPHA6</epiphy.version>
+		<trail-metrics.version>1.0.0.ALPHA4</trail-metrics.version>
 
 		<!-- org.apache dependencies -->
-		<commons.collections.version>4.3</commons.collections.version>
+		<commons-collections.version>4.3</commons-collections.version>
 
 		<!-- javax dependencies -->
 		<javax-servlet.version>4.0.1</javax-servlet.version>
@@ -75,31 +76,36 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-core</artifactId>
-			<version>${com.vaadin.version}</version>
+			<version>${vaadin-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>flow-server-compatibility-mode</artifactId>
+			<version>${vaadin-compatibility-mode.version}</version>
 		</dependency>
 
 		<!-- com.mantledillusion dependencies -->
 		<dependency>
 			<groupId>com.mantledillusion.injection</groupId>
 			<artifactId>hura-core</artifactId>
-			<version>${injection.hura.version}</version>
+			<version>${hura.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mantledillusion.data</groupId>
 			<artifactId>epiphy</artifactId>
-			<version>${data.epiphy.version}</version>
+			<version>${epiphy.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.mantledillusion.metrics</groupId>
 			<artifactId>trail-metrics-support-vaadin-13</artifactId>
-			<version>${trail.metrics.version}</version>
+			<version>${trail-metrics.version}</version>
 		</dependency>
 
 		<!-- org.apache dependencies -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
-			<version>${commons.collections.version}</version>
+			<version>${commons-collections.version}</version>
 		</dependency>
 
 		<!-- javax dependencies -->

@@ -27,7 +27,7 @@ public final class CottonUI extends UI {
 
 	static {
 		try {
-			REGISTER_LISTENER = UIInternals.class.getDeclaredMethod("addNavigationListener", Class.class, Object.class);
+			REGISTER_LISTENER = UIInternals.class.getDeclaredMethod("addListener", Class.class, Object.class);
 			REGISTER_LISTENER.setAccessible(true);
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new Http903NotImplementedException("The method addNavigationListener() in "
