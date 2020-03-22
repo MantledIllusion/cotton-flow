@@ -14,19 +14,18 @@ public class BeforeResponsiveRefreshEvent extends EventObject {
 
     private static final long serialVersionUID = 1L;
 
-    private final boolean forced;
-    private boolean doAccept = true;
+    private Alternative.AdaptionMode adaptionMode;
 
-    public BeforeResponsiveRefreshEvent(Object source, boolean forced) {
+    public BeforeResponsiveRefreshEvent(Object source, Alternative.AdaptionMode adaptionMode) {
         super(source);
-        this.forced = forced;
+        this.adaptionMode = adaptionMode;
     }
 
     /**
      * Marks the requested @{@link Alternative} exchange to be declined.
      */
     public void decline() {
-        this.doAccept = this.forced;
+        this.adaptionMode = Alternative.AdaptionMode.combine(this.adaptionMode, Alternative.AdaptionMode.PROHIBIT);
     }
 
     /**
@@ -35,7 +34,7 @@ public class BeforeResponsiveRefreshEvent extends EventObject {
      * @return True if the exchange will commence no matter what, false otherwise
      */
     public boolean isForced() {
-        return forced;
+        return this.adaptionMode == Alternative.AdaptionMode.FORCE;
     }
 
     /**
@@ -44,6 +43,6 @@ public class BeforeResponsiveRefreshEvent extends EventObject {
      * @return True if no retriever has called {@link #decline()}, false otherwise
      */
     public boolean isAccepted() {
-        return doAccept;
+        return this.adaptionMode == Alternative.AdaptionMode.PERFORM || this.adaptionMode == Alternative.AdaptionMode.FORCE;
     }
 }

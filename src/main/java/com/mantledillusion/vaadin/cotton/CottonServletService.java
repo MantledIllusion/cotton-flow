@@ -35,6 +35,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.shared.Registration;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +117,9 @@ class CottonServletService extends VaadinServletService {
 			this.isMobileDevice = isMobileDevice(CottonSession.current().getBrowser());
 			this.isTouchDevice = clientDetails.isTouchDevice();
 
-			injectAlternative(determineViewType(clientDetails.getWindowInnerWidth(), clientDetails.getWindowInnerHeight()));
+			Responsive.Alternative alternative = determineViewType(clientDetails.getWindowInnerWidth(),
+					clientDetails.getWindowInnerHeight());
+			injectAlternative(alternative != null ? alternative.value() : this.rootRouteTargetType);
 		}
 
 		private boolean isMobileDevice(WebBrowser webBrowser) {
@@ -125,14 +128,21 @@ class CottonServletService extends VaadinServletService {
 
 		@Override
 		public void browserWindowResized(BrowserWindowResizeEvent resizeEvent) {
-			adaptIfRequired(resizeEvent.getWidth(), resizeEvent.getHeight(), false);
+			adaptIfRequired(resizeEvent.getWidth(), resizeEvent.getHeight(), Responsive.Alternative.AdaptionMode.PERFORM);
 		}
 
-		void adaptIfRequired(int width, int height, boolean force) {
-			Class<? extends Component> targetViewType = determineViewType(width, height);
+		void adaptIfRequired(int width, int height, Responsive.Alternative.AdaptionMode adaptionMode) {
+			Responsive.Alternative alternative = determineViewType(width, height);
+			Class<? extends Component> targetViewType;
+			if (alternative != null) {
+				targetViewType = alternative.value();
+				adaptionMode = Responsive.Alternative.AdaptionMode.combine(adaptionMode, alternative.automaticAdaptionMode());
+			} else {
+				targetViewType = this.rootRouteTargetType;
+			}
 
 			if (getChildren().noneMatch(child -> child.getClass() == targetViewType)) {
-				BeforeResponsiveRefreshEvent event = new BeforeResponsiveRefreshEvent(CottonUI.current(), force);
+				BeforeResponsiveRefreshEvent event = new BeforeResponsiveRefreshEvent(CottonUI.current(), adaptionMode);
 				CottonUI.getCurrent().getNavigationListeners(CottonUI.BeforeResponsiveRefreshListener.class).
 						forEach(listener -> listener.beforeRefresh(event));
 
@@ -147,23 +157,22 @@ class CottonServletService extends VaadinServletService {
 			}
 		}
 
-		private Class<? extends Component> determineViewType(int width, int height) {
-			Set<Class<? extends Component>> matches = Arrays.stream(this.alternativeRouteTargets).
+		private Responsive.Alternative determineViewType(int width, int height) {
+			Map<Class<? extends Component>, Responsive.Alternative> matches = Arrays.stream(this.alternativeRouteTargets).
 					filter(alternative -> matchesClientEnvironment(alternative, width, height)).
-					map(Responsive.Alternative::value).
-					collect(Collectors.toSet());
+					collect(Collectors.toMap(Responsive.Alternative::value, alternative -> alternative));
 
 			if (matches.size() == 1) {
-				return matches.iterator().next();
+				return matches.values().iterator().next();
 			} else if (!matches.isEmpty()) {
 				LOGGER.warn("The @" + Responsive.class.getSimpleName()+ " class " +
 						this.rootRouteTargetType.getSimpleName() + " specifies " + this.alternativeRouteTargets.length +
 						" alternatives of which the configuration of " + matches.size() + " (" +
-						StringUtils.join(matches.stream().map(Class::getSimpleName), ", ") +
+						StringUtils.join(matches.keySet().stream().map(Class::getSimpleName), ", ") +
 						") match to the client's environment (isTouchDevice=" + this.isTouchDevice + ", width=" +
 						width + ", height=" + height + "); cannot decide which alternative to choose.");
 			}
-			return this.rootRouteTargetType;
+			return null;
 		}
 
 		private boolean matchesClientEnvironment(Responsive.Alternative alternative, int width, int height) {

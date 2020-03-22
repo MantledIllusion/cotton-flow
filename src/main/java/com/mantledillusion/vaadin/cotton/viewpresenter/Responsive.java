@@ -1,6 +1,7 @@
 package com.mantledillusion.vaadin.cotton.viewpresenter;
 
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PreConstruct;
+import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.Component;
 
@@ -77,6 +78,38 @@ public @interface Responsive {
         }
 
         /**
+         * Determines the mode of how the automatic switch to the @{@link Alternative} should be performed.
+         */
+        enum AdaptionMode {
+
+            /**
+             * Prohibit the automatic switch to the {@link Alternative}; only the
+             * {@link BeforeResponsiveRefreshEvent} will be send.
+             */
+            PROHIBIT,
+
+            /**
+             * Perform the automatic switch to the {@link Alternative}, as long as the
+             * {@link BeforeResponsiveRefreshEvent} is not declined.
+             */
+            PERFORM,
+
+            /**
+             * Always perform the automatic switch to the {@link Alternative}; sending the
+             * {@link BeforeResponsiveRefreshEvent} is only done for information purposes.
+             */
+            FORCE;
+
+            public static AdaptionMode combine(AdaptionMode a1, AdaptionMode a2) {
+                return a1 == AdaptionMode.FORCE ? a1 :
+                        (a2 == AdaptionMode.FORCE ? a2 :
+                                (a1 == AdaptionMode.PROHIBIT ? a1 :
+                                        (a2 == AdaptionMode.PROHIBIT ? a2 :
+                                                (AdaptionMode.PERFORM))));
+            }
+        }
+
+        /**
          * The alternative {@link Component} to inject instead of the {@link Component} annotated
          * with @{@link Responsive} if the @{@link Alternative}'s configuration matches.
          *
@@ -150,6 +183,15 @@ public @interface Responsive {
          * @return The hint, never null
          */
         DeviceHint isTouchDevice() default DeviceHint.UNDETERMINED;
+
+        /**
+         * Determines the mode of how the automatic switch to the @{@link Alternative} should be performed.
+         * <p>
+         * The default is {@link AdaptionMode#PERFORM}.
+         *
+         * @return The automatic adaption mode, never null
+         */
+        AdaptionMode automaticAdaptionMode() default AdaptionMode.PERFORM;
     }
 
     /**
