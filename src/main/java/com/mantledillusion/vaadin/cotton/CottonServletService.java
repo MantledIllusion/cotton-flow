@@ -93,7 +93,7 @@ class CottonServletService extends VaadinServletService {
 		}
 	}
 
-	private static class CottonResponsiveWrapper extends Div implements BrowserWindowResizeListener {
+	static class CottonResponsiveWrapper extends Div implements BrowserWindowResizeListener {
 
 		@Inject
 		private Injector injector;
@@ -125,10 +125,14 @@ class CottonServletService extends VaadinServletService {
 
 		@Override
 		public void browserWindowResized(BrowserWindowResizeEvent resizeEvent) {
-			Class<? extends Component> targetViewType = determineViewType(resizeEvent.getWidth(), resizeEvent.getHeight());
+			adaptIfRequired(resizeEvent.getWidth(), resizeEvent.getHeight(), false);
+		}
+
+		void adaptIfRequired(int width, int height, boolean force) {
+			Class<? extends Component> targetViewType = determineViewType(width, height);
 
 			if (getChildren().noneMatch(child -> child.getClass() == targetViewType)) {
-				BeforeResponsiveRefreshEvent event = new BeforeResponsiveRefreshEvent(CottonUI.current());
+				BeforeResponsiveRefreshEvent event = new BeforeResponsiveRefreshEvent(CottonUI.current(), force);
 				CottonUI.getCurrent().getNavigationListeners(CottonUI.BeforeResponsiveRefreshListener.class).
 						forEach(listener -> listener.beforeRefresh(event));
 

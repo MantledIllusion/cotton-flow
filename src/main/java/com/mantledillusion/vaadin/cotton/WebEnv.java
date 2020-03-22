@@ -3,6 +3,8 @@ package com.mantledillusion.vaadin.cotton;
 import java.util.*;
 
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
+import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -198,5 +200,30 @@ public final class WebEnv {
     @SuppressWarnings("unchecked")
     public static <U extends User> U getLoggedInUser() {
         return (U) CottonServletService.SessionBean.current(LoginHandler.class).getUser();
+    }
+
+    // #########################################################################################################################################
+    // ############################################################## RESPONSIVE ###############################################################
+    // #########################################################################################################################################
+
+    /**
+     * If there currently is a {@link Responsive} view being displayed, this method will cause that view to adapt to
+     * the client browser's current state. If there is no adaption required, nothing will happen.
+     * <p>
+     * This method should only be called after {@link BeforeResponsiveRefreshEvent#decline()} has been used, so the
+     * automatic adaption by the framework was interrupted.
+     * <p>
+     * In case an adaption needs to take place, the {@link BeforeResponsiveRefreshEvent} caused will have the property
+     * {@link BeforeResponsiveRefreshEvent#isForced()}=true set, so listeners to the event will not be able to decline it.
+     */
+    public static void adaptResponsive() {
+        CottonUI.current().getInternals().setExtendedClientDetails(null);
+        CottonUI.current().getPage().retrieveExtendedClientDetails(clientDetails -> {
+            CottonUI.current().getChildren().
+                    filter(child -> CottonServletService.CottonResponsiveWrapper.class.isAssignableFrom(child.getClass())).
+                    map(child -> (CottonServletService.CottonResponsiveWrapper) child).
+                    forEach(responsiveWrapper -> responsiveWrapper.adaptIfRequired(clientDetails.getWindowInnerWidth(),
+                            clientDetails.getWindowInnerHeight(), true));
+        });
     }
 }

@@ -14,17 +14,28 @@ public class BeforeResponsiveRefreshEvent extends EventObject {
 
     private static final long serialVersionUID = 1L;
 
+    private final boolean forced;
     private boolean doAccept = true;
 
-    public BeforeResponsiveRefreshEvent(Object source) {
+    public BeforeResponsiveRefreshEvent(Object source, boolean forced) {
         super(source);
+        this.forced = forced;
     }
 
     /**
      * Marks the requested @{@link Alternative} exchange to be declined.
      */
     public void decline() {
-        this.doAccept = false;
+        this.doAccept = this.forced;
+    }
+
+    /**
+     * Returns whether the announced @{@link Alternative} exchange is forced, so it will commence no matter what.
+     *
+     * @return True if the exchange will commence no matter what, false otherwise
+     */
+    public boolean isForced() {
+        return forced;
     }
 
     /**
