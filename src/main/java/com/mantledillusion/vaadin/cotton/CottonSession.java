@@ -52,10 +52,13 @@ class CottonSession extends VaadinSession {
 		super.setErrorHandler(VaadinMetricsTrailSupport.support(errorHandler));
 	}
 
-	<T> T create(Class<T> type) {
-		this.injector.destroyAll();
-		return this.injector.instantiate(type,
-				Blueprint.PropertyAllocation.of(Bus.PROPERTY_BUS_ISOLATION, Boolean.FALSE.toString()));
+	<T> T createInSessionContext(Class<T> type) {
+		System.out.println("INJECTED in session context: "+type.getName());
+		return this.injector.instantiate(type);
+	}
+
+	<T> void destroyInSessionContext(T bean) {
+		this.injector.destroy(bean);
 	}
 	
 	static CottonSession current() {

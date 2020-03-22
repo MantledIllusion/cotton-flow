@@ -6,13 +6,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.mantledillusion.injection.hura.core.Blueprint;
+import com.mantledillusion.injection.hura.core.Bus;
+import com.mantledillusion.injection.hura.core.Injector;
+import com.mantledillusion.vaadin.cotton.event.responsive.AfterResponsiveRefreshEvent;
+import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionContextException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http903NotImplementedException;
-import com.vaadin.flow.component.UI;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive.Alternative;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.shared.Registration;
 
@@ -72,6 +79,59 @@ public final class CottonUI extends UI {
 	}
 
 	/**
+	 * A listener that may be added to the {@link CottonUI} using
+	 * {@link CottonUI#addAfterResponsiveRefreshListener(AfterResponsiveRefreshListener)}.
+	 * <p>
+	 * Will be notified after a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 */
+	@FunctionalInterface
+	public interface AfterResponsiveRefreshListener {
+
+		/**
+		 * Is called after a @{@link Responsive} view has exchanged its @{@link Alternative}.
+		 *
+		 * @param event The dispatched {@link AfterResponsiveRefreshEvent}; might <b>not</b> be null.
+		 */
+		void afterRefresh(AfterResponsiveRefreshEvent event);
+	}
+
+	/**
+	 * A listener that may be added to the {@link CottonUI} using
+	 * {@link CottonUI#addBeforeResponsiveRefreshListener(BeforeResponsiveRefreshListener)}.
+	 * <p>
+	 * Will be notified before a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 */
+	@FunctionalInterface
+	public interface BeforeResponsiveRefreshListener {
+
+		/**
+		 * Is called before a @{@link Responsive} view has exchanged its @{@link Alternative}.
+		 *
+		 * @param event The dispatched {@link BeforeResponsiveRefreshEvent}; might <b>not</b> be null.
+		 */
+		void beforeRefresh(BeforeResponsiveRefreshEvent event);
+	}
+
+	private Injector injector;
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		this.injector = CottonSession.current().createInSessionContext(Injector.class);
+	}
+
+	<T extends HasElement> T exchangeInjectedView(Class<T> type) {
+		System.out.println("INJECTED in UI context: "+type.getName());
+		this.injector.destroyAll();
+		return this.injector.instantiate(type,
+				Blueprint.PropertyAllocation.of(Bus.PROPERTY_BUS_ISOLATION, Boolean.FALSE.toString()));
+	}
+
+	@Override
+	protected void onDetach(DetachEvent detachEvent) {
+		CottonSession.current().destroyInSessionContext(this.injector);
+	}
+
+	/**
 	 * Adds a listener that will be notified after a new {@link User} has logged in.
 	 * 
 	 * @param listener
@@ -91,6 +151,28 @@ public final class CottonUI extends UI {
 	 */
 	public Registration addBeforeLogoutListener(BeforeLogoutListener listener) {
 		return register(BeforeLogoutListener.class, listener);
+	}
+
+	/**
+	 * Adds a listener that will be notified after a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 *
+	 * @param listener
+	 *            The listener to add; might <b>not</b> be null.
+	 * @return The handler to remove the event listener with, never null
+	 */
+	public Registration addAfterResponsiveRefreshListener(AfterResponsiveRefreshListener listener) {
+		return register(AfterResponsiveRefreshListener.class, listener);
+	}
+
+	/**
+	 * Adds a listener that will be notified before a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 *
+	 * @param listener
+	 *            The listener to add; might <b>not</b> be null.
+	 * @return The handler to remove the event listener with, never null
+	 */
+	public Registration addBeforeResponsiveRefreshListener(BeforeResponsiveRefreshListener listener) {
+		return register(BeforeResponsiveRefreshListener.class, listener);
 	}
 
 	private <E> Registration register(Class<E> listenerType, E listener) {

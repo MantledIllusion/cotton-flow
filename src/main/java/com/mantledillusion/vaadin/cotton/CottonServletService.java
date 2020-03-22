@@ -5,16 +5,26 @@ import com.mantledillusion.injection.hura.core.Bus;
 import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
+import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostDestroy;
 import com.mantledillusion.injection.hura.core.annotation.property.Matches;
 import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
 import com.mantledillusion.metrics.trail.MetricsTrailConsumer;
 import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.metrics.trail.api.MetricAttribute;
+import com.mantledillusion.vaadin.cotton.event.responsive.AfterResponsiveRefreshEvent;
+import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionContextException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.page.BrowserWindowResizeEvent;
+import com.vaadin.flow.component.page.BrowserWindowResizeListener;
+import com.vaadin.flow.component.page.ExtendedClientDetails;
 import com.vaadin.flow.di.DefaultInstantiator;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
@@ -24,6 +34,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.*;
+import com.vaadin.flow.shared.Registration;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +46,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 class CottonServletService extends VaadinServletService {
 
@@ -44,8 +57,6 @@ class CottonServletService extends VaadinServletService {
 	static final String SID_SERVLETSERVICE = "_servletService";
 
 	private final class CottonInstantiator extends DefaultInstantiator {
-
-		private static final long serialVersionUID = 1L;
 
 		public CottonInstantiator() {
 			super(CottonServletService.this);
@@ -58,17 +69,143 @@ class CottonServletService extends VaadinServletService {
 
 		@Override
 		public <T extends HasElement> T createRouteTarget(Class<T> routeTargetType, NavigationEvent event) {
-			long ms = System.currentTimeMillis();
-			T target = super.createRouteTarget(routeTargetType, event);
-			ms = System.currentTimeMillis() - ms;
-			VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SYSTEM_INJECTION.build(ms,
-					new MetricAttribute("class", routeTargetType.getName())));
+			T target;
+
+			if (routeTargetType.isAnnotationPresent(Responsive.class)) {
+				CottonResponsiveWrapper wrapper = CottonUI.current().exchangeInjectedView(CottonResponsiveWrapper.class);
+				CottonUI.current().getPage().retrieveExtendedClientDetails(details ->
+						wrapper.initialize((Class<? extends Component>) routeTargetType, details));
+				target = (T) wrapper;
+			} else {
+				long ms = System.currentTimeMillis();
+				target = CottonUI.current().exchangeInjectedView(routeTargetType);
+				ms = System.currentTimeMillis() - ms;
+
+				VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SYSTEM_INJECTION.build(ms,
+						new MetricAttribute("class", routeTargetType.getName())));
+			}
 			return target;
 		}
 
 		@Override
 		public <T> T getOrCreate(Class<T> type) {
-			return CottonSession.current().create(type);
+			return CottonServletService.this.serviceInjector.instantiate(type);
+		}
+	}
+
+	private static class CottonResponsiveWrapper extends Div implements BrowserWindowResizeListener {
+
+		@Inject
+		private Injector injector;
+
+		private final Registration registration;
+
+		private Class<? extends Component> rootRouteTargetType;
+		private Responsive.Alternative[] alternativeRouteTargets;
+		private boolean isMobileDevice;
+		private boolean isTouchDevice;
+
+		@Construct
+		private CottonResponsiveWrapper() {
+			this.registration = CottonUI.current().getPage().addBrowserWindowResizeListener(this);
+		}
+
+		private <T extends Component> void initialize(Class<T> rootRouteTargetType, ExtendedClientDetails clientDetails) {
+			this.rootRouteTargetType = rootRouteTargetType;
+			this.alternativeRouteTargets = rootRouteTargetType.getAnnotation(Responsive.class).value();
+			this.isMobileDevice = isMobileDevice(CottonSession.current().getBrowser());
+			this.isTouchDevice = clientDetails.isTouchDevice();
+
+			injectAlternative(determineViewType(clientDetails.getWindowInnerWidth(), clientDetails.getWindowInnerHeight()));
+		}
+
+		private boolean isMobileDevice(WebBrowser webBrowser) {
+			return webBrowser.isWindowsPhone() || webBrowser.isAndroid() || webBrowser.isChromeOS() || webBrowser.isIPhone();
+		}
+
+		@Override
+		public void browserWindowResized(BrowserWindowResizeEvent resizeEvent) {
+			Class<? extends Component> targetViewType = determineViewType(resizeEvent.getWidth(), resizeEvent.getHeight());
+
+			if (getChildren().noneMatch(child -> child.getClass() == targetViewType)) {
+				BeforeResponsiveRefreshEvent event = new BeforeResponsiveRefreshEvent(CottonUI.current());
+				CottonUI.getCurrent().getNavigationListeners(CottonUI.BeforeResponsiveRefreshListener.class).
+						forEach(listener -> listener.beforeRefresh(event));
+
+				if (event.isAccepted()) {
+					getChildren().forEach(this.injector::destroy);
+					injectAlternative(targetViewType);
+
+					AfterResponsiveRefreshEvent afterEvent = new AfterResponsiveRefreshEvent(CottonUI.current());
+					CottonUI.getCurrent().getNavigationListeners(CottonUI.AfterResponsiveRefreshListener.class).
+							forEach(listener -> listener.afterRefresh(afterEvent));
+				}
+			}
+		}
+
+		private Class<? extends Component> determineViewType(int width, int height) {
+			Set<Class<? extends Component>> matches = Arrays.stream(this.alternativeRouteTargets).
+					filter(alternative -> matchesClientEnvironment(alternative, width, height)).
+					map(Responsive.Alternative::value).
+					collect(Collectors.toSet());
+
+			if (matches.size() == 1) {
+				return matches.iterator().next();
+			} else if (!matches.isEmpty()) {
+				LOGGER.warn("The @" + Responsive.class.getSimpleName()+ " class " +
+						this.rootRouteTargetType.getSimpleName() + " specifies " + this.alternativeRouteTargets.length +
+						" alternatives of which the configuration of " + matches.size() + " (" +
+						StringUtils.join(matches.stream().map(Class::getSimpleName), ", ") +
+						") match to the client's environment (isTouchDevice=" + this.isTouchDevice + ", width=" +
+						width + ", height=" + height + "); cannot decide which alternative to choose.");
+			}
+			return this.rootRouteTargetType;
+		}
+
+		private boolean matchesClientEnvironment(Responsive.Alternative alternative, int width, int height) {
+			if (this.isMobileDevice && alternative.isMobileDevice() == Responsive.Alternative.DeviceHint.FALSE ||
+					!this.isMobileDevice && alternative.isMobileDevice() == Responsive.Alternative.DeviceHint.TRUE) {
+				return false;
+			} else if (this.isTouchDevice && alternative.isTouchDevice() == Responsive.Alternative.DeviceHint.FALSE ||
+					!this.isTouchDevice && alternative.isTouchDevice() == Responsive.Alternative.DeviceHint.TRUE) {
+				return false;
+			}
+
+			switch (alternative.mode()) {
+				case ABSOLUTE:
+					return width >= alternative.fromX() && width <= alternative.toX() &&
+							height >= alternative.fromY() && height <= alternative.toY();
+				case RATIO:
+					double clientRatio = width / (double) height;
+					double alternativeFromRatio = Math.min(alternative.fromX() / (double) alternative.fromY(),
+							alternative.toX() / (double) alternative.toY());
+					double alternativeToRatio = Math.max(alternative.fromX() / (double) alternative.fromY(),
+							alternative.toX() / (double) alternative.toY());
+					return clientRatio >= alternativeFromRatio && clientRatio <= alternativeToRatio;
+				default:
+					throw new Http500InternalServerErrorException("Handling of alternative mode " +
+							alternative.mode().name() + " not implemented");
+			}
+		}
+
+		private void injectAlternative(Class<? extends Component> targetViewType) {
+			removeAll();
+
+			long ms = System.currentTimeMillis();
+			add(this.injector.instantiate(targetViewType));
+			ms = System.currentTimeMillis() - ms;
+
+			Metric metric = CottonMetrics.SYSTEM_INJECTION.build(ms,
+					new MetricAttribute("class", targetViewType.getName()));
+			if (targetViewType != this.rootRouteTargetType) {
+				metric.getAttributes().add(new MetricAttribute("alternativeTo", this.rootRouteTargetType.getName()));
+			}
+			VaadinMetricsTrailSupport.getCurrent().commit(metric);
+		}
+
+		@PostDestroy
+		private void destroy() {
+			this.registration.remove();
 		}
 	}
 

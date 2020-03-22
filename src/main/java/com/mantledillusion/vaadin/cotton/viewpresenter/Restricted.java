@@ -3,6 +3,10 @@ package com.mantledillusion.vaadin.cotton.viewpresenter;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PreConstruct;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.Component;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -10,11 +14,12 @@ import java.lang.annotation.Target;
 import com.mantledillusion.vaadin.cotton.User;
 
 /**
- * {@link Annotation} for any @{@link com.vaadin.flow.router.Route}d {@link com.vaadin.flow.component.Component} that
- * requires a logged in {@link User} with certain rights in order to be displayed.
+ * {@link Annotation} for any @{@link Route}d {@link Component}s that requires a logged in {@link User} with certain
+ * rights in order to be displayed.
  */
 @Retention(RUNTIME)
 @Target(TYPE)
+@PreConstruct(RoutedValidator.class)
 public @interface Restricted {
 
 	/**
