@@ -123,19 +123,35 @@ public interface Presentable {
 
 		/**
 		 * Registers the given {@link Component}, which will make the component's events @{@link Listen}able to for presenter methods.
-		 * 
+		 *
 		 * @param <T> The type of the {@link Component} to register.
-		 * @param component The component to register; may <b>not</b> be null or has a null component id.
+		 * @param component The component to register; might <b>not</b> be null or has a null component id.
 		 * @return The given component, for inline building
 		 */
 		public <T extends Component> T register(T component) {
+			return register(component, null);
+		}
+
+		/**
+		 * Registers the given {@link Component}, which will make the component's events @{@link Listen}able to for presenter methods.
+		 * 
+		 * @param <T> The type of the {@link Component} to register.
+		 * @param component The component to register; might <b>not</b> be null or has a null component id.
+		 * @param id The component id to set; might be null.
+		 * @return The given component, for inline building
+		 */
+		public <T extends Component> T register(T component, String id) {
 			if (!canRegister) {
 				throw new Http902IllegalStateException(
 						"The component registry may only be used during the initialization of the view it is given to, "
 								+ "as components registered later would not be linked to the view's contolling subscriber anymore.");
 			} else if (component == null) {
 				throw new Http901IllegalArgumentException("Cannot register a null component.");
-			} else if (!component.getId().isPresent()) {
+			} else if (id != null) {
+				component.setId(id);
+			}
+
+			if (!component.getId().isPresent()) {
 				throw new Http901IllegalArgumentException("Cannot register a component without an id.");
 			} else {
 				this.activeComponents.put(component, component.getId().get());

@@ -2,6 +2,8 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
+import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable;
 import com.vaadin.flow.component.Component;
 
 /**
@@ -16,8 +18,49 @@ import com.vaadin.flow.component.Component;
  *            The final implementation type of this {@link AbstractComponentBuilder}. Necessary to allow builder
  *            methods of non-final implementations to return the builder instance in the correct type.
  */
-abstract class AbstractComponentBuilder<C, B extends AbstractComponentBuilder<C, B>>
+abstract class AbstractComponentBuilder<C extends Component, B extends AbstractComponentBuilder<C, B>>
 		extends AbstractEntityBuilder<C, B> implements ComponentBuilder<C, B> {
+
+	/**
+	 * Builder method, configures a {@link Component}'s id.
+	 *
+	 * @see Component#setId(String)
+	 * @param id The id to set; might <b>not</b> be null.
+	 * @return this
+	 */
+	public final B setId(String id) {
+		return configure(activeComponent -> activeComponent.setId(id));
+	}
+
+	/**
+	 * Builder method, registers a {@link Component} to a {@link Presentable.TemporalActiveComponentRegistry} by its id.
+	 *
+	 * @see Component#setId(String)
+	 * @see Presentable.TemporalActiveComponentRegistry#register(Component)
+	 * @param activeComponentRegistry The {@link Presentable.TemporalActiveComponentRegistry} to register at;
+	 *                                might <b>not</b> be null.
+	 * @return this
+	 */
+	public final B setRegistration(Presentable.TemporalActiveComponentRegistry activeComponentRegistry) {
+		return setRegistration(activeComponentRegistry, null);
+	}
+
+	/**
+	 * Builder method, registers a {@link Component} to a {@link Presentable.TemporalActiveComponentRegistry} by its id.
+	 *
+	 * @see Component#setId(String)
+	 * @see Presentable.TemporalActiveComponentRegistry#register(Component)
+	 * @param activeComponentRegistry The {@link Presentable.TemporalActiveComponentRegistry} to register at;
+	 *                                might <b>not</b> be null.
+	 * @param id The id to set; might be null.
+	 * @return this
+	 */
+	public final B setRegistration(Presentable.TemporalActiveComponentRegistry activeComponentRegistry, String id) {
+		if (activeComponentRegistry == null) {
+			throw new Http901IllegalArgumentException("Cannot register a component at a null active component registry");
+		}
+		return configure(activeComponent -> activeComponentRegistry.register(activeComponent, id));
+	}
 
 	/**
 	 * Creates a new {@link Component} instance using {@link #instantiate()}, applies all currently contained
