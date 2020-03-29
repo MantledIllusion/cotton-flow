@@ -25,6 +25,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.BrowserWindowResizeEvent;
 import com.vaadin.flow.component.page.BrowserWindowResizeListener;
 import com.vaadin.flow.component.page.ExtendedClientDetails;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.di.DefaultInstantiator;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
@@ -35,8 +36,8 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.shared.Registration;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
@@ -56,6 +59,8 @@ class CottonServletService extends VaadinServletService {
 	private static final String FILE = "file";
 
 	static final String SID_SERVLETSERVICE = "_servletService";
+	static final String PKEY_RESPONSIVE_ADAPTION_WAIT_MS = "_responsiveAdaptionWaitMs";
+	static final String DEFAULT_RESPONSIVE_ADAPTION_WAIT_MS = "2000";
 
 	private final class CottonInstantiator extends DefaultInstantiator {
 
@@ -96,24 +101,35 @@ class CottonServletService extends VaadinServletService {
 
 	static class CottonResponsiveWrapper extends Div implements BrowserWindowResizeListener {
 
-		@Inject
-		private Injector injector;
-
+		private final Injector injector;
 		private final Registration registration;
+		private final ExecutorService executorService;
+		private final int responsiveAdaptionWaitMs;
+		private Pair<Integer, Integer> resizeDimension;
+		private long resizeWaitMs;
 
 		private Class<? extends Component> rootRouteTargetType;
 		private Responsive.Alternative[] alternativeRouteTargets;
+		private boolean asyncResponsiveAdaptionEnabled;
 		private boolean isMobileDevice;
 		private boolean isTouchDevice;
 
+
 		@Construct
-		private CottonResponsiveWrapper() {
+		private CottonResponsiveWrapper(@Inject Injector injector,
+										@Resolve("${" + PKEY_RESPONSIVE_ADAPTION_WAIT_MS + ":" + DEFAULT_RESPONSIVE_ADAPTION_WAIT_MS + "}") String responsiveAdaptionWaitMs) {
+			this.injector = injector;
 			this.registration = CottonUI.current().getPage().addBrowserWindowResizeListener(this);
+			this.executorService = Executors.newSingleThreadExecutor();
+			this.responsiveAdaptionWaitMs = Math.max(0, Integer.parseInt(responsiveAdaptionWaitMs));
 		}
 
 		private <T extends Component> void initialize(Class<T> rootRouteTargetType, ExtendedClientDetails clientDetails) {
 			this.rootRouteTargetType = rootRouteTargetType;
 			this.alternativeRouteTargets = rootRouteTargetType.getAnnotation(Responsive.class).value();
+			this.asyncResponsiveAdaptionEnabled = CottonServletService.getCurrent().ensurePushAvailable() &&
+					rootRouteTargetType.isAnnotationPresent(Push.class);
+
 			this.isMobileDevice = isMobileDevice(CottonSession.current().getBrowser());
 			this.isTouchDevice = clientDetails.isTouchDevice();
 
@@ -128,7 +144,45 @@ class CottonServletService extends VaadinServletService {
 
 		@Override
 		public void browserWindowResized(BrowserWindowResizeEvent resizeEvent) {
-			adaptIfRequired(resizeEvent.getWidth(), resizeEvent.getHeight(), Responsive.Alternative.AdaptionMode.PERFORM);
+			if (this.asyncResponsiveAdaptionEnabled) {
+				boolean beginTask = false;
+				synchronized (this) {
+					this.resizeWaitMs = System.currentTimeMillis() + this.responsiveAdaptionWaitMs;
+					if (this.resizeDimension == null) {
+						this.resizeDimension = Pair.of(resizeEvent.getWidth(), resizeEvent.getHeight());
+						beginTask = true;
+					}
+				}
+
+				if (beginTask) {
+					CottonUI cottonUI = CottonUI.current();
+					this.executorService.execute(() -> {
+						try {
+							while (true) {
+								long waitMs;
+								synchronized (CottonResponsiveWrapper.this) {
+									waitMs = this.resizeWaitMs - System.currentTimeMillis();
+								}
+								if (waitMs <= 0) {
+									break;
+								}
+								Thread.sleep(waitMs);
+							}
+						} catch (InterruptedException e) {
+							LOGGER.warn("Unable to wait for responsive adaption; adapting immediately.", e);
+						}
+
+						synchronized (CottonResponsiveWrapper.this) {
+							Pair<Integer, Integer> resizeDimension = this.resizeDimension;
+							this.resizeDimension = null;
+							cottonUI.access(() -> adaptIfRequired(resizeDimension.getLeft(),
+									resizeDimension.getRight(), Responsive.Alternative.AdaptionMode.PERFORM));
+						}
+					});
+				}
+			} else {
+				adaptIfRequired(resizeEvent.getWidth(), resizeEvent.getHeight(), Responsive.Alternative.AdaptionMode.PERFORM);
+			}
 		}
 
 		void adaptIfRequired(int width, int height, Responsive.Alternative.AdaptionMode adaptionMode) {

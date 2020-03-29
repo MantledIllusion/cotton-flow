@@ -1,11 +1,16 @@
 package com.mantledillusion.vaadin.cotton;
 
+import com.vaadin.flow.component.page.Push;
+
+import com.mantledillusion.injection.hura.core.annotation.instruction.Define;
 import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.metrics.trail.MetricsConsumer;
 import com.mantledillusion.metrics.trail.MetricsPredicate;
 import com.mantledillusion.metrics.trail.MetricsTrailConsumer;
 import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,8 +18,8 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 /**
- * Offers static methods for @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}ing
- * {@link Blueprint.Allocation}s in the application's environment {@link Blueprint}.
+ * Offers static methods for @{@link Define}ing {@link Blueprint.Allocation}s in the application's
+ * environment {@link Blueprint}.
  */
 public final class CottonEnvironment {
 
@@ -28,8 +33,8 @@ public final class CottonEnvironment {
     static final String PKEY_AUTOMATIC_ROUTE_DISCOVERY = "cotton.application.automaticRouteDiscovery";
 
     /**
-     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
-     * the application's base package. By default, this package is the one the application's environment {@link Blueprint} is resided in.
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link Define} the application's base package. By
+     * default, this package is the one the application's environment {@link Blueprint} is resided in.
      * <p>
      * Cotton will use this package for the automatic @{@link com.vaadin.flow.router.Route} discovery.
      *
@@ -45,9 +50,9 @@ public final class CottonEnvironment {
     }
 
     /**
-     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
-     * whether Cotton should automatically define @{@link com.vaadin.flow.router.Route}d {@link com.vaadin.flow.component.Component}s
-     * found in {@link Package}s in and underneath the application's base package.
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link Define} whether Cotton should automatically
+     * define @{@link com.vaadin.flow.router.Route}d {@link com.vaadin.flow.component.Component}s found
+     * in {@link Package}s in and underneath the application's base package.
      * <p>
      * By default, this option is enabled.
      *
@@ -65,9 +70,8 @@ public final class CottonEnvironment {
     static final String SID_LOGIN_PROVIDER = "_loginProvider";
 
     /**
-     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
-     * a {@link LoginProvider} which is triggered for example when
-     * a @{@link com.mantledillusion.vaadin.cotton.viewpresenter.Restricted} @{@link com.vaadin.flow.router.Route} is visited.
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link Define} a {@link LoginProvider} which is
+     * triggered for example when a @{@link Restricted} @{@link com.vaadin.flow.router.Route} is visited.
      *
      * @param loginProvider The {@link LoginProvider} to register; might <b>not</b> be null.
      * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
@@ -100,8 +104,8 @@ public final class CottonEnvironment {
     }
 
     /**
-     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
-     * the default {@link Locale} language Cotton uses for localization. By default, that is {@link Locale#ENGLISH}.
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link Define} the default {@link Locale} language
+     * Cotton uses for localization. By default, that is {@link Locale#ENGLISH}.
      *
      * @param defaultLocale The default {@link Locale} to set; might <b>not</b> be null or have {@link Locale#toLanguageTag()} return null.
      * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
@@ -115,8 +119,8 @@ public final class CottonEnvironment {
     }
 
     /**
-     * Builds a {@link List} of {@link Blueprint.SingletonAllocation}s that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
-     * i18n localizations from resource files.
+     * Builds a {@link List} of {@link Blueprint.SingletonAllocation}s that can @{@link Define} i18n localizations
+     * from resource files.
      * <p>
      * The resource files are expected to reside in the application's src/main/resouces directory like this:<br>
      * - src/main/resouces/foo_en.properties<br>
@@ -203,12 +207,36 @@ public final class CottonEnvironment {
     }
 
     // #################################################################################################################
+    // ############################################### RESPONSIVE ######################################################
+    // #################################################################################################################
+
+    /**
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link Define} the wait time in milliseconds after the
+     * last browser resize event will trigger a responsive adaption.
+     * <p>
+     * Since client browsers will send multiple resize events when their window is resized by dragging it using a
+     * mouse, this wait time is useful when trying to keep responsive adaptions down to a reasonable amount.
+     * <p>
+     * Note that this function only works if the view annotated with @{@link Responsive} is also annotated
+     * with @{@link Push} and async support is enabled for the servlet in the application server.
+     * <p>
+     * By default, the wait time is {@value CottonServletService#DEFAULT_RESPONSIVE_ADAPTION_WAIT_MS} milliseconds.
+     *
+     * @param waitMs The wait time in milliseconds, 0 or negative values will cause the responsive trigger not to wait
+     *               at all.
+     * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
+     */
+    public static Blueprint.PropertyAllocation forResponsiveAdaptionWaitMs(int waitMs) {
+        return Blueprint.PropertyAllocation.of(CottonServletService.PKEY_RESPONSIVE_ADAPTION_WAIT_MS, String.valueOf(waitMs));
+    }
+
+    // #################################################################################################################
     // ################################################# METRICS #######################################################
     // #################################################################################################################
 
     /**
-     * Builds a {@link Blueprint.SingletonAllocation} that can @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}
-     * a {@link MetricsConsumer} for the application's Vaadin metrics.
+     * Builds a {@link Blueprint.SingletonAllocation} that can @{@link Define} a {@link MetricsConsumer} for the
+     * application's Vaadin metrics.
      *
      * @param consumerId The unique id to add the consumer under, which will be delivered
      *                   to the consumer on each

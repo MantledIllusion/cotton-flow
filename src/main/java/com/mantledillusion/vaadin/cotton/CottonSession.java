@@ -53,7 +53,6 @@ class CottonSession extends VaadinSession {
 	}
 
 	<T> T createInSessionContext(Class<T> type) {
-		System.out.println("INJECTED in session context: "+type.getName());
 		return this.injector.instantiate(type);
 	}
 

@@ -98,11 +98,11 @@ public @interface Responsive {
              * Always perform the automatic switch to the {@link Alternative}; sending the
              * {@link BeforeResponsiveRefreshEvent} is only done for information purposes.
              */
-            FORCE;
+            ENFORCE;
 
             public static AdaptionMode combine(AdaptionMode a1, AdaptionMode a2) {
-                return a1 == AdaptionMode.FORCE ? a1 :
-                        (a2 == AdaptionMode.FORCE ? a2 :
+                return a1 == AdaptionMode.ENFORCE ? a1 :
+                        (a2 == AdaptionMode.ENFORCE ? a2 :
                                 (a1 == AdaptionMode.PROHIBIT ? a1 :
                                         (a2 == AdaptionMode.PROHIBIT ? a2 :
                                                 (AdaptionMode.PERFORM))));

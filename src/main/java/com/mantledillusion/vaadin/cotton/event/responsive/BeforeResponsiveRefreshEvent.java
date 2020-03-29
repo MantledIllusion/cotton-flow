@@ -34,7 +34,7 @@ public class BeforeResponsiveRefreshEvent extends EventObject {
      * @return True if the exchange will commence no matter what, false otherwise
      */
     public boolean isForced() {
-        return this.adaptionMode == Alternative.AdaptionMode.FORCE;
+        return this.adaptionMode == Alternative.AdaptionMode.ENFORCE;
     }
 
     /**
@@ -43,6 +43,6 @@ public class BeforeResponsiveRefreshEvent extends EventObject {
      * @return True if no retriever has called {@link #decline()}, false otherwise
      */
     public boolean isAccepted() {
-        return this.adaptionMode == Alternative.AdaptionMode.PERFORM || this.adaptionMode == Alternative.AdaptionMode.FORCE;
+        return this.adaptionMode == Alternative.AdaptionMode.PERFORM || this.adaptionMode == Alternative.AdaptionMode.ENFORCE;
     }
 }

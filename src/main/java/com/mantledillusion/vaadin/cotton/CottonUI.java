@@ -120,7 +120,6 @@ public final class CottonUI extends UI {
 	}
 
 	<T extends HasElement> T exchangeInjectedView(Class<T> type) {
-		System.out.println("INJECTED in UI context: "+type.getName());
 		this.injector.destroyAll();
 		return this.injector.instantiate(type,
 				Blueprint.PropertyAllocation.of(Bus.PROPERTY_BUS_ISOLATION, Boolean.FALSE.toString()));
