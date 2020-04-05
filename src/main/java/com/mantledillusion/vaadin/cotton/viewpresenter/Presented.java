@@ -7,10 +7,8 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PostInject;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.PreConstruct;
-import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentValidator;
-import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentProcessor;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentedValidator;
 
 /**
  * {@link Annotation} for {@link Presentable} implementations that need controlling by a {@link Presenter}.
@@ -20,8 +18,7 @@ import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable.PresentProces
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@PreConstruct(PresentValidator.class)
-@PostInject(PresentProcessor.class)
+@PreConstruct(PresentedValidator.class)
 public @interface Presented {
 
 	/**
@@ -31,5 +28,5 @@ public @interface Presented {
 	 * @return The {@link Presenter} implementation that presents instances of a {@link Presentable} implementation;
 	 * never null
 	 */
-	Class<? extends Presenter> value();
+	Class<? extends Presenter<?>> value();
 }

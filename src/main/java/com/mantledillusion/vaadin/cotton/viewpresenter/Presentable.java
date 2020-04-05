@@ -11,6 +11,7 @@ import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.Phase;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.AnnotationProcessor;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.BeanProcessor;
+import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostInject;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http902IllegalStateException;
@@ -24,12 +25,13 @@ import org.apache.commons.lang3.reflect.MethodUtils;
  * Basic interface for a view that contains active {@link Component}s a presenter hooked using @{@link Presented} on
  * the {@link Presentable} implementation might @{@link Listen} to.
  */
+@PostInject(Presentable.PresentableProcessor.class)
 public interface Presentable {
 
-	final class PresentValidator implements AnnotationProcessor<Presented, Class<?>> {
+	final class PresentedValidator implements AnnotationProcessor<Presented, Class<?>> {
 
 		@Construct
-		private PresentValidator() {}
+		private PresentedValidator() {}
 
 		@Override
 		public void process(Phase phase, Object bean, Presented annotationInstance, Class<?> annotatedElement,
@@ -42,26 +44,25 @@ public interface Presentable {
 		}
 	}
 
-	final class PresentProcessor implements AnnotationProcessor<Presented, Class<?>> {
+	final class PresentableProcessor implements BeanProcessor<Presentable> {
 
 		@Construct
-		private PresentProcessor() {}
+		private PresentableProcessor() {}
 
 		@Override
-		public void process(Phase phase, Object bean, Presented annotationInstance, Class<?> annotatedElement,
-							Injector.TemporalInjectorCallback callback) throws Exception {
-			Presentable presentable = (Presentable) bean;
-
+		public void process(Phase phase, Presentable bean, Injector.TemporalInjectorCallback callback) throws Exception {
 			TemporalActiveComponentRegistry reg = new TemporalActiveComponentRegistry();
 			try {
-				presentable.registerActiveComponents(reg);
+				bean.registerActiveComponents(reg);
 			} catch (Exception e) {
 				throw new Http500InternalServerErrorException(
-						"Unable to register active components of " + presentable.getClass().getSimpleName(), e);
+						"Unable to register active components of " + bean.getClass().getSimpleName(), e);
 			}
 			reg.canRegister = false;
 
-			instantiatePresenter(presentable, annotationInstance, reg, callback);
+			if (bean.getClass().isAnnotationPresent(Presented.class)) {
+				instantiatePresenter(bean, bean.getClass().getAnnotation(Presented.class), reg, callback);
+			}
 		}
 
 		private <V extends Presentable, T> void instantiatePresenter(V view, Presented annotationInstance,
