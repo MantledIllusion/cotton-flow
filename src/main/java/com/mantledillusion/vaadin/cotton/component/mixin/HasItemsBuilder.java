@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasItems;
 
@@ -55,7 +56,7 @@ public interface HasItemsBuilder<C extends HasItems<E>, E, B extends HasItemsBui
 	 */
 	default B setItems(Stream<E> elementStream) {
 		if (elementStream == null) {
-			throw new IllegalArgumentException("Cannot set a null element stream");
+			throw new Http901IllegalArgumentException("Cannot set a null element stream");
 		}
 		return configure(hasItems -> hasItems.setItems(elementStream));
 	}
