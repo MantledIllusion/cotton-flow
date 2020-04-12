@@ -6,13 +6,16 @@ import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.TabVariant;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.tabs.TabsVariant;
 
 /**
  * {@link ComponentBuilder} for {@link Tabs}.
  */
-public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder>
-        implements HasSizeBuilder<Tabs, TabsBuilder>,
+public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> implements
+        HasSizeBuilder<Tabs, TabsBuilder>,
+        HasThemeVariantBuilder<Tabs, TabsBuilder, TabsVariant>,
         HasStyleBuilder<Tabs, TabsBuilder>,
         HasEnabledBuilder<Tabs, TabsBuilder>,
         HasComponentsBuilder<Tabs, TabsBuilder> {
@@ -20,8 +23,12 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder>
     /**
      * {@link ComponentBuilder} for {@link Tab}s.
      */
-    public final class TabBuilder extends AbstractEntityBuilder<Tab, TabBuilder> implements Configurer<Tabs>,
-            HasStyleBuilder<Tab, TabBuilder>, HasEnabledBuilder<Tab, TabBuilder>, HasComponentsBuilder<Tab, TabBuilder> {
+    public final class TabBuilder extends AbstractEntityBuilder<Tab, TabBuilder> implements
+            Configurer<Tabs>,
+            HasThemeVariantBuilder<Tab, TabBuilder, TabVariant>,
+            HasStyleBuilder<Tab, TabBuilder>,
+            HasEnabledBuilder<Tab, TabBuilder>,
+            HasComponentsBuilder<Tab, TabBuilder> {
 
         private TabBuilder() {
             super(TabsBuilder.this);
@@ -32,6 +39,11 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder>
             Tab tab = new Tab();
             component.add(tab);
             apply(tab);
+        }
+
+        @Override
+        public String toVariantName(TabVariant variant) {
+            return variant.getVariantName();
         }
 
         /**
@@ -110,6 +122,11 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder>
     @Override
     protected Tabs instantiate() {
         return new Tabs();
+    }
+
+    @Override
+    public String toVariantName(TabsVariant variant) {
+        return variant.getVariantName();
     }
 
     /**

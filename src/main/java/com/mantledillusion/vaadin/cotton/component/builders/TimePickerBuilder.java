@@ -12,9 +12,11 @@ import java.util.Locale;
 /**
  * {@link ComponentBuilder} for {@link TimePicker}s.
  */
-public class TimePickerBuilder extends AbstractComponentBuilder<TimePicker, TimePickerBuilder>
-		implements HasSizeBuilder<TimePicker, TimePickerBuilder>, HasStyleBuilder<TimePicker, TimePickerBuilder>,
-		FocusableBuilder<TimePicker, TimePickerBuilder>, HasEnabledBuilder<TimePicker, TimePickerBuilder>,
+public class TimePickerBuilder extends AbstractComponentBuilder<TimePicker, TimePickerBuilder> implements
+		HasSizeBuilder<TimePicker, TimePickerBuilder>,
+		HasStyleBuilder<TimePicker, TimePickerBuilder>,
+		FocusableBuilder<TimePicker, TimePickerBuilder>,
+		HasEnabledBuilder<TimePicker, TimePickerBuilder>,
 		HasValueBuilder<TimePicker, LocalTime, TimePickerBuilder> {
 
 	private TimePickerBuilder() {}

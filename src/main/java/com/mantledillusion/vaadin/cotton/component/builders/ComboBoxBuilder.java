@@ -4,12 +4,7 @@ import java.util.regex.Pattern;
 
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.FocusableBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasEnabledBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasItemsBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasValueBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -19,9 +14,11 @@ import com.vaadin.flow.function.SerializablePredicate;
 /**
  * {@link ComponentBuilder} for {@link ComboBox}es.
  */
-public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, ComboBoxBuilder<E>>
-		implements HasSizeBuilder<ComboBox<E>, ComboBoxBuilder<E>>, HasStyleBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
-		FocusableBuilder<ComboBox<E>, ComboBoxBuilder<E>>, HasEnabledBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
+public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, ComboBoxBuilder<E>> implements
+		HasSizeBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
+		HasStyleBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
+		FocusableBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
+		HasEnabledBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
 		HasItemsBuilder<ComboBox<E>, E, ComboBoxBuilder<E>>,
 		HasValueBuilder<ComboBox<E>, E, ComboBoxBuilder<E>> {
 

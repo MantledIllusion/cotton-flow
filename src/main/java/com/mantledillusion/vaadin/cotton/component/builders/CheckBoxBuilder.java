@@ -8,10 +8,13 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 /**
  * {@link ComponentBuilder} for {@link Checkbox}es.
  */
-public class CheckBoxBuilder extends AbstractComponentBuilder<Checkbox, CheckBoxBuilder>
-		implements HasSizeBuilder<Checkbox, CheckBoxBuilder>, HasStyleBuilder<Checkbox, CheckBoxBuilder>,
-		FocusableBuilder<Checkbox, CheckBoxBuilder>, HasEnabledBuilder<Checkbox, CheckBoxBuilder>,
-		HasValueBuilder<Checkbox, Boolean, CheckBoxBuilder>, ClickableBuilder<Checkbox, CheckBoxBuilder> {
+public class CheckBoxBuilder extends AbstractComponentBuilder<Checkbox, CheckBoxBuilder> implements
+		HasSizeBuilder<Checkbox, CheckBoxBuilder>,
+		HasStyleBuilder<Checkbox, CheckBoxBuilder>,
+		FocusableBuilder<Checkbox, CheckBoxBuilder>,
+		HasEnabledBuilder<Checkbox, CheckBoxBuilder>,
+		HasValueBuilder<Checkbox, Boolean, CheckBoxBuilder>,
+		ClickableBuilder<Checkbox, CheckBoxBuilder> {
 
 	private CheckBoxBuilder() {}
 

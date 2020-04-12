@@ -4,25 +4,23 @@ import java.util.regex.Pattern;
 
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.FocusableBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasAutocapitalizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasAutocompleteBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasAutocorrectBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasEnabledBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasValueBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasValueChangeModeBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 
 /**
  * {@link ComponentBuilder} for {@link TextField}s.
  */
-public class TextFieldBuilder extends AbstractComponentBuilder<TextField, TextFieldBuilder>
-		implements HasSizeBuilder<TextField, TextFieldBuilder>, HasStyleBuilder<TextField, TextFieldBuilder>,
-		HasValueChangeModeBuilder<TextField, TextFieldBuilder>, HasAutocompleteBuilder<TextField, TextFieldBuilder>,
-		HasAutocapitalizeBuilder<TextField, TextFieldBuilder>, HasAutocorrectBuilder<TextField, TextFieldBuilder>,
-		FocusableBuilder<TextField, TextFieldBuilder>, HasEnabledBuilder<TextField, TextFieldBuilder>,
+public class TextFieldBuilder extends AbstractComponentBuilder<TextField, TextFieldBuilder> implements
+		HasSizeBuilder<TextField, TextFieldBuilder>,
+		HasThemeVariantBuilder<TextField, TextFieldBuilder, TextFieldVariant>,
+		HasStyleBuilder<TextField, TextFieldBuilder>,
+		HasValueChangeModeBuilder<TextField, TextFieldBuilder>,
+		HasAutocompleteBuilder<TextField, TextFieldBuilder>,
+		HasAutocapitalizeBuilder<TextField, TextFieldBuilder>,
+		HasAutocorrectBuilder<TextField, TextFieldBuilder>,
+		FocusableBuilder<TextField, TextFieldBuilder>,
+		HasEnabledBuilder<TextField, TextFieldBuilder>,
 		HasValueBuilder<TextField, String, TextFieldBuilder> {
 
 	private TextFieldBuilder() {}
@@ -39,6 +37,11 @@ public class TextFieldBuilder extends AbstractComponentBuilder<TextField, TextFi
 	@Override
 	protected TextField instantiate() {
 		return new TextField();
+	}
+
+	@Override
+	public String toVariantName(TextFieldVariant variant) {
+		return variant.getVariantName();
 	}
 
 	/**

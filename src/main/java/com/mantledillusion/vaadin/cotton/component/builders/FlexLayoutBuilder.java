@@ -8,8 +8,8 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 /**
  * {@link ComponentBuilder} for {@link FlexLayout}s.
  */
-public class FlexLayoutBuilder extends AbstractComponentBuilder<FlexLayout, FlexLayoutBuilder>
-        implements HasSizeBuilder<FlexLayout, FlexLayoutBuilder>,
+public class FlexLayoutBuilder extends AbstractComponentBuilder<FlexLayout, FlexLayoutBuilder> implements
+        HasSizeBuilder<FlexLayout, FlexLayoutBuilder>,
         HasStyleBuilder<FlexLayout, FlexLayoutBuilder>,
         HasEnabledBuilder<FlexLayout, FlexLayoutBuilder>,
         HasComponentsBuilder<FlexLayout, FlexLayoutBuilder>,

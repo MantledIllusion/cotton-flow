@@ -5,14 +5,19 @@ import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 
 /**
  * {@link ComponentBuilder} for {@link Button}s.
  */
-public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilder>
-		implements HasSizeBuilder<Button, ButtonBuilder>, HasStyleBuilder<Button, ButtonBuilder>,
-		HasTextBuilder<Button, ButtonBuilder>, HasEnabledBuilder<Button, ButtonBuilder>,
-		FocusableBuilder<Button, ButtonBuilder>, ClickableBuilder<Button, ButtonBuilder> {
+public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilder> implements
+		HasSizeBuilder<Button, ButtonBuilder>,
+		HasThemeVariantBuilder<Button, ButtonBuilder, ButtonVariant>,
+		HasStyleBuilder<Button, ButtonBuilder>,
+		HasTextBuilder<Button, ButtonBuilder>,
+		HasEnabledBuilder<Button, ButtonBuilder>,
+		FocusableBuilder<Button, ButtonBuilder>,
+		ClickableBuilder<Button, ButtonBuilder> {
 
 	private ButtonBuilder() {}
 
@@ -28,6 +33,11 @@ public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilde
 	@Override
 	protected Button instantiate() {
 		return new Button();
+	}
+
+	@Override
+	public String toVariantName(ButtonVariant variant) {
+		return variant.getVariantName();
 	}
 
 	/**

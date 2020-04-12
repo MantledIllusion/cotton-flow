@@ -4,15 +4,21 @@ import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextAreaVariant;
 
 /**
  * {@link ComponentBuilder} for {@link TextArea}s.
  */
-public class TextAreaBuilder extends AbstractComponentBuilder<TextArea, TextAreaBuilder>
-		implements HasSizeBuilder<TextArea, TextAreaBuilder>, HasStyleBuilder<TextArea, TextAreaBuilder>,
-		HasValueChangeModeBuilder<TextArea, TextAreaBuilder>, HasAutocompleteBuilder<TextArea, TextAreaBuilder>,
-		HasAutocapitalizeBuilder<TextArea, TextAreaBuilder>, HasAutocorrectBuilder<TextArea, TextAreaBuilder>,
-		FocusableBuilder<TextArea, TextAreaBuilder>, HasEnabledBuilder<TextArea, TextAreaBuilder>,
+public class TextAreaBuilder extends AbstractComponentBuilder<TextArea, TextAreaBuilder> implements
+		HasSizeBuilder<TextArea, TextAreaBuilder>,
+		HasThemeVariantBuilder<TextArea, TextAreaBuilder, TextAreaVariant>,
+		HasStyleBuilder<TextArea, TextAreaBuilder>,
+		HasValueChangeModeBuilder<TextArea, TextAreaBuilder>,
+		HasAutocompleteBuilder<TextArea, TextAreaBuilder>,
+		HasAutocapitalizeBuilder<TextArea, TextAreaBuilder>,
+		HasAutocorrectBuilder<TextArea, TextAreaBuilder>,
+		FocusableBuilder<TextArea, TextAreaBuilder>,
+		HasEnabledBuilder<TextArea, TextAreaBuilder>,
 		HasValueBuilder<TextArea, String, TextAreaBuilder> {
 
 	private TextAreaBuilder() {}
@@ -29,6 +35,11 @@ public class TextAreaBuilder extends AbstractComponentBuilder<TextArea, TextArea
 	@Override
 	protected TextArea instantiate() {
 		return new TextArea();
+	}
+
+	@Override
+	public String toVariantName(TextAreaVariant variant) {
+		return variant.getVariantName();
 	}
 
 	/**

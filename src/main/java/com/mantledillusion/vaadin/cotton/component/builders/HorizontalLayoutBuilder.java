@@ -9,8 +9,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 /**
  * {@link ComponentBuilder} for {@link HorizontalLayout}s.
  */
-public class HorizontalLayoutBuilder extends AbstractComponentBuilder<HorizontalLayout, HorizontalLayoutBuilder>
-        implements HasSizeBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
+public class HorizontalLayoutBuilder extends AbstractComponentBuilder<HorizontalLayout, HorizontalLayoutBuilder> implements
+        HasSizeBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
         HasStyleBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
         HasEnabledBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
         HasComponentsBuilder<HorizontalLayout, HorizontalLayoutBuilder>,

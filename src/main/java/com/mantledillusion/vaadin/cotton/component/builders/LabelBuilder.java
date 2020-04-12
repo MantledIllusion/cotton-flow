@@ -11,9 +11,11 @@ import com.vaadin.flow.component.html.Label;
 /**
  * {@link ComponentBuilder} for {@link Label}s.
  */
-public class LabelBuilder extends AbstractComponentBuilder<Label, LabelBuilder>
-		implements HasSizeBuilder<Label, LabelBuilder>, HasStyleBuilder<Label, LabelBuilder>,
-		HasEnabledBuilder<Label, LabelBuilder>, HasTextBuilder<Label, LabelBuilder> {
+public class LabelBuilder extends AbstractComponentBuilder<Label, LabelBuilder> implements
+		HasSizeBuilder<Label, LabelBuilder>,
+		HasStyleBuilder<Label, LabelBuilder>,
+		HasEnabledBuilder<Label, LabelBuilder>,
+		HasTextBuilder<Label, LabelBuilder> {
 
 	private LabelBuilder() {}
 

@@ -11,6 +11,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.SortOrderProvider;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -29,14 +30,19 @@ import java.util.function.Supplier;
  */
 public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
         AbstractComponentBuilder<Grid<E>, GridBuilder<E, F>> implements
-        HasSizeBuilder<Grid<E>, GridBuilder<E, F>>, HasStyleBuilder<Grid<E>, GridBuilder<E, F>>,
-        FocusableBuilder<Grid<E>, GridBuilder<E, F>>, HasEnabledBuilder<Grid<E>, GridBuilder<E, F>>,
-        HasItemsBuilder<Grid<E>, E, GridBuilder<E, F>>, HasDataProviderBuilder<Grid<E>, E, F, GridBuilder<E, F>> {
+        HasSizeBuilder<Grid<E>, GridBuilder<E, F>>,
+        HasThemeVariantBuilder<Grid<E>, GridBuilder<E, F>, GridVariant>,
+        HasStyleBuilder<Grid<E>, GridBuilder<E, F>>,
+        FocusableBuilder<Grid<E>, GridBuilder<E, F>>,
+        HasEnabledBuilder<Grid<E>, GridBuilder<E, F>>,
+        HasItemsBuilder<Grid<E>, E, GridBuilder<E, F>>,
+        HasDataProviderBuilder<Grid<E>, E, F, GridBuilder<E, F>> {
 
     /**
      * {@link EntityBuilder} for {@link Grid.Column}s.
      */
-    public final class GridColumnBuilder extends AbstractEntityBuilder<Grid.Column<E>, GridColumnBuilder> implements Configurer<Grid<E>> {
+    public final class GridColumnBuilder extends AbstractEntityBuilder<Grid.Column<E>, GridColumnBuilder> implements
+            Configurer<Grid<E>> {
 
         private final Function<Grid<E>, Grid.Column<E>> columnSupplier;
 
@@ -449,6 +455,11 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
     @Override
     protected Grid<E> instantiate() {
         return new Grid<>();
+    }
+
+    @Override
+    public String toVariantName(GridVariant variant) {
+        return variant.getVariantName();
     }
 
     /**

@@ -5,6 +5,7 @@ import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
 		AbstractComponentBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>> implements
+		HasThemeVariantBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>, RadioGroupVariant>,
 		HasStyleBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
 		HasEnabledBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
 		HasItemsBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E, F>>,
@@ -64,6 +66,11 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	@Override
 	protected RadioButtonGroup<E> instantiate() {
 		return new RadioButtonGroup<>();
+	}
+
+	@Override
+	public String toVariantName(RadioGroupVariant variant) {
+		return variant.getVariantName();
 	}
 
 	/**

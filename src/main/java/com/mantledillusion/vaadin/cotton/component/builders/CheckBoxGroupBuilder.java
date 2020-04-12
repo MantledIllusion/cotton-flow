@@ -5,6 +5,7 @@ import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.function.SerializablePredicate;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,6 +20,7 @@ import java.util.Set;
 public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
 		AbstractComponentBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>> implements
 		HasSizeBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
+		HasThemeVariantBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>, CheckboxGroupVariant>,
 		HasStyleBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
 		HasEnabledBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
 		HasItemsBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E, F>>,
@@ -65,6 +67,11 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	@Override
 	protected CheckboxGroup<E> instantiate() {
 		return new CheckboxGroup<>();
+	}
+
+	@Override
+	public String toVariantName(CheckboxGroupVariant variant) {
+		return variant.getVariantName();
 	}
 
 	/**

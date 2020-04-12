@@ -16,9 +16,11 @@ import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 /**
  * {@link ComponentBuilder} for {@link DatePicker}s.
  */
-public class DatePickerBuilder extends AbstractComponentBuilder<DatePicker, DatePickerBuilder>
-		implements HasSizeBuilder<DatePicker, DatePickerBuilder>, HasStyleBuilder<DatePicker, DatePickerBuilder>,
-		FocusableBuilder<DatePicker, DatePickerBuilder>, HasEnabledBuilder<DatePicker, DatePickerBuilder>,
+public class DatePickerBuilder extends AbstractComponentBuilder<DatePicker, DatePickerBuilder> implements
+		HasSizeBuilder<DatePicker, DatePickerBuilder>,
+		HasStyleBuilder<DatePicker, DatePickerBuilder>,
+		FocusableBuilder<DatePicker, DatePickerBuilder>,
+		HasEnabledBuilder<DatePicker, DatePickerBuilder>,
 		HasValueBuilder<DatePicker, LocalDate, DatePickerBuilder> {
 
 	private DatePickerBuilder() {}
