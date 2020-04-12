@@ -1,13 +1,12 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.Autocomplete;
 import com.vaadin.flow.component.textfield.HasAutocomplete;
 
 /**
- * {@link ComponentBuilder} for {@link HasAutocomplete} implementing
- * {@link Component}s.
+ * {@link EntityBuilder} for {@link HasAutocomplete} implementing {@link Component}s.
  *
  * @param <C>
  *            The {@link Component} type implementing {@link HasAutocomplete}.
@@ -15,7 +14,7 @@ import com.vaadin.flow.component.textfield.HasAutocomplete;
  *            The final implementation type of {@link HasAutocompleteBuilder}.
  */
 public interface HasAutocompleteBuilder<C extends HasAutocomplete, B extends HasAutocompleteBuilder<C, B>>
-		extends ComponentBuilder<C, B> {
+		extends EntityBuilder<C, B> {
 
 	/**
 	 * Builder method, configures the {@link Autocomplete} to be set.

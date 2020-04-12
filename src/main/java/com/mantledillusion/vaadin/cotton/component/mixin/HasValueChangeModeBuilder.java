@@ -1,13 +1,12 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
- * {@link ComponentBuilder} for {@link HasValueChangeMode} implementing
- * {@link Component}s.
+ * {@link EntityBuilder} for {@link HasValueChangeMode} implementing {@link Component}s.
  *
  * @param <C>
  *            The {@link Component} type implementing
@@ -17,7 +16,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  *            {@link HasValueChangeModeBuilder}.
  */
 public interface HasValueChangeModeBuilder<C extends HasValueChangeMode, B extends HasValueChangeModeBuilder<C, B>>
-		extends ComponentBuilder<C, B> {
+		extends EntityBuilder<C, B> {
 
 	/**
 	 * Builder method, configures the {@link ValueChangeMode} that specifies at what

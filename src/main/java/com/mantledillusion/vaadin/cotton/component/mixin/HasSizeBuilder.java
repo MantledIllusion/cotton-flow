@@ -1,18 +1,18 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 
 /**
- * {@link ComponentBuilder} for {@link HasSize} implementing {@link Component}s.
+ * {@link EntityBuilder} for {@link HasSize} implementing {@link Component}s.
  *
  * @param <C>
  *            The {@link Component} type implementing {@link HasSize}.
  * @param <B>
  *            The final implementation type of {@link HasSizeBuilder}.
  */
-public interface HasSizeBuilder<C extends HasSize, B extends HasSizeBuilder<C, B>> extends ComponentBuilder<C, B> {
+public interface HasSizeBuilder<C extends HasSize, B extends HasSizeBuilder<C, B>> extends EntityBuilder<C, B> {
 	
 	String CSS_PX = "px";
 	String CSS_PCT = "%";

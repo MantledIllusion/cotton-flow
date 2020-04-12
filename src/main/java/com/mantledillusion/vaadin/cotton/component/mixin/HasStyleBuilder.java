@@ -1,19 +1,18 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 
 /**
- * {@link ComponentBuilder} for {@link HasStyle} implementing
- * {@link Component}s.
+ * {@link EntityBuilder} for {@link HasStyle} implementing {@link Component}s.
  *
  * @param <C>
  *            The {@link Component} type implementing {@link HasStyle}.
  * @param <B>
  *            The final implementation type of {@link HasStyleBuilder}.
  */
-public interface HasStyleBuilder<C extends HasStyle, B extends HasStyleBuilder<C, B>> extends ComponentBuilder<C, B> {
+public interface HasStyleBuilder<C extends HasStyle, B extends HasStyleBuilder<C, B>> extends EntityBuilder<C, B> {
 
 	/**
 	 * Builder method, configures one or more style class names to be added.

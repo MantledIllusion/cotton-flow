@@ -1,7 +1,7 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
 import com.mantledillusion.data.epiphy.Property;
-import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.model.InMemoryDataProviderBinding;
 import com.mantledillusion.vaadin.cotton.model.ModelAccessor;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * {@link ComponentBuilder} for {@link HasDataProvider} implementing {@link Component}s.
+ * {@link EntityBuilder} for {@link HasDataProvider} implementing {@link Component}s.
  *
  * @param <C> The {@link Component} type implementing {@link HasDataProvider}.
  * @param <E> The element type of the {@link HasDataProvider}.
@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * @param <B> The final implementation type of {@link HasValueBuilder}.
  */
 public interface HasDataProviderBuilder<C extends HasDataProvider<E>, E, F extends HasDataProviderBuilder.ConfigurableFilter<E>,
-        B extends HasDataProviderBuilder<C, E, F, B>> extends ComponentBuilder<C, B> {
+        B extends HasDataProviderBuilder<C, E, F, B>> extends EntityBuilder<C, B> {
 
     /**
      * A configurable filter for elements of a {@link DataProvider}.

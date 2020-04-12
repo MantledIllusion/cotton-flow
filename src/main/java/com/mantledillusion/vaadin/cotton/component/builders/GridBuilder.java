@@ -458,7 +458,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      * @param <V> The value type of the column.
      * @param property
      *            The {@link Property}; might <b>not</b> be null.
-     * @return this
+     * @return A new {@link GridColumnBuilder}, never null
      */
     public <V extends Comparable<? super V>> GridColumnBuilder configureColumn(Property<E, V> property) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(property::get, property.getId()));
@@ -472,7 +472,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      * @see Grid#addColumn(String)
      * @param propertyName
      *            The name of the property; might <b>not</b> be null.
-     * @return this
+     * @return A new {@link GridColumnBuilder}, never null
      */
     public GridColumnBuilder configureColumn(String propertyName) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(propertyName));
@@ -486,7 +486,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      * @see Grid#addColumn(Renderer)
      * @param renderer
      *            The renderer; might <b>not</b> be null.
-     * @return this
+     * @return A new {@link GridColumnBuilder}, never null
      */
     public GridColumnBuilder configureColumn(Renderer<E> renderer) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(renderer));
@@ -502,7 +502,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      *            The renderer; might <b>not</b> be null.
      * @param sortingProperties
      *            The properties to sort by, might be null.
-     * @return this
+     * @return A new {@link GridColumnBuilder}, never null
      */
     public GridColumnBuilder configureColumn(Renderer<E> renderer, String... sortingProperties) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(renderer, sortingProperties));
@@ -516,7 +516,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      * @see Grid#addColumn(ValueProvider)
      * @param valueProvider
      *            The value provider; might <b>not</b> be null.
-     * @return this
+     * @return A new {@link GridColumnBuilder}, never null
      */
     public GridColumnBuilder configureColumn(ValueProvider<E, ?> valueProvider) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(valueProvider));
@@ -533,7 +533,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      *            The value provider; might <b>not</b> be null.
      * @param sortingProperties
      *            The properties to sort by, might be null.
-     * @return this
+     * @return A new {@link GridColumnBuilder}, never null
      */
     public <V extends Comparable<? super V>> GridColumnBuilder configureColumn(ValueProvider<E, V> valueProvider, String... sortingProperties) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(valueProvider, sortingProperties));
@@ -548,7 +548,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      * @param <V> The value type of the column.
      * @param valueProvider
      *            The component provider; might <b>not</b> be null.
-     * @return this
+     * @return A new {@link GridColumnBuilder}, never null
      */
     public <V extends Component> GridColumnBuilder configureComponentColumn(ValueProvider<E, V> valueProvider) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addComponentColumn(valueProvider));

@@ -3,14 +3,13 @@ package com.mantledillusion.vaadin.cotton.component.mixin;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasItems;
 
 /**
- * {@link ComponentBuilder} for {@link HasItems} implementing
- * {@link Component}s.
+ * {@link EntityBuilder} for {@link HasItems} implementing {@link Component}s.
  *
  * @param <C>
  *            The {@link Component} type implementing {@link HasItems}.
@@ -20,7 +19,7 @@ import com.vaadin.flow.data.binder.HasItems;
  *            The final implementation type of {@link HasItemsBuilder}.
  */
 public interface HasItemsBuilder<C extends HasItems<E>, E, B extends HasItemsBuilder<C, E, B>>
-		extends ComponentBuilder<C, B> {
+		extends EntityBuilder<C, B> {
 
 	/**
 	 * Builder method, configures a {@link Collection} of elements to set.

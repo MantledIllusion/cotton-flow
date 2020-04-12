@@ -1,11 +1,11 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
-import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
+import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
 
 /**
- * {@link ComponentBuilder} for {@link HasEnabled} implementing {@link Component}s.
+ * {@link EntityBuilder} for {@link HasEnabled} implementing {@link Component}s.
  *
  * @param <C>
  *            The {@link Component} type implementing {@link HasEnabled}.
@@ -13,7 +13,7 @@ import com.vaadin.flow.component.HasEnabled;
  *            The final implementation type of {@link HasEnabledBuilder}.
  */
 public interface HasEnabledBuilder<C extends HasEnabled, B extends HasEnabledBuilder<C, B>>
-		extends ComponentBuilder<C, B> {
+		extends EntityBuilder<C, B> {
 
 	/**
 	 * Builder method, configures whether the {@link Component} is enabled or
