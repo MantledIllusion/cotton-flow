@@ -23,7 +23,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
     /**
      * {@link ComponentBuilder} for {@link Tab}s.
      */
-    public final class TabBuilder extends AbstractEntityBuilder<Tab, TabBuilder> implements
+    public class TabBuilder extends AbstractEntityBuilder<Tab, TabBuilder> implements
             Configurer<Tabs>,
             HasThemeVariantBuilder<Tab, TabBuilder, TabVariant>,
             HasStyleBuilder<Tab, TabBuilder>,

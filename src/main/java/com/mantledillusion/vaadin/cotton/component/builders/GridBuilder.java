@@ -41,7 +41,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
     /**
      * {@link EntityBuilder} for {@link Grid.Column}s.
      */
-    public final class GridColumnBuilder extends AbstractEntityBuilder<Grid.Column<E>, GridColumnBuilder> implements
+    public class GridColumnBuilder extends AbstractEntityBuilder<Grid.Column<E>, GridColumnBuilder> implements
             Configurer<Grid<E>> {
 
         private final Function<Grid<E>, Grid.Column<E>> columnSupplier;
