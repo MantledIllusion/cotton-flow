@@ -18,11 +18,11 @@ import java.util.function.Supplier;
 public final class BindingBuilder<C> {
 
     private final ComponentBuilder<C, ?> componentBuilder;
-    private final Function<C, Binding> bindingCallback;
+    private final Function<C, Binding<?>> bindingCallback;
 
     private final List<Supplier<Binding.AccessMode>> bindingAuditors = new ArrayList<>();
 
-    BindingBuilder(ComponentBuilder<C, ?> componentBuilder, Function<C, Binding> bindingCallback) {
+    public BindingBuilder(ComponentBuilder<C, ?> componentBuilder, Function<C, Binding<?>> bindingCallback) {
         this.componentBuilder = componentBuilder;
         this.bindingCallback = bindingCallback;
     }
@@ -50,7 +50,7 @@ public final class BindingBuilder<C> {
         C component = componentBuilder.build();
 
         // APPLY ALL BINDING AUDITORS
-        Binding binding = this.bindingCallback.apply(component);
+        Binding<?> binding = this.bindingCallback.apply(component);
         this.bindingAuditors.forEach(binding::withRestriction);
 
         return component;

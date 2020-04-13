@@ -74,7 +74,7 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 		} else if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
 		}
-		return new BindingBuilder<>(this, c -> binder.bindConsumer(text -> c.setText(text), property));
+		return new BindingBuilder<>(this, c -> binder.bindConsumer(c::setText, property));
 	}
 
 	/**
@@ -137,6 +137,6 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 		} else if (property == null) {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property.");
 		}
-		return new BindingBuilder<>(this, c -> binder.bindConsumer(text -> c.setText(text), converter, property));
+		return new BindingBuilder<>(this, c -> binder.bindConsumer(c::setText, converter, property));
 	}
 }
