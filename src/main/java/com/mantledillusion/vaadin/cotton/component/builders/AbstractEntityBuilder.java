@@ -72,6 +72,7 @@ abstract class AbstractEntityBuilder<C, B extends AbstractEntityBuilder<C, B>> i
 
 	protected void apply(C entity) {
 		this.context.clear();
+		this.context.put(entity.getClass(), entity);
 		this.configurators.forEach(configuration -> configuration.configure(entity));
 	}
 }

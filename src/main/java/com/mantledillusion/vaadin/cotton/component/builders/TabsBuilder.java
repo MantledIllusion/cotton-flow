@@ -91,7 +91,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
          * @return this
          */
         public TabBuilder addSelectedChangeListenerForTab(ComponentEventListener<Tabs.SelectedChangeEvent> listener) {
-            return configure(tab -> TabsBuilder.this.addSelectedChangeListener(event -> {
+            return configure(tab -> TabBuilder.this.get(Tabs.class).addSelectedChangeListener(event -> {
                 if (tab == event.getSelectedTab()) {
                     listener.onComponentEvent(event);
                 }
