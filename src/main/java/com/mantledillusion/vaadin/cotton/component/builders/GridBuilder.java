@@ -318,6 +318,19 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
         }
 
         /**
+         * Builder method, configures the {@link Grid.Column}'s width to be adapted automatically to the content in the
+         * column the moment the {@link Grid} is loaded the first time.
+         *
+         * @see Grid.Column#setAutoWidth(boolean)
+         * @param autoWidth
+         *            True if the column should be adapted, false otherwise.
+         * @return this
+         */
+        public GridColumnBuilder setAutoWidth(boolean autoWidth) {
+            return configure(hasSize -> hasSize.setAutoWidth(autoWidth));
+        }
+
+        /**
          * Builder method, configures a CSS class name generator for the {@link Grid.Column}.
          *
          * @see Grid.Column#setClassNameGenerator(SerializableFunction)
