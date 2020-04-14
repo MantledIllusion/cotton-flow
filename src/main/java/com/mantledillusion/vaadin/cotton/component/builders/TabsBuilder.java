@@ -79,7 +79,12 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
          * @return this
          */
         public TabBuilder setSelected(boolean selected) {
-            return configure(tab -> tab.setSelected(selected));
+            return configure(tab -> {
+                tab.setSelected(selected);
+                if (selected) {
+                    TabBuilder.this.get(Tabs.class).setSelectedTab(tab);
+                }
+            });
         }
 
         /**
