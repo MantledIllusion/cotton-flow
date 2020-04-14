@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 /**
  * Basic super type for {@link Presentable}s that are a {@link Composite} of different {@link Component}s.
  */
-public abstract class AbstractView extends Composite<Div> implements Presentable {
+public abstract class AbstractView extends Composite<Component> implements Presentable {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,13 +27,13 @@ public abstract class AbstractView extends Composite<Div> implements Presentable
     }
 
     @Override
-    protected final Div initContent() {
+    protected final Component initContent() {
         if (this.root == null) {
             throw new Http903NotImplementedException(
                     "The composition root of an " + Presentable.class.getSimpleName()
                             + " is build during its injection; however, this has not been completed yet.");
         }
-        return new Div(this.root);
+        return this.root;
     }
 
     /**
