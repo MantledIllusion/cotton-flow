@@ -68,6 +68,18 @@ public class ProgressBarBuilder extends AbstractComponentBuilder<ProgressBar, Pr
     }
 
     /**
+     * Builder method, configures the {@link ProgressBar}'s current value.
+     *
+     * @see ProgressBar#setValue(double)
+     * @param value
+     *            The value of the {@link ProgressBar}.
+     * @return this
+     */
+    public ProgressBarBuilder setValue(double value) {
+        return configure(progressBar -> progressBar.setValue(value));
+    }
+
+    /**
      * Builder method, configures the {@link ProgressBar} to be indeterminate.
      *
      * @see ProgressBar#setIndeterminate(boolean)
