@@ -1,5 +1,6 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
+import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
@@ -95,13 +96,13 @@ public class MenuBarBuilder extends AbstractComponentBuilder<MenuBar, MenuBarBui
          * Builder method, configures a new {@link MenuItem}.
          *
          * @see com.vaadin.flow.component.contextmenu.SubMenu#addItem(String)
-         * @param text
-         *            The text to use on the item; might be null.
+         * @param msgId
+         *            The text to use on the item, or a message id to localize; might be null.
          * @return A new {@link MenuItemBuilder}, never null
          */
-        public MenuItemBuilder<MenuItem, MenuItemBuilder<PC, PB>> configureItem(String text) {
+        public MenuItemBuilder<MenuItem, MenuItemBuilder<PC, PB>> configureItem(String msgId) {
             MenuItemBuilder<MenuItem, MenuItemBuilder<PC, PB>> itemBuilder = new MenuItemBuilder<>(this,
-                    menuItem -> menuItem.getSubMenu().addItem(text));
+                    menuItem -> menuItem.getSubMenu().addItem(WebEnv.getTranslation(msgId)));
             configure(itemBuilder);
             return itemBuilder;
         }
@@ -163,13 +164,13 @@ public class MenuBarBuilder extends AbstractComponentBuilder<MenuBar, MenuBarBui
      * Builder method, configures a new {@link MenuItem}.
      *
      * @see MenuBar#addItem(String)
-     * @param text
-     *            The text to use on the item; might be null.
+     * @param msgId
+     *            The text to use on the item, or a message id to localize; might be null.
      * @return A new {@link MenuItemBuilder}, never null
      */
-    public MenuItemBuilder<MenuBar, MenuBarBuilder> configureItem(String text) {
+    public MenuItemBuilder<MenuBar, MenuBarBuilder> configureItem(String msgId) {
         MenuItemBuilder<MenuBar, MenuBarBuilder> itemBuilder = new MenuItemBuilder<>(this,
-                bar -> bar.addItem(text));
+                bar -> bar.addItem(WebEnv.getTranslation(msgId)));
         configure(itemBuilder);
         return itemBuilder;
     }

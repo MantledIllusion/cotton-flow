@@ -1,5 +1,6 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
+import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
@@ -50,12 +51,12 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
          * Builder method, configures the {@link Component}'s label.
          *
          * @see Tab#setLabel(String)
-         * @param label
-         *            the label to display
+         * @param msgId
+         *            The label text, or a message id to localize; might be null.
          * @return this
          */
-        public TabBuilder setLabel(String label) {
-            return configure(tab -> tab.setLabel(label));
+        public TabBuilder setLabel(String msgId) {
+            return configure(tab -> tab.setLabel(WebEnv.getTranslation(msgId)));
         }
 
         /**
