@@ -13,7 +13,8 @@ public class FlexLayoutBuilder extends AbstractComponentBuilder<FlexLayout, Flex
         HasStyleBuilder<FlexLayout, FlexLayoutBuilder>,
         HasEnabledBuilder<FlexLayout, FlexLayoutBuilder>,
         HasComponentsBuilder<FlexLayout, FlexLayoutBuilder>,
-        FlexComponentBuilder<FlexLayout, FlexLayoutBuilder> {
+        FlexComponentBuilder<FlexLayout, FlexLayoutBuilder>,
+        ClickableBuilder<FlexLayout, FlexLayoutBuilder> {
 
     private FlexLayoutBuilder() {}
 

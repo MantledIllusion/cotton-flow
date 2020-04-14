@@ -15,7 +15,8 @@ public class HorizontalLayoutBuilder extends AbstractComponentBuilder<Horizontal
         HasEnabledBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
         HasComponentsBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
         ThemableLayoutBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
-        FlexComponentBuilder<HorizontalLayout, HorizontalLayoutBuilder> {
+        FlexComponentBuilder<HorizontalLayout, HorizontalLayoutBuilder>,
+        ClickableBuilder<HorizontalLayout, HorizontalLayoutBuilder> {
 
     private HorizontalLayoutBuilder() {}
 
