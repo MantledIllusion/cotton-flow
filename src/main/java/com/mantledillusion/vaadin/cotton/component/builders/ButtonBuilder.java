@@ -63,7 +63,7 @@ public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilde
 	 *            The {@link Component} to display as icon; might be null.
 	 * @return this
 	 */
-	public ButtonBuilder setIconAfterText(Component icon) {
+	public ButtonBuilder setIcon(Component icon) {
 		return configure(button -> button.setIcon(icon));
 	}
 
