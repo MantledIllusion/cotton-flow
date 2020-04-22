@@ -31,4 +31,18 @@ public interface HasStyleBuilder<C extends HasStyle, B extends HasStyleBuilder<C
 			hasStyle.addClassNames(classNames);
 		});
 	}
+
+	/**
+	 * Builder method, configures a specific value for a CSS style.
+	 *
+	 * @see com.vaadin.flow.dom.Style#set(String, String)
+	 * @param name
+	 *            The first style class name to add; might <b>not</b> be null.
+	 * @param value
+	 *            The first style class name to add; might be null.
+	 * @return this
+	 */
+	default B setCssStyle(String name, String value) {
+		return configure(hasStyle -> hasStyle.getElement().getStyle().set(name, value));
+	}
 }
