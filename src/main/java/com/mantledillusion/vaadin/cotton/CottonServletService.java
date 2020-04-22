@@ -30,10 +30,7 @@ import com.vaadin.flow.di.DefaultInstantiator;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
-import com.vaadin.flow.router.NavigationEvent;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.shared.Registration;
 import org.apache.commons.lang3.StringUtils;
@@ -352,12 +349,16 @@ class CottonServletService extends VaadinServletService {
 				.forEach(e -> registerIfRoute(load(e.getName().replace('/', '.').replace(".class", ""))));
 	}
 
-	private void registerIfRoute(Class<?> clazz) {
+	private <C extends Component & HasUrlParameter<String>> void registerIfRoute(Class<?> clazz) {
 		if (Component.class.isAssignableFrom(clazz) && (clazz.isAnnotationPresent(Route.class) || clazz.isAnnotationPresent(RouteAlias.class))) {
 			Class<? extends Component> routeTarget = (Class<? extends Component>) clazz;
 			RouteConfiguration router = RouteConfiguration.forRegistry(getRouter().getRegistry());
 			router.setAnnotatedRoute(routeTarget);
-			LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl(routeTarget) + "'");
+			if (HasUrlParameter.class.isAssignableFrom(clazz)) {
+				LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl((Class<C>) routeTarget, "") + "'");
+			} else {
+				LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl(routeTarget) + "'");
+			}
 		}
 	}
 
