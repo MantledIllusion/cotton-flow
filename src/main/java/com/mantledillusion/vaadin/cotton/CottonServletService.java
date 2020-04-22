@@ -355,7 +355,7 @@ class CottonServletService extends VaadinServletService {
 			RouteConfiguration router = RouteConfiguration.forRegistry(getRouter().getRegistry());
 			router.setAnnotatedRoute(routeTarget);
 			if (HasUrlParameter.class.isAssignableFrom(clazz)) {
-				LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl((Class<C>) routeTarget, "") + "'");
+				LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl((Class<C>) routeTarget, "{parameter}") + "'");
 			} else {
 				LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl(routeTarget) + "'");
 			}
