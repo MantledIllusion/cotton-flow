@@ -58,4 +58,16 @@ public class LabelBuilder extends AbstractComponentBuilder<Label, LabelBuilder> 
 	public LabelBuilder setFor(Component c) {
 		return configure(label -> label.setFor(c));
 	}
+
+	/**
+	 * Builder method, configures whether the {@link Label}'s text can be wrapped on white spaces or not.
+	 *
+	 * @see com.vaadin.flow.dom.Style#set(String, String)
+	 * @param wrap
+	 *            True if the text can be wrapped, false otherwise.
+	 * @return this
+	 */
+	public LabelBuilder setWrap(boolean wrap) {
+		return configure(label -> label.getElement().getStyle().set("white-space", wrap ? "pre-wrap" : "nowrap"));
+	}
 }
