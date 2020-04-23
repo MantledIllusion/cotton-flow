@@ -29,12 +29,13 @@ public class DialogBuilder extends AbstractComponentBuilder<Dialog, DialogBuilde
     /**
      * {@link ComponentBuilder} for {@link Dialog}s with only a message and 0-&gt;n options for the user to choose from.
      */
-    public static class BasicDialogBuilder extends AbstractComponentBuilder<Dialog, BasicDialogBuilder> {
+    public static class BasicDialogBuilder extends AbstractEntityBuilder<Dialog, BasicDialogBuilder> {
 
         private final DialogBuilder parent;
 
         private BasicDialogBuilder(DialogBuilder parent, String msgId, Object... indexedMessageParameters) {
-            this.parent = parent.configure(dialog -> BasicDialogBuilder.this.set(ButtonBuilder.class, ButtonBuilder.create().setSizeUndefined()));
+            super(parent);
+            this.parent = parent.configure(dialog -> parent.set(ButtonBuilder.class, ButtonBuilder.create().setSizeUndefined()), true);
 
             configure(dialog -> {
                 HorizontalLayout btnLayout = HorizontalLayoutBuilder.create().
@@ -58,11 +59,6 @@ public class DialogBuilder extends AbstractComponentBuilder<Dialog, DialogBuilde
                         add(btnLayout).
                         build());
             }, true);
-        }
-
-        @Override
-        protected Dialog instantiate() {
-            return this.parent.build();
         }
 
         /**
@@ -200,8 +196,23 @@ public class DialogBuilder extends AbstractComponentBuilder<Dialog, DialogBuilde
          *
          * @return A new {@link Dialog} instance, fully configured, never null
          */
+        public Dialog build() {
+            Dialog dialog = this.parent.build();
+            apply(dialog);
+            return dialog;
+        }
+
+        /**
+         * Creates a new {@link Dialog} instance using {@link #instantiate()}, applies all currently contained
+         * {@link Configurer}s to it and returns it.
+         * <p>
+         * Also directly opens the {@link Dialog} once its build.
+         *
+         * @return A new {@link Dialog} instance, fully configured, never null
+         */
         public Dialog buildAndOpen() {
-            Dialog dialog = build();
+            Dialog dialog = this.parent.build();
+            apply(dialog);
             dialog.open();
             return dialog;
         }
