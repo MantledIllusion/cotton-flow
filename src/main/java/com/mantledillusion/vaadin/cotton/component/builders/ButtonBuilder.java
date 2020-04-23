@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
  * {@link ComponentBuilder} for {@link Button}s.
  */
 public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilder> implements
+		HasElementBuilder<Button, ButtonBuilder>,
 		HasSizeBuilder<Button, ButtonBuilder>,
 		HasThemeVariantBuilder<Button, ButtonBuilder, ButtonVariant>,
 		HasStyleBuilder<Button, ButtonBuilder>,

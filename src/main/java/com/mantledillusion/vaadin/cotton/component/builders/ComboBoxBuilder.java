@@ -15,6 +15,7 @@ import com.vaadin.flow.function.SerializablePredicate;
  * {@link ComponentBuilder} for {@link ComboBox}es.
  */
 public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, ComboBoxBuilder<E>> implements
+		HasElementBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
 		HasSizeBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
 		HasStyleBuilder<ComboBox<E>, ComboBoxBuilder<E>>,
 		FocusableBuilder<ComboBox<E>, ComboBoxBuilder<E>>,

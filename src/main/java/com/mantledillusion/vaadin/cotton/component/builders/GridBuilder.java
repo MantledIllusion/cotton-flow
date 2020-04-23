@@ -30,6 +30,7 @@ import java.util.function.Supplier;
  */
 public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
         AbstractComponentBuilder<Grid<E>, GridBuilder<E, F>> implements
+        HasElementBuilder<Grid<E>, GridBuilder<E, F>>,
         HasSizeBuilder<Grid<E>, GridBuilder<E, F>>,
         HasThemeVariantBuilder<Grid<E>, GridBuilder<E, F>, GridVariant>,
         HasStyleBuilder<Grid<E>, GridBuilder<E, F>>,
@@ -42,6 +43,7 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      * {@link EntityBuilder} for {@link Grid.Column}s.
      */
     public class GridColumnBuilder extends AbstractEntityBuilder<Grid.Column<E>, GridColumnBuilder> implements
+            HasElementBuilder<Grid.Column<E>, GridColumnBuilder>,
             Configurer<Grid<E>> {
 
         private final Function<Grid<E>, Grid.Column<E>> columnSupplier;

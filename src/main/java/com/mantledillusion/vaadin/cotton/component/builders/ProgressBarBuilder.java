@@ -3,10 +3,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
-import com.mantledillusion.vaadin.cotton.component.mixin.BindingBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasThemeVariantBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.model.Converter;
 import com.mantledillusion.vaadin.cotton.model.ModelAccessor;
@@ -18,6 +15,7 @@ import com.vaadin.flow.component.progressbar.ProgressBarVariant;
  * {@link ComponentBuilder} for {@link ProgressBar}s.
  */
 public class ProgressBarBuilder extends AbstractComponentBuilder<ProgressBar, ProgressBarBuilder> implements
+        HasElementBuilder<ProgressBar, ProgressBarBuilder>,
         HasSizeBuilder<ProgressBar, ProgressBarBuilder>,
         HasThemeVariantBuilder<ProgressBar, ProgressBarBuilder, ProgressBarVariant>,
         HasStyleBuilder<ProgressBar, ProgressBarBuilder> {

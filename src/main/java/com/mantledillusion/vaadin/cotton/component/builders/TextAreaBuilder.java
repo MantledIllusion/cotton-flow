@@ -10,6 +10,7 @@ import com.vaadin.flow.component.textfield.TextAreaVariant;
  * {@link ComponentBuilder} for {@link TextArea}s.
  */
 public class TextAreaBuilder extends AbstractComponentBuilder<TextArea, TextAreaBuilder> implements
+		HasElementBuilder<TextArea, TextAreaBuilder>,
 		HasSizeBuilder<TextArea, TextAreaBuilder>,
 		HasThemeVariantBuilder<TextArea, TextAreaBuilder, TextAreaVariant>,
 		HasStyleBuilder<TextArea, TextAreaBuilder>,

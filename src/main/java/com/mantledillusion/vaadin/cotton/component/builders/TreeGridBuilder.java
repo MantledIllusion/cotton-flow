@@ -9,6 +9,7 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
  * {@link ComponentBuilder} for {@link TreeGrid}s.
  */
 public class TreeGridBuilder<E> extends AbstractComponentBuilder<TreeGrid<E>, TreeGridBuilder<E>> implements
+        HasElementBuilder<TreeGrid<E>, TreeGridBuilder<E>>,
         HasSizeBuilder<TreeGrid<E>, TreeGridBuilder<E>>,
         HasThemeVariantBuilder<TreeGrid<E>, TreeGridBuilder<E>, GridVariant>,
         HasStyleBuilder<TreeGrid<E>, TreeGridBuilder<E>>,

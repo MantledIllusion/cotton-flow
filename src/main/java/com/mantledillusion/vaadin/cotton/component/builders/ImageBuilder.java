@@ -1,10 +1,7 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.ClickableBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasComponentsBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasTextBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
@@ -13,6 +10,7 @@ import com.vaadin.flow.server.StreamResource;
  * {@link ComponentBuilder} for {@link Image}s.
  */
 public class ImageBuilder extends AbstractComponentBuilder<Image, ImageBuilder> implements
+        HasElementBuilder<Image, ImageBuilder>,
         HasSizeBuilder<Image, ImageBuilder>,
         HasComponentsBuilder<Image, ImageBuilder>,
         HasTextBuilder<Image, ImageBuilder>,

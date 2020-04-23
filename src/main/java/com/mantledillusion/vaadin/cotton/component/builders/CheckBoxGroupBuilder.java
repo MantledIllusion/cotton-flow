@@ -19,6 +19,7 @@ import java.util.Set;
  */
 public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
 		AbstractComponentBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>> implements
+		HasElementBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
 		HasSizeBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
 		HasThemeVariantBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>, CheckboxGroupVariant>,
 		HasStyleBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,

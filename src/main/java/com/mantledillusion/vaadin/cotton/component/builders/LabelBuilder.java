@@ -1,10 +1,7 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasEnabledBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasTextBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Label;
 
@@ -12,6 +9,7 @@ import com.vaadin.flow.component.html.Label;
  * {@link ComponentBuilder} for {@link Label}s.
  */
 public class LabelBuilder extends AbstractComponentBuilder<Label, LabelBuilder> implements
+		HasElementBuilder<Label, LabelBuilder>,
 		HasSizeBuilder<Label, LabelBuilder>,
 		HasStyleBuilder<Label, LabelBuilder>,
 		HasEnabledBuilder<Label, LabelBuilder>,

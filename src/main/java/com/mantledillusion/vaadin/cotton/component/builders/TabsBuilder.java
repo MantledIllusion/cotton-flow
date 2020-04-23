@@ -15,6 +15,7 @@ import com.vaadin.flow.component.tabs.TabsVariant;
  * {@link ComponentBuilder} for {@link Tabs}.
  */
 public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> implements
+        HasElementBuilder<Tabs, TabsBuilder>,
         HasSizeBuilder<Tabs, TabsBuilder>,
         HasThemeVariantBuilder<Tabs, TabsBuilder, TabsVariant>,
         HasStyleBuilder<Tabs, TabsBuilder>,
@@ -26,6 +27,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
      */
     public class TabBuilder extends AbstractEntityBuilder<Tab, TabBuilder> implements
             Configurer<Tabs>,
+            HasElementBuilder<Tab, TabBuilder>,
             HasThemeVariantBuilder<Tab, TabBuilder, TabVariant>,
             HasStyleBuilder<Tab, TabBuilder>,
             HasEnabledBuilder<Tab, TabBuilder>,

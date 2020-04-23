@@ -15,6 +15,7 @@ import java.util.function.Function;
  * {@link ComponentBuilder} for {@link MenuBar}s.
  */
 public class MenuBarBuilder extends AbstractComponentBuilder<MenuBar, MenuBarBuilder> implements
+        HasElementBuilder<MenuBar, MenuBarBuilder>,
         HasSizeBuilder<MenuBar, MenuBarBuilder>,
         HasThemeVariantBuilder<MenuBar, MenuBarBuilder, MenuBarVariant>,
         HasStyleBuilder<MenuBar, MenuBarBuilder> {

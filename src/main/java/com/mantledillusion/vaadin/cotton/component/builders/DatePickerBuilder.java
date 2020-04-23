@@ -5,11 +5,7 @@ import java.util.Locale;
 
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.FocusableBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasEnabledBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasSizeBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.HasValueBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 
@@ -17,6 +13,7 @@ import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
  * {@link ComponentBuilder} for {@link DatePicker}s.
  */
 public class DatePickerBuilder extends AbstractComponentBuilder<DatePicker, DatePickerBuilder> implements
+		HasElementBuilder<DatePicker, DatePickerBuilder>,
 		HasSizeBuilder<DatePicker, DatePickerBuilder>,
 		HasStyleBuilder<DatePicker, DatePickerBuilder>,
 		FocusableBuilder<DatePicker, DatePickerBuilder>,

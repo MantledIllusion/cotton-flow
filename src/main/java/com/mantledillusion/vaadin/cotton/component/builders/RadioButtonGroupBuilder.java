@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends
 		AbstractComponentBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>> implements
+		HasElementBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
 		HasThemeVariantBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>, RadioGroupVariant>,
 		HasStyleBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
 		HasEnabledBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,

@@ -10,6 +10,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  * {@link ComponentBuilder} for {@link VerticalLayout}s.
  */
 public class VerticalLayoutBuilder extends AbstractComponentBuilder<VerticalLayout, VerticalLayoutBuilder> implements
+        HasElementBuilder<VerticalLayout, VerticalLayoutBuilder>,
         HasSizeBuilder<VerticalLayout, VerticalLayoutBuilder>,
         HasStyleBuilder<VerticalLayout, VerticalLayoutBuilder>,
         HasEnabledBuilder<VerticalLayout, VerticalLayoutBuilder>,

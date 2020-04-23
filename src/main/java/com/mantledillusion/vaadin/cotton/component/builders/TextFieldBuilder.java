@@ -12,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextFieldVariant;
  * {@link ComponentBuilder} for {@link TextField}s.
  */
 public class TextFieldBuilder extends AbstractComponentBuilder<TextField, TextFieldBuilder> implements
+		HasElementBuilder<TextField, TextFieldBuilder>,
 		HasSizeBuilder<TextField, TextFieldBuilder>,
 		HasThemeVariantBuilder<TextField, TextFieldBuilder, TextFieldVariant>,
 		HasStyleBuilder<TextField, TextFieldBuilder>,
