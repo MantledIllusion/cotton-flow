@@ -150,17 +150,17 @@ public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, Co
 	 * Builder method, configures the {@link ItemLabelGenerator} that is used to
 	 * build a label of the currently selected item (and possibly the selectable
 	 * items as well if no {@link Renderer} is set to
-	 * {@link #setSelectableElementRenderer(Renderer)});
+	 * {@link #setSelectedElementRenderer(Renderer)});
 	 * <p>
 	 * Renamed from the original {@link ComboBox} method to mark the difference to
-	 * {@link #setSelectableElementRenderer(Renderer)}.
+	 * {@link #setSelectedElementRenderer(Renderer)}.
 	 * 
 	 * @see ComboBox#setItemLabelGenerator(ItemLabelGenerator)
 	 * @param itemLabelGenerator
 	 *            The {@link ItemLabelGenerator} to set; might <b>not</b> be null.
 	 * @return this
 	 */
-	public ComboBoxBuilder<E> setSelectedElementRenderer(ItemLabelGenerator<E> itemLabelGenerator) {
+	public ComboBoxBuilder<E> setSelectableElementRenderer(ItemLabelGenerator<E> itemLabelGenerator) {
 		return configure(comboBox -> comboBox.setItemLabelGenerator(itemLabelGenerator));
 	}
 
@@ -169,14 +169,14 @@ public class ComboBoxBuilder<E> extends AbstractComponentBuilder<ComboBox<E>, Co
 	 * items in the {@link ComboBox}es' drop down that are not selected (yet).
 	 * <p>
 	 * Renamed from the original {@link ComboBox} method to mark the difference to
-	 * {@link #setSelectedElementRenderer(ItemLabelGenerator)}.
+	 * {@link #setSelectableElementRenderer(ItemLabelGenerator)}.
 	 * 
 	 * @see ComboBox#setRenderer(Renderer)
 	 * @param renderer
 	 *            The {@link Renderer} to set; might <b>not</b> be null.
 	 * @return this
 	 */
-	public ComboBoxBuilder<E> setSelectableElementRenderer(Renderer<E> renderer) {
+	public ComboBoxBuilder<E> setSelectedElementRenderer(Renderer<E> renderer) {
 		return configure(comboBox -> comboBox.setRenderer(renderer));
 	}
 }
