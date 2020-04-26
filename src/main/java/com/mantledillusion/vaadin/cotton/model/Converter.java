@@ -1,5 +1,6 @@
 package com.mantledillusion.vaadin.cotton.model;
 
+import com.mantledillusion.vaadin.cotton.exception.http900.Http903NotImplementedException;
 import com.vaadin.flow.component.HasValue;
 
 /**
@@ -13,6 +14,7 @@ import com.vaadin.flow.component.HasValue;
  * @param <PropertyValueType>
  *            The value type of the property.
  */
+@FunctionalInterface
 public interface Converter<FieldValueType, PropertyValueType> {
 
 	/**
@@ -32,6 +34,9 @@ public interface Converter<FieldValueType, PropertyValueType> {
 	 * @param value
 	 *            The field's value to convert; might be null.
 	 * @return The converted value for the property, might be null
+	 * @throws Http903NotImplementedException When called without being overridden
 	 */
-	PropertyValueType toProperty(FieldValueType value);
+	default PropertyValueType toProperty(FieldValueType value) {
+		throw new Http903NotImplementedException("Converting to the property value type is not implemented");
+	}
 }
