@@ -40,7 +40,7 @@
 		<vaadin-compatibility-mode.version>2.1.6</vaadin-compatibility-mode.version>
 
 		<!-- com.mantledillusion dependencies -->
-		<hura.version>2.0.0.ALPHA9</hura.version>
+		<hura.version>2.0.0.ALPHA10</hura.version>
 		<epiphy.version>4.0.0.ALPHA6</epiphy.version>
 		<trail-metrics.version>1.0.0.ALPHA4</trail-metrics.version>
 

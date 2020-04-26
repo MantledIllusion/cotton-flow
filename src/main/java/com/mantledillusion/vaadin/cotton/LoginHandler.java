@@ -22,7 +22,7 @@ import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.BeforeLeaveListener;
 import org.apache.commons.lang3.ArrayUtils;
 
-class LoginHandler implements CottonServletService.SessionBean, BeforeLeaveListener {
+class LoginHandler implements BeforeLeaveListener {
 	
 	private static final long serialVersionUID = 1L;
 

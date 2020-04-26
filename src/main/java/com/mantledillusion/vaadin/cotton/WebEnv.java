@@ -79,7 +79,7 @@ public final class WebEnv {
      * @return True if there is a localization for the given id, false otherwise
      */
     public static boolean canTranslate(String msgId) {
-        return CottonServletService.SessionBean.current(Localizer.class).canTranslate(msgId, Localizer.currentLang());
+        return CottonSession.current().getLocalizer().canTranslate(msgId, Localizer.currentLang());
     }
 
     /**
@@ -96,8 +96,7 @@ public final class WebEnv {
      * @return A localized and parameter filled message, or the given msgId if localization was not possible
      */
     public static <T> String getTranslation(String msgId) {
-        return CottonServletService.SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
-                Collections.emptyMap());
+        return CottonSession.current().getLocalizer().getTranslation(msgId, Localizer.currentLang(), Collections.emptyMap());
     }
 
     /**
@@ -118,7 +117,7 @@ public final class WebEnv {
      */
     @SafeVarargs
     public static <T> String getTranslation(String msgId, T... indexedMessageParameters) {
-        return CottonServletService.SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
+        return CottonSession.current().getLocalizer().getTranslation(msgId, Localizer.currentLang(),
                 Collections.emptyMap(), indexedMessageParameters);
     }
 
@@ -140,8 +139,7 @@ public final class WebEnv {
      */
     @SuppressWarnings("unchecked")
     public static <T> String getTranslation(String msgId, Map<String, T> messageParameters) {
-        return CottonServletService.SessionBean.current(Localizer.class).getTranslation(msgId, Localizer.currentLang(),
-                (Map<String, Object>) messageParameters);
+        return CottonSession.current().getLocalizer().getTranslation(msgId, Localizer.currentLang(), messageParameters);
     }
 
     // #########################################################################################################################################
@@ -164,7 +162,7 @@ public final class WebEnv {
                 return false;
             }
             if (user != null) {
-                CottonServletService.SessionBean.current(LoginHandler.class).login(user);
+                CottonSession.current().getLoginHandler().login(user);
             }
         }
         return true;
@@ -177,7 +175,7 @@ public final class WebEnv {
      */
     public static boolean logOut() {
         if (isLoggedIn()) {
-            return CottonServletService.SessionBean.current(LoginHandler.class).logout();
+            return CottonSession.current().getLoginHandler().logout();
         }
         return true;
     }
@@ -188,7 +186,7 @@ public final class WebEnv {
      * @return True if there is a {@link User} logged in, false otherwise
      */
     public static boolean isLoggedIn() {
-        return CottonServletService.SessionBean.current(LoginHandler.class).getUser() != null;
+        return CottonSession.current().getLoginHandler().getUser() != null;
     }
 
     /**
@@ -199,7 +197,7 @@ public final class WebEnv {
      */
     @SuppressWarnings("unchecked")
     public static <U extends User> U getLoggedInUser() {
-        return (U) CottonServletService.SessionBean.current(LoginHandler.class).getUser();
+        return (U) CottonSession.current().getLoginHandler().getUser();
     }
 
     // #########################################################################################################################################

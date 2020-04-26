@@ -16,7 +16,6 @@ import com.mantledillusion.metrics.trail.api.MetricAttribute;
 import com.mantledillusion.vaadin.cotton.event.responsive.AfterResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
-import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionContextException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.vaadin.flow.component.Component;
@@ -273,25 +272,6 @@ class CottonServletService extends VaadinServletService {
 		}
 	}
 
-	interface SessionBean {
-
-		@SuppressWarnings("unchecked")
-		default <T extends SessionBean> void hook(VaadinSession session) {
-			session.setAttribute((Class<T>) getClass(), (T) this);
-		}
-
-		default void unhook(VaadinSession session) {
-			session.setAttribute(getClass(), null);
-		}
-
-		static <T extends SessionBean> T current(Class<T> beanType) {
-			if (VaadinSession.getCurrent() == null) {
-				throw new Http900NoSessionContextException();
-			}
-			return VaadinSession.getCurrent().getAttribute(beanType);
-		}
-	}
-
 	private final Injector serviceInjector;
 	private final Localizer localizer;
 	private final String applicationInitializerClass;
@@ -416,8 +396,10 @@ class CottonServletService extends VaadinServletService {
 
 	@Override
 	public void fireSessionDestroy(VaadinSession vaadinSession) {
+		if (this.serviceInjector.isActive()) {
+			vaadinSession.access(() -> this.serviceInjector.destroy(vaadinSession));
+		}
 		super.fireSessionDestroy(vaadinSession);
-		vaadinSession.access(() -> this.serviceInjector.destroy(vaadinSession));
 	}
 
 	@Override

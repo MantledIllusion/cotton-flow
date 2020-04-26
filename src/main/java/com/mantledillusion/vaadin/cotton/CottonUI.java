@@ -112,22 +112,22 @@ public final class CottonUI extends UI {
 		void beforeRefresh(BeforeResponsiveRefreshEvent event);
 	}
 
-	private Injector injector;
+	private Injector uiInjector;
 
 	@Override
 	protected void onAttach(AttachEvent attachEvent) {
-		this.injector = CottonSession.current().createInSessionContext(Injector.class);
+		this.uiInjector = ((CottonSession) getInternals().getSession()).createInSessionContext(Injector.class);
 	}
 
 	<T extends HasElement> T exchangeInjectedView(Class<T> type) {
-		this.injector.destroyAll();
-		return this.injector.instantiate(type,
+		this.uiInjector.destroyAll();
+		return this.uiInjector.instantiate(type,
 				Blueprint.PropertyAllocation.of(Bus.PROPERTY_BUS_ISOLATION, Boolean.FALSE.toString()));
 	}
 
 	@Override
 	protected void onDetach(DetachEvent detachEvent) {
-		CottonSession.current().destroyInSessionContext(this.injector);
+		((CottonSession) getInternals().getSession()).destroyInSessionContext(this.uiInjector);
 	}
 
 	/**
@@ -190,7 +190,7 @@ public final class CottonUI extends UI {
 	public <E> List<E> getNavigationListeners(Class<E> navigationHandler) {
 		if (navigationHandler.isAssignableFrom(LoginHandler.class)) {
 			List<E> listeners = new ArrayList<>();
-			listeners.add((E) CottonServletService.SessionBean.current(LoginHandler.class));
+			listeners.add((E) CottonSession.current().getLoginHandler());
 			listeners.addAll(super.getNavigationListeners(navigationHandler));
 			return Collections.unmodifiableList(listeners);
 		} else {
