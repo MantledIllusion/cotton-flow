@@ -13,8 +13,12 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.SortOrderProvider;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 
 import java.util.Comparator;
@@ -570,14 +574,41 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
     /**
      * Builder method, configures a new column.
      *
-     * @see Grid#addColumn(ValueProvider)
+     * @see Grid#addComponentColumn(ValueProvider)
      * @param <V> The value type of the column.
-     * @param valueProvider
+     * @param componentProvider
      *            The component provider; might <b>not</b> be null.
      * @return A new {@link GridColumnBuilder}, never null
      */
-    public <V extends Component> GridColumnBuilder configureComponentColumn(ValueProvider<E, V> valueProvider) {
-        GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addComponentColumn(valueProvider));
+    public <V extends Component> GridColumnBuilder configureComponentColumn(ValueProvider<E, V> componentProvider) {
+        GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addComponentColumn(componentProvider));
+        configure(columnBuilder);
+        return columnBuilder;
+    }
+
+    /**
+     * Builder method, configures a new column.
+     *
+     * @see Grid#addComponentColumn(ValueProvider)
+     * @param <V> The value type of the column.
+     * @param <C> The component type of the column.
+     * @param componentSupplier
+     *            The component supplier; might <b>not</b> be null.
+     * @param getter
+     *            The getter to retrieve the column's values with; might <b>not</b> be null.
+     * @param setter
+     *            The setter to write the column's values back with; might <b>not</b> be null.
+     * @return A new {@link GridColumnBuilder}, never null
+     */
+    public <V, C extends Component & HasValue<?, V>> GridColumnBuilder configureComponentColumn(SerializableSupplier<C> componentSupplier, ValueProvider<E, V> getter, Setter<E, V> setter) {
+        GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(new ComponentRenderer<C, E>(element -> {
+            C component = componentSupplier.get();
+            Binder<E> binder = new Binder<>();
+            binder.bind(component, getter, setter);
+            binder.setBean(element);
+            component.addValueChangeListener(e -> binder.readBean(element));
+            return component;
+        })));
         configure(columnBuilder);
         return columnBuilder;
     }
