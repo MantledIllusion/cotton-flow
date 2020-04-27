@@ -18,8 +18,9 @@ public abstract class AbstractFrame extends AbstractView {
     @Override
     protected final Dialog buildUI(TemporalActiveComponentRegistry reg) throws Exception {
         DialogBuilder builder = DialogBuilder.create();
+        Component content = buildUI(builder, reg);
         this.dialog = builder.build();
-        this.dialog.add(buildUI(builder, reg));
+        this.dialog.add(content);
         return this.dialog;
     }
 
