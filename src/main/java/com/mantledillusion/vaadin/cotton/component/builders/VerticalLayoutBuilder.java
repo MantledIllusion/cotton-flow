@@ -63,4 +63,20 @@ public class VerticalLayoutBuilder extends AbstractComponentBuilder<VerticalLayo
     public VerticalLayoutBuilder setDefaultHorizontalComponentAlignment(FlexComponent.Alignment alignment) {
         return configure(verticalLayout -> verticalLayout.setDefaultHorizontalComponentAlignment(alignment));
     }
+
+    /**
+     * Builder method, configures the {@link Component}'s child {@link Component}s.
+     *
+     * @see VerticalLayout#add(Component...)
+     * @see VerticalLayout#setHorizontalComponentAlignment(FlexComponent.Alignment, Component...)
+     * @param alignment The alignment to align the given components with; might <b>not</b> be null.
+     * @param components The {@link Component}s to add; might be null, might <b>not</b> contain nulls.
+     * @return this
+     */
+    public VerticalLayoutBuilder add(FlexComponent.Alignment alignment, Component... components) {
+        return configure(verticalLayout -> {
+            verticalLayout.add(components);
+            verticalLayout.setHorizontalComponentAlignment(alignment, components);
+        });
+    }
 }
