@@ -26,4 +26,16 @@ public interface HasElementBuilder<C extends HasElement, B extends HasElementBui
     default B setNativeTooltip(String msgId) {
         return configure(hasElement -> hasElement.getElement().setAttribute("title", WebEnv.getTranslation(msgId)));
     }
+
+    /**
+     * Builder method, configures whether the {@link HasElement} is visible.
+     *
+     * @see com.vaadin.flow.dom.Element#setVisible(boolean)
+     * @param visible
+     *            True if the {@link HasElement} should be invisible, false otherwise.
+     * @return this
+     */
+    default B setVisible(boolean visible) {
+        return configure(hasElement -> hasElement.getElement().setVisible(visible));
+    }
 }
