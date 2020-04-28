@@ -575,12 +575,12 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      * Builder method, configures a new column.
      *
      * @see Grid#addComponentColumn(ValueProvider)
-     * @param <V> The value type of the column.
+     * @param <C> The value type of the column.
      * @param componentProvider
      *            The component provider; might <b>not</b> be null.
      * @return A new {@link GridColumnBuilder}, never null
      */
-    public <V extends Component> GridColumnBuilder configureComponentColumn(ValueProvider<E, V> componentProvider) {
+    public <C extends Component> GridColumnBuilder configureComponentColumn(ValueProvider<E, C> componentProvider) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addComponentColumn(componentProvider));
         configure(columnBuilder);
         return columnBuilder;
@@ -600,9 +600,9 @@ public class GridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<
      *            The setter to write the column's values back with; might <b>not</b> be null.
      * @return A new {@link GridColumnBuilder}, never null
      */
-    public <V, C extends Component & HasValue<?, V>> GridColumnBuilder configureComponentColumn(SerializableSupplier<C> componentSupplier, ValueProvider<E, V> getter, Setter<E, V> setter) {
+    public <V, C extends Component & HasValue<?, V>> GridColumnBuilder configureComponentColumn(ValueProvider<E, C> componentSupplier, ValueProvider<E, V> getter, Setter<E, V> setter) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(new ComponentRenderer<C, E>(element -> {
-            C component = componentSupplier.get();
+            C component = componentSupplier.apply(element);
             Binder<E> binder = new Binder<>();
             binder.bind(component, getter, setter);
             binder.setBean(element);
