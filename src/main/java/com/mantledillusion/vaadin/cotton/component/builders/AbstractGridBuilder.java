@@ -80,46 +80,46 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
          * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
          * to the {@link Grid}'s filter.
          *
-         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <H> The {@link HasValue}'s {@link Component} type.
          * @param <V> The {@link HasValue}'s value type.
          * @param hasValue The @link HasValue}; might <b>not</b> be null.
          * @param filterProperty A {@link Property} to adopt a change to the {@link HasValue}'s value into the
          *                       {@link Grid}'s filter; might <b>not</b> be null.
          * @return this
          */
-        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(C hasValue,
+        public <H extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(H hasValue,
                                                                                      Property<F, V> filterProperty) {
-            return setFilter((Supplier<C>) () -> hasValue, filterProperty::set);
+            return setFilter((Supplier<H>) () -> hasValue, filterProperty::set);
         }
 
         /**
          * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
          * to the {@link Grid}'s filter.
          *
-         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <H> The {@link HasValue}'s {@link Component} type.
          * @param <V> The {@link HasValue}'s value type.
          * @param hasValueBuilder A {@link ComponentBuilder} for {@link HasValue}s; might <b>not</b> be null.
          * @param filterProperty A {@link Property} to adopt a change to the {@link HasValue}'s value into the
          *                       {@link Grid}'s filter; might <b>not</b> be null.
          * @return this
          */
-        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(ComponentBuilder<C ,?> hasValueBuilder,
+        public <H extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(ComponentBuilder<H,?> hasValueBuilder,
                                                                                      Property<F, V> filterProperty) {
-            return setFilter((Supplier<C>) hasValueBuilder::build, filterProperty::set);
+            return setFilter((Supplier<H>) hasValueBuilder::build, filterProperty::set);
         }
 
         /**
          * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
          * to the {@link Grid}'s filter.
          *
-         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <H> The {@link HasValue}'s {@link Component} type.
          * @param <V> The {@link HasValue}'s value type.
          * @param hasValueSupplier A supplier for {@link HasValue}s; might <b>not</b> be null.
          * @param filterProperty A {@link Property} to adopt a change to the {@link HasValue}'s value into the
          *                       {@link Grid}'s filter; might <b>not</b> be null.
          * @return this
          */
-        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(Supplier<C> hasValueSupplier,
+        public <H extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(Supplier<H> hasValueSupplier,
                                                                                      Property<F, V> filterProperty) {
             return setFilter(hasValueSupplier, filterProperty::set);
         }
@@ -128,46 +128,46 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
          * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
          * to the {@link Grid}'s filter.
          *
-         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <H> The {@link HasValue}'s {@link Component} type.
          * @param <V> The {@link HasValue}'s value type.
          * @param hasValue The @link HasValue}; might <b>not</b> be null.
          * @param filterChangeConsumer A {@link BiConsumer} to adopt a change to the {@link HasValue}'s value into the
          *                             {@link Grid}'s filter; might <b>not</b> be null.
          * @return this
          */
-        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(C hasValue,
+        public <H extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(H hasValue,
                                                                                      BiConsumer<F, V> filterChangeConsumer) {
-            return setFilter((Supplier<C>) () -> hasValue, filterChangeConsumer);
+            return setFilter((Supplier<H>) () -> hasValue, filterChangeConsumer);
         }
 
         /**
          * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
          * to the {@link Grid}'s filter.
          *
-         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <H> The {@link HasValue}'s {@link Component} type.
          * @param <V> The {@link HasValue}'s value type.
          * @param hasValueBuilder A {@link ComponentBuilder} for {@link HasValue}s; might <b>not</b> be null.
          * @param filterChangeConsumer A {@link BiConsumer} to adopt a change to the {@link HasValue}'s value into the
          *                             {@link Grid}'s filter; might <b>not</b> be null.
          * @return this
          */
-        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(ComponentBuilder<C ,?> hasValueBuilder,
+        public <H extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(ComponentBuilder<H,?> hasValueBuilder,
                                                                                      BiConsumer<F, V> filterChangeConsumer) {
-            return setFilter((Supplier<C>) hasValueBuilder::build, filterChangeConsumer);
+            return setFilter((Supplier<H>) hasValueBuilder::build, filterChangeConsumer);
         }
 
         /**
          * Builder method, configures a {@link HasValue} as header to the column whose value is automatically bound
          * to the {@link Grid}'s filter.
          *
-         * @param <C> The {@link HasValue}'s {@link Component} type.
+         * @param <H> The {@link HasValue}'s {@link Component} type.
          * @param <V> The {@link HasValue}'s value type.
          * @param hasValueSupplier A supplier for {@link HasValue}s; might <b>not</b> be null.
          * @param filterChangeConsumer A {@link BiConsumer} to adopt a change to the {@link HasValue}'s value into the
          *                             {@link Grid}'s filter; might <b>not</b> be null.
          * @return this
          */
-        public <C extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(Supplier<C> hasValueSupplier,
+        public <H extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(Supplier<H> hasValueSupplier,
                                                                                      BiConsumer<F, V> filterChangeConsumer) {
             return configure(column -> {
                 if (!contains(ConfigurableFilter.class)) {
@@ -175,7 +175,7 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
                             "with filter being configured.");
                 }
                 F filter = (F) get(ConfigurableFilter.class);
-                C hasValue = hasValueSupplier.get();
+                H hasValue = hasValueSupplier.get();
                 hasValue.addValueChangeListener(event -> {
                     filterChangeConsumer.accept(filter, event.getValue());
                 });
@@ -528,12 +528,12 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
      * Builder method, configures a new column.
      *
      * @see Grid#addComponentColumn(ValueProvider)
-     * @param <C> The value type of the column.
+     * @param <V> The value type of the column.
      * @param componentProvider
      *            The component provider; might <b>not</b> be null.
      * @return A new {@link GridColumnBuilder}, never null
      */
-    public <C extends Component> GridColumnBuilder configureComponentColumn(ValueProvider<E, C> componentProvider) {
+    public <V extends Component> GridColumnBuilder configureComponentColumn(ValueProvider<E, V> componentProvider) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addComponentColumn(componentProvider));
         configure(columnBuilder);
         return columnBuilder;
@@ -544,7 +544,7 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
      *
      * @see Grid#addComponentColumn(ValueProvider)
      * @param <V> The value type of the column.
-     * @param <C> The component type of the column.
+     * @param <H> The component type of the column.
      * @param componentSupplier
      *            The component supplier; might <b>not</b> be null.
      * @param getter
@@ -553,9 +553,9 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
      *            The setter to write the column's values back with; might <b>not</b> be null.
      * @return A new {@link GridColumnBuilder}, never null
      */
-    public <V, C extends Component & HasValue<?, V>> GridColumnBuilder configureComponentColumn(ValueProvider<E, C> componentSupplier, ValueProvider<E, V> getter, Setter<E, V> setter) {
-        GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(new ComponentRenderer<C, E>(element -> {
-            C component = componentSupplier.apply(element);
+    public <V, H extends Component & HasValue<?, V>> GridColumnBuilder configureComponentColumn(ValueProvider<E, H> componentSupplier, ValueProvider<E, V> getter, Setter<E, V> setter) {
+        GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addColumn(new ComponentRenderer<H, E>(element -> {
+            H component = componentSupplier.apply(element);
             Binder<E> binder = new Binder<>();
             binder.bind(component, getter, setter);
             binder.setBean(element);
