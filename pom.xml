@@ -36,8 +36,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- maven dependency versions -->
-		<vaadin-core.version>14.1.20</vaadin-core.version>
-		<vaadin-compatibility-mode.version>2.1.6</vaadin-compatibility-mode.version>
+		<vaadin-core.version>14.1.27</vaadin-core.version>
+		<vaadin-compatibility-mode.version>2.1.9</vaadin-compatibility-mode.version>
 
 		<!-- com.mantledillusion dependencies -->
 		<hura.version>2.0.0.ALPHA10</hura.version>
@@ -97,7 +97,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.mantledillusion.metrics</groupId>
-			<artifactId>trail-metrics-support-vaadin-13</artifactId>
+			<artifactId>trail-metrics-support-vaadin-14</artifactId>
 			<version>${trail-metrics.version}</version>
 		</dependency>
 
