@@ -285,7 +285,7 @@ public interface HasStyleBuilder<C extends HasStyle, B extends HasStyleBuilder<C
 	 */
 	class CssFontSizeStyle {
 
-		public CssStyle of(double value, ECSSUnit unit) {
+		public static CssStyle of(double value, ECSSUnit unit) {
 			return CssStyle.of("font-size", unit.format(value));
 		}
 	}
