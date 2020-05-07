@@ -11,7 +11,6 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.dialog.GeneratedVaadinDialog;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -54,7 +53,7 @@ public class DialogBuilder extends AbstractComponentBuilder<Dialog, DialogBuilde
                         add(LabelBuilder.create().
                                 setWidthFull().
                                 setHeightUndefined().
-                                setValue(WebEnv.getTranslation(msgId, indexedMessageParameters)).
+                                setText(WebEnv.getTranslation(msgId, indexedMessageParameters)).
                                 build()).
                         add(btnLayout).
                         build());

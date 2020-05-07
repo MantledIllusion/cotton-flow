@@ -28,7 +28,7 @@ public interface HasTextBuilder<C extends HasText, B extends HasTextBuilder<C, B
 	 *            The initial text, or a message id to localize; might be null.
 	 * @return this
 	 */
-	default B setValue(String msgId) {
+	default B setText(String msgId) {
 		return configure(hasValue -> hasValue.setText(WebEnv.getTranslation(msgId)));
 	}
 

@@ -1,6 +1,5 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
-import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.vaadin.flow.component.Component;
@@ -79,18 +78,5 @@ public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilde
 	 */
 	public ButtonBuilder setIconAfterText(boolean iconAfterText) {
 		return configure(button -> button.setIconAfterText(iconAfterText));
-	}
-
-	/**
-	 * Builder method, configures the {@link Button}'s text.
-	 * 
-	 * @see Button#setText(String)
-	 * @param msgId
-	 *            The text or a message id to translate via {@link WebEnv}; might be
-	 *            null.
-	 * @return this
-	 */
-	public ButtonBuilder setText(String msgId) {
-		return configure(button -> button.setText(WebEnv.getTranslation(msgId)));
 	}
 }
