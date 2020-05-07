@@ -32,8 +32,7 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
         HasThemeVariantBuilder<C, B, GridVariant>,
         HasStyleBuilder<C, B>,
         HasEnabledBuilder<C, B>,
-        HasItemsBuilder<C, E, B>,
-        HasDataProviderBuilder<C, E, F, B> {
+        HasItemsBuilder<C, E, B> {
 
     /**
      * {@link EntityBuilder} for {@link Grid.Column}s.
@@ -170,11 +169,11 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
         public <H extends Component & HasValue<?, V>, V> GridColumnBuilder setFilter(Supplier<H> hasValueSupplier,
                                                                                      BiConsumer<F, V> filterChangeConsumer) {
             return configure(column -> {
-                if (!contains(ConfigurableFilter.class)) {
+                if (!contains(HasDataProviderBuilder.ConfigurableFilter.class)) {
                     throw new Http902IllegalStateException("Cannot configure a filter column without a data provider " +
                             "with filter being configured.");
                 }
-                F filter = (F) get(ConfigurableFilter.class);
+                F filter = (F) get(HasDataProviderBuilder.ConfigurableFilter.class);
                 H hasValue = hasValueSupplier.get();
                 hasValue.addValueChangeListener(event -> {
                     filterChangeConsumer.accept(filter, event.getValue());

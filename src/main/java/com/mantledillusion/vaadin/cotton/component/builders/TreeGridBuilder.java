@@ -2,6 +2,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasDataProviderBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.HasHierarchicalDataProviderBuilder;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.function.ValueProvider;
 
@@ -11,7 +12,8 @@ import com.vaadin.flow.function.ValueProvider;
  * @param <E> The element type of the {@link TreeGrid}
  * @param <F> The filter type of the {@link TreeGrid}
  */
-public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends AbstractGridBuilder<TreeGrid<E>, TreeGridBuilder<E, F>, E, F> {
+public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> extends AbstractGridBuilder<TreeGrid<E>, TreeGridBuilder<E, F>, E, F>
+        implements HasHierarchicalDataProviderBuilder<TreeGrid<E>, E, F, TreeGridBuilder<E, F>> {
 
     private TreeGridBuilder() {}
 
@@ -20,7 +22,7 @@ public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFil
      *
      * @return A new instance, never null.
      */
-    public static TreeGridBuilder<Object, ConfigurableFilter<Object>> create() {
+    public static TreeGridBuilder<Object, HasDataProviderBuilder.ConfigurableFilter<Object>> create() {
         return new TreeGridBuilder<>();
     }
 
@@ -31,7 +33,7 @@ public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFil
      * @param elementType The class type of the element; might be null.
      * @return A new instance, never null.
      */
-    public static <E> TreeGridBuilder<E, ConfigurableFilter<E>> create(Class<E> elementType) {
+    public static <E> TreeGridBuilder<E, HasDataProviderBuilder.ConfigurableFilter<E>> create(Class<E> elementType) {
         return new TreeGridBuilder<>();
     }
 
@@ -44,8 +46,8 @@ public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFil
      * @param filterType The class type of the filter; might be null.
      * @return A new instance, never null.
      */
-    public static <E, F extends ConfigurableFilter<E>> TreeGridBuilder<E, F> create(Class<E> elementType,
-                                                                                    Class<F> filterType) {
+    public static <E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> TreeGridBuilder<E, F> create(Class<E> elementType,
+                                                                                                           Class<F> filterType) {
         return new TreeGridBuilder<>();
     }
 

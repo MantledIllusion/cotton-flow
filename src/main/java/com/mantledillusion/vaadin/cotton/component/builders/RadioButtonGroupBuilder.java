@@ -26,7 +26,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 		HasItemsBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E, F>>,
 		HasValueBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E, F>>,
 		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
-		HasDataProviderBuilder<RadioButtonGroup<E>, E, F, RadioButtonGroupBuilder<E, F>> {
+        HasSimpleDataProviderBuilder<RadioButtonGroup<E>, E, F, RadioButtonGroupBuilder<E, F>> {
 
 	private RadioButtonGroupBuilder() {}
 
@@ -35,7 +35,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	 *
 	 * @return A new instance, never null.
 	 */
-	public static RadioButtonGroupBuilder<Object, ConfigurableFilter<Object>> create() {
+	public static RadioButtonGroupBuilder<Object, HasDataProviderBuilder.ConfigurableFilter<Object>> create() {
 		return new RadioButtonGroupBuilder<>();
 	}
 
@@ -46,7 +46,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	 * @param elementType The class type of the element; might be null.
 	 * @return A new instance, never null.
 	 */
-	public static <E> RadioButtonGroupBuilder<E, ConfigurableFilter<E>> create(Class<E> elementType) {
+	public static <E> RadioButtonGroupBuilder<E, HasDataProviderBuilder.ConfigurableFilter<E>> create(Class<E> elementType) {
 		return new RadioButtonGroupBuilder<>();
 	}
 
@@ -59,8 +59,8 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	 * @param filterType The class type of the filter; might be null.
 	 * @return A new instance, never null.
 	 */
-	public static <E, F extends ConfigurableFilter<E>> RadioButtonGroupBuilder<E, F> create(Class<E> elementType,
-																							Class<F> filterType) {
+	public static <E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> RadioButtonGroupBuilder<E, F> create(Class<E> elementType,
+																												   Class<F> filterType) {
 		return new RadioButtonGroupBuilder<>();
 	}
 

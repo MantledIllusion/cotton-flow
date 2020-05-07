@@ -27,7 +27,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 		HasItemsBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E, F>>,
 		HasValueBuilder<CheckboxGroup<E>, Set<E>, CheckBoxGroupBuilder<E, F>>,
 		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
-		HasDataProviderBuilder<CheckboxGroup<E>, E, F, CheckBoxGroupBuilder<E, F>> {
+        HasSimpleDataProviderBuilder<CheckboxGroup<E>, E, F, CheckBoxGroupBuilder<E, F>> {
 
 	private CheckBoxGroupBuilder() {}
 
@@ -36,7 +36,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 *
 	 * @return A new instance, never null.
 	 */
-	public static CheckBoxGroupBuilder<Object, ConfigurableFilter<Object>> create() {
+	public static CheckBoxGroupBuilder<Object, HasDataProviderBuilder.ConfigurableFilter<Object>> create() {
 		return new CheckBoxGroupBuilder();
 	}
 
@@ -47,7 +47,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 * @param elementType The class type of the element; might be null.
 	 * @return A new instance, never null.
 	 */
-	public static <E> CheckBoxGroupBuilder<E, ConfigurableFilter<E>> create(Class<E> elementType) {
+	public static <E> CheckBoxGroupBuilder<E, HasDataProviderBuilder.ConfigurableFilter<E>> create(Class<E> elementType) {
 		return new CheckBoxGroupBuilder();
 	}
 
@@ -60,8 +60,8 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 * @param filterType The class type of the filter; might be null.
 	 * @return A new instance, never null.
 	 */
-	public static <E, F extends ConfigurableFilter<E>> CheckBoxGroupBuilder<E, F> create(Class<E> elementType,
-																						 Class<F> filterType) {
+	public static <E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> CheckBoxGroupBuilder<E, F> create(Class<E> elementType,
+																												Class<F> filterType) {
 		return new CheckBoxGroupBuilder();
 	}
 
