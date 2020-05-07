@@ -47,6 +47,8 @@ public class RouterLinkBuilder extends AbstractComponentBuilder<RouterLink, Rout
      * Builder method, configures the location to navigate to when the link is clicked.
      *
      * @see RouterLink#setRoute(Class, Object)
+     * @param <T> The type of the URL parameter of the {@link Component} to navigate to.
+     * @param <C> The type of the {@link Component} to navigate to.
      * @param navigationTarget
      *            The view to whose location to navigate to; might <b>not</b> be null.
      * @param parameter
