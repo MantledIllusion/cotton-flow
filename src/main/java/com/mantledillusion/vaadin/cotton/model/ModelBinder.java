@@ -342,6 +342,15 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			Set<ElementType> elements = Collections.newSetFromMap(new IdentityHashMap<>());
 			boolean changed = false;
 
+			if (type != UpdateType.ADD) {
+				for (ElementType element: this.elementHandle.get()) {
+					if (!elements.contains(element)) {
+						this.elementHandle.remove(element);
+						changed = true;
+					}
+				}
+			}
+
 			if (type != UpdateType.REMOVE) {
 				ElementType sibling = null;
 				for (ElementType element: this.property.iterate(ModelBinder.this.getModel(), context)) {
@@ -354,15 +363,6 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 				}
 			} else {
 				this.property.stream(ModelBinder.this.getModel(), context).forEach(elements::add);
-			}
-
-			if (type != UpdateType.ADD) {
-				for (ElementType element: this.elementHandle.get()) {
-					if (!elements.contains(element)) {
-						this.elementHandle.remove(element);
-						changed = true;
-					}
-				}
 			}
 
 			if (changed) {
