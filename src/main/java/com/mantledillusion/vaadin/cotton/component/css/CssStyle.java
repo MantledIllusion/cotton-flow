@@ -1,5 +1,8 @@
 package com.mantledillusion.vaadin.cotton.component.css;
 
+import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
+import com.vaadin.flow.component.HasElement;
+
 import java.util.Objects;
 
 /**
@@ -181,6 +184,18 @@ public interface CssStyle extends CssProperty, CssValue {
      * The CSS "padding" style property.
      */
     CssSizeProperty PADDING = new CssSizeProperty("padding");
+
+    /**
+     * Applies this style on the given {@link HasElement}.
+     *
+     * @param hasElement The element to apply on; might <b>not</b> be null.
+     */
+    default void apply(HasElement hasElement) {
+        if (hasElement == null) {
+            throw new Http901IllegalArgumentException("Cannot apply style on a null element");
+        }
+        hasElement.getElement().setAttribute(this.getStylePropertyName(), this.getValue());
+    }
 
     /**
      * Creates an anonymous {@link CssStyle}.

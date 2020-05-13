@@ -51,7 +51,7 @@ public interface HasElementBuilder<C extends HasElement, B extends HasElementBui
      * @return this
      */
     default B setCssStyle(String name, String value) {
-        return configure(hasStyle -> hasStyle.getElement().getStyle().set(name, value));
+        return configure(hasElement -> hasElement.getElement().getStyle().set(name, value));
     }
 
     /**
@@ -63,6 +63,6 @@ public interface HasElementBuilder<C extends HasElement, B extends HasElementBui
      * @return this
      */
     default B setCssStyle(CssStyle style) {
-        return configure(hasStyle -> hasStyle.getElement().getStyle().set(style.getStylePropertyName(), style.getValue()));
+        return configure(style::apply);
     }
 }
