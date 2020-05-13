@@ -194,7 +194,7 @@ public interface CssStyle extends CssProperty, CssValue {
         if (hasElement == null) {
             throw new Http901IllegalArgumentException("Cannot apply style on a null element");
         }
-        hasElement.getElement().setAttribute(this.getStylePropertyName(), this.getValue());
+        hasElement.getElement().getStyle().set(this.getStylePropertyName(), this.getValue());
     }
 
     /**
