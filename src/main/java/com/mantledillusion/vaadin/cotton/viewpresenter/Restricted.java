@@ -28,7 +28,7 @@ public @interface Restricted {
 	 * order to be allowed assess to the {@link com.vaadin.flow.router.Route}.
 	 * <p>
 	 * For example, if a {@link User} has to own the right "R1" and either the right "R2" or "R3", the
-	 * {@link Expression} might look like this: <code>@Restricted("R1 && (R2 || R3)")</code>
+	 * {@link Expression} might look like this: <code>@Restricted("R1 &amp;&amp; (R2 || R3)")</code>
 	 * <p>
 	 * If no expression is specified a {@link User} just has to be logged in in order to gain access.
 	 * 
