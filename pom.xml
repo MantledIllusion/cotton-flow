@@ -43,7 +43,7 @@
 		<hura.version>2.0.0.ALPHA10</hura.version>
 		<epiphy.version>4.0.0.ALPHA7</epiphy.version>
 		<trail-metrics.version>1.0.0.ALPHA4</trail-metrics.version>
-		<expression-essentials.version>1.0.0-SNAPSHOT</expression-essentials.version>
+		<expression-essentials.version>1.0.0</expression-essentials.version>
 
 		<!-- org.apache dependencies -->
 		<commons-collections.version>4.3</commons-collections.version>

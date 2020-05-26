@@ -75,7 +75,7 @@ class LoginHandler implements BeforeLeaveListener {
 		} else if (this.user == null) {
 			return false;
 		}
-		return rightExpression.validate(rightId -> this.user.hasRights(Collections.singleton(rightId)));
+		return rightExpression.evaluate(rightId -> this.user.hasRights(Collections.singleton(rightId)));
 	}
 
 	@Override
