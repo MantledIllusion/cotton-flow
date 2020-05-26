@@ -2,6 +2,7 @@ package com.mantledillusion.vaadin.cotton;
 
 import java.util.*;
 
+import com.mantledillusion.essentials.expression.Expression;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
@@ -137,7 +138,6 @@ public final class WebEnv {
      *                          id could be localized.
      * @return A localized and parameter filled message, or the given msgId if localization was not possible
      */
-    @SuppressWarnings("unchecked")
     public static <T> String getTranslation(String msgId, Map<String, T> messageParameters) {
         return CottonSession.current().getLocalizer().getTranslation(msgId, Localizer.currentLang(), messageParameters);
     }
@@ -198,6 +198,19 @@ public final class WebEnv {
     @SuppressWarnings("unchecked")
     public static <U extends User> U getLoggedInUser() {
         return (U) CottonSession.current().getLoginHandler().getUser();
+    }
+
+    /**
+     * Returns whether a logged in {@link User} instance owns the rights of the given rightIds.
+     *
+     * @see User#hasRights(Set)
+     * @param expression The boolean {@link Expression} of right ID constellation the logged in {@link User} is asked
+     *                   to have; might <b>not</b> be null.
+     * @return True if a {@link User} is logged in and the rights correspond to the given {@link Expression},
+     * false otherwise.
+     */
+    public static boolean userHasRights(Expression<String> expression) {
+        return CottonSession.current().getLoginHandler().userHasRights(expression);
     }
 
     // #########################################################################################################################################

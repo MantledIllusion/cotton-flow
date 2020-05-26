@@ -1,9 +1,8 @@
 package com.mantledillusion.vaadin.cotton;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import com.mantledillusion.essentials.expression.Expression;
 import com.mantledillusion.essentials.reflection.TypeEssentials;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
@@ -16,11 +15,12 @@ import com.mantledillusion.vaadin.cotton.CottonUI.BeforeLogoutListener;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
 import com.mantledillusion.vaadin.cotton.event.user.BeforeLogoutEvent;
 import com.mantledillusion.vaadin.cotton.exception.http400.Http403UnauthorizedException;
+import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.BeforeLeaveListener;
-import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 class LoginHandler implements BeforeLeaveListener {
 	
@@ -69,6 +69,15 @@ class LoginHandler implements BeforeLeaveListener {
 		return true;
 	}
 
+	boolean userHasRights(Expression<String> rightExpression) {
+		if (rightExpression == null) {
+			throw new Http901IllegalArgumentException("Unable to check user rights against a null expression");
+		} else if (this.user == null) {
+			return false;
+		}
+		return rightExpression.validate(rightId -> this.user.hasRights(Collections.singleton(rightId)));
+	}
+
 	@Override
 	public void beforeLeave(BeforeLeaveEvent event) {
 		if (this.provider != null && this.provider.loginView != null &&
@@ -76,10 +85,10 @@ class LoginHandler implements BeforeLeaveListener {
 			return;
 		}
 
-		List<Class<?>> restrictions = TypeEssentials.getSuperClassesAnnotatedWith(event.getNavigationTarget(),
+		List<Class<?>> restrictedTypes = TypeEssentials.getSuperClassesAnnotatedWith(event.getNavigationTarget(),
 				Restricted.class);
 		
-		if (!restrictions.isEmpty()) {
+		if (!restrictedTypes.isEmpty()) {
 			if (this.user == null && this.provider != null) {
 				if (this.provider.loginView != null) {
 					event.rerouteTo(this.provider.loginView);
@@ -93,19 +102,15 @@ class LoginHandler implements BeforeLeaveListener {
 			}
 			
 			if (this.user != null) {
-				Set<String> requiredUserRights = new HashSet<>();
-				for (Class<?> type : restrictions) {
+				List<Expression<String>> restrictions = new ArrayList<>();
+				for (Class<?> type : restrictedTypes) {
 					Restricted restricted = type.getAnnotation(Restricted.class);
-					if (ArrayUtils.isNotEmpty(restricted.value())) {
-						for (String requiredUserRight : restricted.value()) {
-							if (requiredUserRight != null) {
-								requiredUserRights.add(requiredUserRight);
-							}
-						}
+					if (StringUtils.isNotBlank(restricted.value())) {
+						restrictions.add(Expression.parse(restricted.value()));
 					}
 				}
 				
-				if (this.user.hasRights(requiredUserRights)) {
+				if (restrictions.stream().allMatch(this::userHasRights)) {
 					VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SECURITY_ACCESS_PERMITTED.build(
 							new MetricAttribute("target", event.getNavigationTarget().getName()),
 							new MetricAttribute("user", this.user.toString())));
