@@ -18,7 +18,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@PreConstruct(RoutedValidator.class)
+@PreConstruct(ResponsiveValidator.class)
 public @interface Responsive {
 
     /**

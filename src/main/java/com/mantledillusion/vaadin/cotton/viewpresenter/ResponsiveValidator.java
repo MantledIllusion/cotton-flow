@@ -10,10 +10,10 @@ import com.vaadin.flow.router.Route;
 
 import java.lang.annotation.Annotation;
 
-final class RoutedValidator implements AnnotationProcessor<Annotation, Class<?>> {
+final class ResponsiveValidator implements AnnotationProcessor<Annotation, Class<?>> {
 
     @Construct
-    private RoutedValidator() {}
+    private ResponsiveValidator() {}
 
     @Override
     public void process(Phase phase, Object bean, Annotation annotationInstance, Class<?> annotatedElement, Injector.TemporalInjectorCallback callback) throws Exception {
