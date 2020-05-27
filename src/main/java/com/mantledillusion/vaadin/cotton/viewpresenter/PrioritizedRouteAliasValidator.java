@@ -8,23 +8,21 @@ import com.mantledillusion.vaadin.cotton.exception.http900.Http904IllegalAnnotat
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.Route;
 
-import java.lang.annotation.Annotation;
-
-final class ResponsiveValidator implements AnnotationProcessor<Responsive, Class<?>> {
+final class PrioritizedRouteAliasValidator implements AnnotationProcessor<PrioritizedRouteAlias, Class<?>> {
 
     @Construct
-    private ResponsiveValidator() {}
+    private PrioritizedRouteAliasValidator() {}
 
     @Override
-    public void process(Phase phase, Object bean, Responsive annotationInstance, Class<?> annotatedElement, Injector.TemporalInjectorCallback callback) throws Exception {
+    public void process(Phase phase, Object bean, PrioritizedRouteAlias annotationInstance, Class<?> annotatedElement, Injector.TemporalInjectorCallback callback) throws Exception {
         if (!Component.class.isAssignableFrom(annotatedElement)) {
             throw new Http904IllegalAnnotationUseException("The class " + annotatedElement.getSimpleName() +
                     " has to be an extension to the class " + Component.class + " in order to be annotated with @" +
-                    Responsive.class.getSimpleName());
+                    PrioritizedRouteAlias.class.getSimpleName());
         } else if (!annotatedElement.isAnnotationPresent(Route.class)) {
             throw new Http904IllegalAnnotationUseException("The class " + annotatedElement.getSimpleName() +
                     " has to be annotated with @" + Route.class + " in order to be annotated with @" +
-                    Responsive.class.getSimpleName());
+                    PrioritizedRouteAlias.class.getSimpleName());
         }
     }
 }

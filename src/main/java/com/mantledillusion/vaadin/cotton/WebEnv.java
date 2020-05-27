@@ -162,7 +162,8 @@ public final class WebEnv {
                 return false;
             }
             if (user != null) {
-                CottonSession.current().getLoginHandler().login(user);
+                CottonSession.current().getAuthenticationHandler().login(user);
+                CottonUI.current().getPage().reload();
             }
         }
         return true;
@@ -175,7 +176,7 @@ public final class WebEnv {
      */
     public static boolean logOut() {
         if (isLoggedIn()) {
-            return CottonSession.current().getLoginHandler().logout();
+            return CottonSession.current().getAuthenticationHandler().logout();
         }
         return true;
     }
@@ -186,7 +187,7 @@ public final class WebEnv {
      * @return True if there is a {@link User} logged in, false otherwise
      */
     public static boolean isLoggedIn() {
-        return CottonSession.current().getLoginHandler().getUser() != null;
+        return CottonSession.current().getAuthenticationHandler().isLoggedIn();
     }
 
     /**
@@ -197,7 +198,7 @@ public final class WebEnv {
      */
     @SuppressWarnings("unchecked")
     public static <U extends User> U getLoggedInUser() {
-        return (U) CottonSession.current().getLoginHandler().getUser();
+        return (U) CottonSession.current().getAuthenticationHandler().getUser();
     }
 
     /**
@@ -210,7 +211,7 @@ public final class WebEnv {
      * false otherwise.
      */
     public static boolean userHasRights(Expression<String> expression) {
-        return CottonSession.current().getLoginHandler().userHasRights(expression);
+        return CottonSession.current().getAuthenticationHandler().userHasRights(expression);
     }
 
     // #########################################################################################################################################

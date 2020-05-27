@@ -26,6 +26,9 @@ public final class LoginProvider {
 		 * @return A {@link User} instance; never null.
 		 */
 		User provide();
+
+
+		boolean isSilent();
 	}
 
 	final Class<? extends Component> loginView;

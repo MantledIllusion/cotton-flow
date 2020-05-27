@@ -14,8 +14,10 @@ class CottonSession extends VaadinSession {
 
 	@Inject @Qualifier(Localizer.SID_LOCALIZER)
 	private Localizer localizer;
+	@Inject @Qualifier(AccessHandler.SID_NAVIGATION_HANDLER)
+	private AccessHandler accessHandler;
 	@Inject
-	private LoginHandler loginHandler;
+	private AuthenticationHandler authenticationHandler;
 	@Inject
 	private Injector sessionInjector;
 
@@ -34,8 +36,12 @@ class CottonSession extends VaadinSession {
 		return this.localizer;
 	}
 
-	LoginHandler getLoginHandler() {
-		return this.loginHandler;
+	AccessHandler getAccessHandler() {
+		return this.accessHandler;
+	}
+
+	AuthenticationHandler getAuthenticationHandler() {
+		return this.authenticationHandler;
 	}
 
 	<T> T createInSessionContext(Class<T> type) {

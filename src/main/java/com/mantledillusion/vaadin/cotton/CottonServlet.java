@@ -40,7 +40,7 @@ public class CottonServlet extends VaadinServlet {
     static final String PID_INITIALIZERCLASS = "_initializerClass";
     static final String PID_BASEPACKAGE = "_basePackage";
 
-    private final class CottonDeploymentConfiguration extends DefaultDeploymentConfiguration {
+    private static final class CottonDeploymentConfiguration extends DefaultDeploymentConfiguration {
 
         private static final long serialVersionUID = 1L;
 

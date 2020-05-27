@@ -188,9 +188,9 @@ public final class CottonUI extends UI {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <E> List<E> getNavigationListeners(Class<E> navigationHandler) {
-		if (navigationHandler.isAssignableFrom(LoginHandler.class)) {
+		if (navigationHandler.isAssignableFrom(AccessHandler.class)) {
 			List<E> listeners = new ArrayList<>();
-			listeners.add((E) CottonSession.current().getLoginHandler());
+			listeners.add((E) CottonSession.current().getAccessHandler());
 			listeners.addAll(super.getNavigationListeners(navigationHandler));
 			return Collections.unmodifiableList(listeners);
 		} else {

@@ -40,7 +40,7 @@ public enum CottonMetrics implements EnumeratedMetric {
      * - 'target': The {@link Class} of the view access was permitted to.<br>
      * - 'user': The identifier of the user whose access was permitted.<br>
      */
-    SECURITY_ACCESS_PERMITTED(MetricType.ALERT),
+    SECURITY_ACCESS_GRANTED(MetricType.ALERT),
 
     /**
      * {@link Metric} ID for the {@link MetricType#ALERT} when acces to a view is denied.

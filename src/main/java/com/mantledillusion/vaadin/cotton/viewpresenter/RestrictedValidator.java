@@ -7,19 +7,17 @@ import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.A
 import com.mantledillusion.vaadin.cotton.exception.http900.Http904IllegalAnnotationUseException;
 import com.vaadin.flow.component.Component;
 
-import java.lang.annotation.Annotation;
-
-final class RestrictedValidator implements AnnotationProcessor<Annotation, Class<?>> {
+final class RestrictedValidator implements AnnotationProcessor<Restricted, Class<?>> {
 
     @Construct
     private RestrictedValidator() {}
 
     @Override
-    public void process(Phase phase, Object bean, Annotation annotationInstance, Class<?> annotatedElement, Injector.TemporalInjectorCallback callback) throws Exception {
+    public void process(Phase phase, Object bean, Restricted annotationInstance, Class<?> annotatedElement, Injector.TemporalInjectorCallback callback) throws Exception {
         if (!Component.class.isAssignableFrom(annotatedElement)) {
             throw new Http904IllegalAnnotationUseException("The class " + annotatedElement.getSimpleName() +
                     " has to be an extension to the class " + Component.class + " in order to be annotated with @" +
-                    annotationInstance.getClass().getSimpleName());
+                    Restricted.class.getSimpleName());
         }
     }
 }

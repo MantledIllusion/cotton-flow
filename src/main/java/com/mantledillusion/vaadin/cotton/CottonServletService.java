@@ -1,5 +1,6 @@
 package com.mantledillusion.vaadin.cotton;
 
+import com.mantledillusion.essentials.reflection.TypeEssentials;
 import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.injection.hura.core.Bus;
 import com.mantledillusion.injection.hura.core.Injector;
@@ -17,6 +18,7 @@ import com.mantledillusion.vaadin.cotton.event.responsive.AfterResponsiveRefresh
 import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
+import com.mantledillusion.vaadin.cotton.viewpresenter.PrioritizedRouteAlias;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
@@ -274,6 +276,7 @@ class CottonServletService extends VaadinServletService {
 
 	private final Injector serviceInjector;
 	private final Localizer localizer;
+	private final AccessHandler accessHandler;
 	private final String applicationInitializerClass;
 	private final String applicationBasePackage;
 	private final boolean automaticRouteDiscovery;
@@ -281,6 +284,7 @@ class CottonServletService extends VaadinServletService {
 	CottonServletService(@Inject @Qualifier(CottonServlet.SID_SERVLET) VaadinServlet servlet,
 						 @Inject @Qualifier(CottonServlet.SID_DEPLOYMENTCONFIG) DeploymentConfiguration deploymentConfiguration,
 						 @Inject @Qualifier(Localizer.SID_LOCALIZER) Localizer localizer,
+						 @Inject @Qualifier(AccessHandler.SID_NAVIGATION_HANDLER) AccessHandler accessHandler,
 						 @Inject Injector serviceInjector,
 						 @Resolve("${" + CottonServlet.PID_INITIALIZERCLASS + "}") String applicationInitializerClass,
 						 @Resolve("${" + CottonServlet.PID_BASEPACKAGE + "}") String applicationBasePackage,
@@ -288,6 +292,7 @@ class CottonServletService extends VaadinServletService {
 		super(servlet, deploymentConfiguration);
 		this.serviceInjector = serviceInjector;
 		this.localizer = localizer;
+		this.accessHandler = accessHandler;
 		this.applicationInitializerClass = applicationInitializerClass;
 		this.applicationBasePackage = applicationBasePackage;
 		this.automaticRouteDiscovery = Boolean.parseBoolean(automaticRouteDiscovery);
@@ -317,6 +322,26 @@ class CottonServletService extends VaadinServletService {
 				throw new ServiceException("Automatic @" + Route.class.getSimpleName() + " detection failed", e);
 			}
 		}
+
+		Set<String> forwardedPaths = new HashSet<>();
+		for (RouteData routeData: getRouter().getRegistry().getRegisteredRoutes()) {
+			List<PrioritizedRouteAlias> routeAliases = new ArrayList<>();
+			TypeEssentials.getSuperClassesAnnotatedWith(routeData.getNavigationTarget(),
+					PrioritizedRouteAlias.PrioritizedRouteAliases.class).stream().
+					map(c -> c.getAnnotation(PrioritizedRouteAlias.PrioritizedRouteAliases.class)).
+					flatMap(c -> Arrays.stream(c.value())).
+					forEach(routeAliases::add);
+			TypeEssentials.getSuperClassesAnnotatedWith(routeData.getNavigationTarget(),
+					PrioritizedRouteAlias.class).stream().
+					map(c -> c.getAnnotation(PrioritizedRouteAlias.class)).
+					forEach(routeAliases::add);
+			for (PrioritizedRouteAlias routeAlias: routeAliases) {
+				this.accessHandler.register(routeAlias.value(), routeData.getNavigationTarget(), routeAlias.priority());
+				forwardedPaths.add(routeAlias.value());
+			}
+		}
+		forwardedPaths.forEach(path -> getRouter().getRegistry().
+				setRoute(path, AccessHandler.ForwardingView.class, Collections.emptyList()));
 
 		// OBSERVE METRICS
 		VaadinMetricsTrailSupport support = VaadinMetricsTrailSupport.support(this);
