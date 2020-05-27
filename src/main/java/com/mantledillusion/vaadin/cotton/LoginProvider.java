@@ -27,7 +27,11 @@ public final class LoginProvider {
 		 */
 		User provide();
 
-
+		/**
+		 * Determines whether or not a call to {@link #provide()} would go unnoticed by the client (no page forwardings etc).
+		 *
+		 * @return True if the client would not recognize the execution done by {@link #provide()}, false otherwise.
+		 */
 		boolean isSilent();
 	}
 
