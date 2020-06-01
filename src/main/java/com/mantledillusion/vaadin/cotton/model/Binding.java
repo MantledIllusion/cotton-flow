@@ -1,17 +1,45 @@
 package com.mantledillusion.vaadin.cotton.model;
 
 import com.mantledillusion.data.epiphy.context.Context;
-import org.apache.commons.lang3.ObjectUtils;
-
-import java.util.function.Supplier;
+import com.mantledillusion.essentials.expression.Expression;
 
 /**
  * Represents the configurable binding of a property.
  */
-public abstract class Binding<FieldValueType> {
+public abstract class Binding<FieldValueType> implements AuditingConfigurer<Binding<FieldValueType>> {
 
     /**
-     * Represents the modes a {@link Binding} can allow access of a properties data to.
+     * Represents the modes a {@link Binding} can allow or restrict access of a properties' data from.
+     */
+    public enum AuditMode {
+
+        /**
+         * Allow access completely using {@link AccessMode#READ_WRITE}, any further auditing will limit access.
+         */
+        GENEROUS(AccessMode.READ_WRITE),
+
+        /**
+         * Limit access completely using {@link AccessMode#HIDDEN}, any further auditing will allow access.
+         */
+        RESTRICTIVE(AccessMode.HIDDEN);
+
+        private final AccessMode defaultAccessMode;
+
+        AuditMode(AccessMode defaultAccessMode) {
+            this.defaultAccessMode = defaultAccessMode;
+        }
+
+        public AccessMode getDefaultAccessMode() {
+            return defaultAccessMode;
+        }
+
+        AccessMode reduce(AccessMode mode1, AccessMode mode2) {
+            return mode1.ordinal() < mode2.ordinal() ? (this == GENEROUS ? mode2 : mode1) : (this == GENEROUS ? mode1 : mode2);
+        }
+    }
+
+    /**
+     * Represents the modes a {@link Binding} can allow or limit access of a properties' data with.
      */
     public enum AccessMode {
 
@@ -40,22 +68,14 @@ public abstract class Binding<FieldValueType> {
         AccessMode(boolean coupled) {
             this.coupled = coupled;
         }
-
-        static Supplier<AccessMode> chain(Supplier<AccessMode> auditor1, Supplier<AccessMode> auditor2) {
-            return () -> or(auditor1.get(), auditor2.get());
-        }
-
-        private static AccessMode or(AccessMode mode1, AccessMode mode2) {
-            return mode1 == null ? mode2 : (mode2 == null ? mode1 : (mode1.ordinal() < mode2.ordinal() ? mode1 : mode2));
-        }
     }
 
+    private final Auditor bindingAuditor;
     private AccessMode accessMode;
-    private Supplier<AccessMode> bindingAuditor;
     private FieldValueType maskedValue;
 
-    Binding(Supplier<AccessMode> bindingAuditor) {
-        this.bindingAuditor = bindingAuditor;
+    Binding(Auditor baseAuditor) {
+        this.bindingAuditor = new Auditor(baseAuditor);
     }
 
     protected final AccessMode getAccessMode() {
@@ -63,27 +83,13 @@ public abstract class Binding<FieldValueType> {
     }
 
     protected final void refreshAccessMode() {
-        this.accessMode = ObjectUtils.defaultIfNull(this.bindingAuditor.get(), AccessMode.READ_WRITE);
+        this.accessMode = this.bindingAuditor.audit();
         accessModeChanged(this.accessMode.coupled);
     }
 
-    /**
-     * Builder method, adds the given binding auditor to the binding to restrict it.
-     * <p>
-     * The given {@link Supplier}'s result will be used to determine at which {@link AccessMode} this binding is
-     * expected to allow access to the data of its bound property.
-     * <p>
-     * When this method is never used so no binding auditor is ever specified, a default auditor will allow general
-     * {@link AccessMode#READ_WRITE} access to the property.
-     * <p>
-     * When multiple binding auditors are specified using this method, the most generous {@link AccessMode} determined
-     * by the auditors will be used.
-     *
-     * @param bindingAuditor The binding auditor; might <b>not</b> be null.
-     * @return this
-     */
-    public final Binding<FieldValueType> withRestriction(Supplier<AccessMode> bindingAuditor) {
-        this.bindingAuditor = AccessMode.chain(this.bindingAuditor, bindingAuditor);
+    @Override
+    public Binding<FieldValueType> setAudit(AccessMode mode, boolean requiresLogin, Expression<String> rightExpression) {
+        this.bindingAuditor.set(mode, requiresLogin, rightExpression);
         refreshAccessMode();
         return this;
     }

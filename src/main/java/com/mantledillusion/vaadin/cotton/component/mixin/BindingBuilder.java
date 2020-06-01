@@ -1,41 +1,36 @@
 package com.mantledillusion.vaadin.cotton.component.mixin;
 
+import com.mantledillusion.essentials.expression.Expression;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
+import com.mantledillusion.vaadin.cotton.model.AuditingConfigurer;
 import com.mantledillusion.vaadin.cotton.model.Binding;
 import com.vaadin.flow.component.Component;
+import org.apache.commons.lang3.tuple.Triple;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Builder to configure a {@link Binding} of a {@link Component} being build with with.
  *
  * @param <C> The bound component type.
  */
-public final class BindingBuilder<C> {
+public final class BindingBuilder<C> implements AuditingConfigurer<BindingBuilder<C>> {
 
     private final ComponentBuilder<C, ?> componentBuilder;
     private final Function<C, Binding<?>> bindingCallback;
 
-    private final List<Supplier<Binding.AccessMode>> bindingAuditors = new ArrayList<>();
+    private final List<Triple<Binding.AccessMode, Boolean, Expression<String>>> bindingAuditors = new ArrayList<>();
 
     public BindingBuilder(ComponentBuilder<C, ?> componentBuilder, Function<C, Binding<?>> bindingCallback) {
         this.componentBuilder = componentBuilder;
         this.bindingCallback = bindingCallback;
     }
 
-    /**
-     * Builder method, adds the given binding auditor to the binding to restrict it.
-     *
-     * @see Binding#withRestriction(Supplier)
-     * @param bindingAuditor The binding auditor; might <b>not</b> be null.
-     * @return this
-     */
-    public BindingBuilder<C> withRestriction(Supplier<Binding.AccessMode> bindingAuditor) {
-        this.bindingAuditors.add(bindingAuditor);
+    @Override
+    public BindingBuilder<C> setAudit(Binding.AccessMode mode, boolean requiresLogin, Expression<String> rightExpression) {
+        this.bindingAuditors.add(Triple.of(mode, requiresLogin, rightExpression));
         return this;
     }
 
@@ -51,7 +46,7 @@ public final class BindingBuilder<C> {
 
         // APPLY ALL BINDING AUDITORS
         Binding<?> binding = this.bindingCallback.apply(component);
-        this.bindingAuditors.forEach(binding::withRestriction);
+        this.bindingAuditors.forEach(auditor -> binding.setAudit(auditor.getLeft(), auditor.getRight()));
 
         return component;
     }

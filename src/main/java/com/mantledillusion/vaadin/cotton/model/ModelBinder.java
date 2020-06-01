@@ -3,12 +3,12 @@ package com.mantledillusion.vaadin.cotton.model;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
+import com.mantledillusion.essentials.expression.Expression;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
@@ -27,10 +27,9 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.shared.Registration;
 
-abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
+abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, AuditingConfigurer<ModelBinder<ModelType>> {
 
 	private static final Procedure NOOP = () -> {};
-	private static final Supplier<Binding.AccessMode> NOAUDIT = () -> null;
 
 	private interface Procedure {
 
@@ -42,9 +41,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	}
 
 	private final Context context;
-	private final Map<Property<ModelType, ?>, List<Binding>> bindings = new IdentityHashMap<>();
-
-	private Supplier<Binding.AccessMode> baseBindingAuditor = NOAUDIT;
+	private final Auditor baseBindingAuditor = new Auditor(null);
+	private final Map<Property<ModelType, ?>, List<Binding<?>>> bindings = new IdentityHashMap<>();
 
 	protected ModelBinder(Context context) {
 		this.context = context;
@@ -55,22 +53,34 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	}
 
 	/**
-	 * BAdds the given binding auditor to all bound bindings to restrict them.
+	 * Sets the {@link Binding.AuditMode} for this {@link ModelBinder} and all {@link Binding}s created on it.
 	 * <p>
-	 * The given {@link Supplier}'s result will be used to determine at which {@link Binding.AccessMode} created
-	 * bindings are expected to allow access to the data of their respective bound properties.
+	 * The mode determines the basis right auditings added using {@link #setAudit(Binding.AccessMode, Expression)} are
+	 * executed on:<br>
+	 * - {@link Binding.AuditMode#GENEROUS}: {@link Binding.AccessMode#READ_WRITE} is the default, added
+	 * {@link Expression}s limit the access.<br>
+	 * - {@link Binding.AuditMode#RESTRICTIVE}: {@link Binding.AccessMode#HIDDEN} is the default, added
+	 * {@link Expression}s expand the access.<br>
 	 * <p>
-	 * When this method is never used so no binding auditor is ever specified, a default auditor will allow general
-	 * {@link Binding.AccessMode#READ_WRITE} access to properties, as long as the individual {@link Binding}s do not
-	 * have their own restrictions.
-	 * <p>
-	 * When multiple binding auditors are specified using this method, the most generous {@link Binding.AccessMode}
-	 * determined by the auditors (and the possible other auditors of the {@link Binding}s) will be used.
+	 * The default mode is {@link Binding.AuditMode#GENEROUS}.
 	 *
-	 * @param baseBindingAuditor The binding auditor; might <b>not</b> be null.
+	 * @param mode The mode to set; might <b>not</b> be null.
+	 * @return this.
 	 */
-	public final void withBaseRestriction(Supplier<Binding.AccessMode> baseBindingAuditor) {
-		this.baseBindingAuditor = Binding.AccessMode.chain(this.baseBindingAuditor, baseBindingAuditor);
+	public final ModelBinder<ModelType> setAuditMode(Binding.AuditMode mode) {
+		this.baseBindingAuditor.setAuditMode(mode);
+		refreshBindingAuditing();
+		return this;
+	}
+
+	@Override
+	public final ModelBinder<ModelType> setAudit(Binding.AccessMode mode, boolean requiresLogin, Expression<String> rightExpression) {
+		this.baseBindingAuditor.set(mode, requiresLogin, rightExpression);
+		refreshBindingAuditing();
+		return this;
+	}
+
+	private void refreshBindingAuditing() {
 		this.bindings.values().stream().flatMap(List::stream).forEach(Binding::refreshAccessMode);
 	}
 
@@ -78,12 +88,12 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 	// ########################################################## CONSUMER BINDING ##########################################################
 	// ######################################################################################################################################
 
-	private class ConsumerBinding<V> extends Binding<V> {
+	private static class ConsumerBinding<V> extends Binding<V> {
 		private final Procedure valueReader;
 		private final Consumer<V> valueResetter;
 
-		private ConsumerBinding(Supplier<AccessMode> bindingAuditor, Procedure valueReader, Consumer<V> valueResetter) {
-			super(bindingAuditor);
+		private ConsumerBinding(Auditor baseAuditor, Procedure valueReader, Consumer<V> valueResetter) {
+			super(baseAuditor);
 			this.valueReader = valueReader;
 			this.valueResetter = valueResetter;
 
@@ -122,11 +132,10 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
-		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> consumer.accept(ModelBinder.this.get(property));
 		Consumer<FieldValueType> valueResetter = consumer::accept;
 
-		return addBinding(property, new ConsumerBinding<>(bindingAuditor, valueReader, valueResetter));
+		return addBinding(property, new ConsumerBinding<>(this.baseBindingAuditor, valueReader, valueResetter));
 	}
 
 	/**
@@ -152,18 +161,17 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
-		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> consumer.accept(converter.toField(ModelBinder.this.get(property)));
 		Consumer<FieldValueType> valueResetter = consumer::accept;
 
-		return addBinding(property, new ConsumerBinding<>(bindingAuditor, valueReader, valueResetter));
+		return addBinding(property, new ConsumerBinding<>(this.baseBindingAuditor, valueReader, valueResetter));
 	}
 
 	// ######################################################################################################################################
 	// ########################################################## HASVALUE BINDING ##########################################################
 	// ######################################################################################################################################
 
-	private class HasValueBinding<FieldValueType> extends Binding<FieldValueType> implements ValueChangeListener {
+	private class HasValueBinding<FieldValueType> extends Binding<FieldValueType> implements ValueChangeListener<ValueChangeEvent<?>> {
 
 		private final HasValue<?, ?> hasValue;
 		private final Property<ModelType, ?> property;
@@ -174,9 +182,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		private Registration registration;
 		private boolean synchronizing = false;
 
-		public HasValueBinding(Supplier<AccessMode> bindingAuditor, HasValue<?, ?> hasValue, Property<ModelType, ?> property,
+		public HasValueBinding(Auditor baseAuditor, HasValue<?, ?> hasValue, Property<ModelType, ?> property,
 							   Procedure valueReader, Procedure valueWriter, Consumer<FieldValueType> valueResetter) {
-			super(bindingAuditor);
+			super(baseAuditor);
 			this.hasValue = hasValue;
 			this.property = property;
 			this.valueReader = valueReader;
@@ -208,7 +216,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		}
 
 		@Override
-		public synchronized void valueChanged(ValueChangeEvent event) {
+		public synchronized void valueChanged(ValueChangeEvent<?> event) {
 			if (!this.synchronizing) {
 				this.synchronizing = true;
 				this.valueWriter.trigger();
@@ -255,7 +263,6 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
-		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> hasValue
 				.setValue(ObjectUtils.defaultIfNull(ModelBinder.this.get(property), hasValue.getEmptyValue()));
 		Procedure valueWriter;
@@ -267,7 +274,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		Consumer<FieldValueType> valueResetter = maskedValue ->
 				hasValue.setValue(maskedValue == null ? hasValue.getEmptyValue() : maskedValue);
 
-		return addBinding(property, new HasValueBinding<>(bindingAuditor, hasValue, property, valueReader, valueWriter, valueResetter));
+		return addBinding(property, new HasValueBinding<>(this.baseBindingAuditor, hasValue, property,
+				valueReader, valueWriter, valueResetter));
 	}
 
 	/**
@@ -293,7 +301,6 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 			throw new Http901IllegalArgumentException("Cannot bind using a null property");
 		}
 
-		Supplier<Binding.AccessMode> bindingAuditor = () -> ModelBinder.this.baseBindingAuditor.get();
 		Procedure valueReader = () -> hasValue.setValue(
 				ObjectUtils.defaultIfNull(converter.toField(ModelBinder.this.get(property)), hasValue.getEmptyValue()));
 		Procedure valueWriter;
@@ -305,7 +312,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		Consumer<FieldValueType> valueResetter = maskedValue ->
 				hasValue.setValue(maskedValue == null ? hasValue.getEmptyValue() : maskedValue);
 
-		return addBinding(property, new HasValueBinding<>(bindingAuditor, hasValue, property, valueReader, valueWriter, valueResetter));
+		return addBinding(property, new HasValueBinding<>(this.baseBindingAuditor, hasValue, property,
+				valueReader, valueWriter, valueResetter));
 	}
 
 	// ######################################################################################################################################
@@ -328,11 +336,11 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		private final Property<ModelType, ElementType> property;
 		private final ElementHandle<ElementType> elementHandle;
 
-		private DataProviderBinding(Supplier<AccessMode> bindingAuditor,
+		private DataProviderBinding(Auditor baseAuditor,
 									Property<ModelType, ElementType> property,
 									InMemoryDataProvider<ElementType> dataProvider,
 									ElementHandle<ElementType> elementHandle) {
-			super(bindingAuditor, dataProvider);
+			super(baseAuditor, dataProvider);
 			this.property = property;
 			this.elementHandle = elementHandle;
 		}
@@ -384,7 +392,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		dataProvider.setFilter(filter);
 		hasDataProvider.setDataProvider(dataProvider);
 
-		return addBinding(property, new DataProviderBinding<>(() -> ModelBinder.this.baseBindingAuditor.get(),
+		return addBinding(property, new DataProviderBinding<>(this.baseBindingAuditor,
 				property, dataProvider, new ElementHandle<ElementType>() {
 
 			@Override
@@ -422,7 +430,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 		dataProvider.setFilter(filter);
 		hasDataProvider.setDataProvider(dataProvider);
 
-		return addBinding(property, new DataProviderBinding<>(() -> ModelBinder.this.baseBindingAuditor.get(),
+		return addBinding(property, new DataProviderBinding<>(this.baseBindingAuditor,
 				property, dataProvider, new ElementHandle<ElementType>() {
 
 			@Override
@@ -495,14 +503,14 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType> {
 
 	@PreDestroy
 	private synchronized void destroy() {
-		Iterator<Entry<Property<ModelType, ?>, List<Binding>>> mapIter = this.bindings.entrySet().iterator();
-		while (mapIter.hasNext()) {
-			Iterator<Binding> bindingIter = mapIter.next().getValue().iterator();
-			while (bindingIter.hasNext()) {
-				bindingIter.next().accessModeChanged(false);
-				bindingIter.remove();
+		Iterator<Entry<Property<ModelType, ?>, List<Binding<?>>>> entryIterator = this.bindings.entrySet().iterator();
+		while (entryIterator.hasNext()) {
+			Iterator<Binding<?>> bindingIterator = entryIterator.next().getValue().iterator();
+			while (bindingIterator.hasNext()) {
+				bindingIterator.next().accessModeChanged(false);
+				bindingIterator.remove();
 			}
-			mapIter.remove();
+			entryIterator.remove();
 		}
 	}
 }

@@ -13,9 +13,8 @@ public abstract class InMemoryDataProviderBinding<ElementType> extends Binding<E
 
     private final InMemoryDataProvider<ElementType> dataProvider;
 
-    InMemoryDataProviderBinding(Supplier<Binding.AccessMode> bindingAuditor,
-                                InMemoryDataProvider<ElementType> dataProvider) {
-        super(bindingAuditor);
+    InMemoryDataProviderBinding(Auditor baseAuditor, InMemoryDataProvider<ElementType> dataProvider) {
+        super(baseAuditor);
         this.dataProvider = dataProvider;
     }
 
