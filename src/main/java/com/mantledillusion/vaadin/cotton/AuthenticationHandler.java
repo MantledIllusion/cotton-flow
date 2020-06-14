@@ -4,7 +4,7 @@ import java.util.*;
 
 import com.mantledillusion.essentials.expression.Expression;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
-import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.MetricsTrailSupport;
 import com.mantledillusion.metrics.trail.api.MetricAttribute;
 import com.mantledillusion.vaadin.cotton.CottonUI.AfterLoginListener;
 import com.mantledillusion.vaadin.cotton.CottonUI.BeforeLogoutListener;
@@ -31,7 +31,7 @@ class AuthenticationHandler {
 	
 	void login(User user) {
 		this.user = user;
-		VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.USER_STATE.build(
+		MetricsTrailSupport.commit(CottonMetrics.SECURITY_USER_STATE.build(
 				MetricAttribute.operatorOf("LOGGED_IN"),
 				new MetricAttribute("user", user.toString())));
 		AfterLoginEvent event = new AfterLoginEvent(CottonUI.current());
@@ -48,7 +48,7 @@ class AuthenticationHandler {
 				return false;
 			}
 		}
-		VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.USER_STATE.build(
+		MetricsTrailSupport.commit(CottonMetrics.SECURITY_USER_STATE.build(
 				MetricAttribute.operatorOf("LOGGED_OUT"),
 				new MetricAttribute("user", this.user.toString())));
 		this.user = null;

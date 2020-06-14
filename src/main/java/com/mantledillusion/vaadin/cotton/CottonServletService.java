@@ -1,23 +1,26 @@
 package com.mantledillusion.vaadin.cotton;
 
+import com.mantledillusion.essentials.object.Null;
 import com.mantledillusion.essentials.reflection.TypeEssentials;
 import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.injection.hura.core.Bus;
 import com.mantledillusion.injection.hura.core.Injector;
+import com.mantledillusion.injection.hura.core.annotation.injection.Aggregate;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostDestroy;
 import com.mantledillusion.injection.hura.core.annotation.property.Matches;
 import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
-import com.mantledillusion.metrics.trail.MetricsTrailConsumer;
-import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.*;
 import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.metrics.trail.api.MetricAttribute;
 import com.mantledillusion.vaadin.cotton.event.responsive.AfterResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
+import com.mantledillusion.vaadin.cotton.metrics.BrowserType;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
+import com.mantledillusion.vaadin.cotton.metrics.SystemEnvironmentType;
 import com.mantledillusion.vaadin.cotton.viewpresenter.PrioritizedRouteAlias;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.vaadin.flow.component.Component;
@@ -50,7 +53,7 @@ import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-class CottonServletService extends VaadinServletService {
+class CottonServletService extends VaadinServletService implements MetricsTrailListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
 	private static final String JAR = "jar";
@@ -85,7 +88,7 @@ class CottonServletService extends VaadinServletService {
 				target = CottonUI.current().exchangeInjectedView(routeTargetType);
 				ms = System.currentTimeMillis() - ms;
 
-				VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SYSTEM_INJECTION.build(ms,
+				MetricsTrailSupport.commit(CottonMetrics.SYSTEM_INJECTION.build(ms,
 						new MetricAttribute("class", routeTargetType.getName())));
 			}
 			return target;
@@ -265,7 +268,7 @@ class CottonServletService extends VaadinServletService {
 			if (targetViewType != this.rootRouteTargetType) {
 				metric.getAttributes().add(new MetricAttribute("alternativeTo", this.rootRouteTargetType.getName()));
 			}
-			VaadinMetricsTrailSupport.getCurrent().commit(metric);
+			MetricsTrailSupport.commit(metric);
 		}
 
 		@PostDestroy
@@ -280,6 +283,9 @@ class CottonServletService extends VaadinServletService {
 	private final String applicationInitializerClass;
 	private final String applicationBasePackage;
 	private final boolean automaticRouteDiscovery;
+
+	@Aggregate
+	private List<MetricsTrailConsumer> metricsTrailConsumers;
 
 	CottonServletService(@Inject @Qualifier(CottonServlet.SID_SERVLET) VaadinServlet servlet,
 						 @Inject @Qualifier(CottonServlet.SID_DEPLOYMENTCONFIG) DeploymentConfiguration deploymentConfiguration,
@@ -296,6 +302,11 @@ class CottonServletService extends VaadinServletService {
 		this.applicationInitializerClass = applicationInitializerClass;
 		this.applicationBasePackage = applicationBasePackage;
 		this.automaticRouteDiscovery = Boolean.parseBoolean(automaticRouteDiscovery);
+	}
+
+	@Override
+	protected Optional<Instantiator> loadInstantiators() {
+		return Optional.of(new CottonInstantiator());
 	}
 
 	@Override
@@ -343,10 +354,13 @@ class CottonServletService extends VaadinServletService {
 		forwardedPaths.forEach(path -> getRouter().getRegistry().
 				setRoute(path, AccessHandler.ForwardingView.class, Collections.emptyList()));
 
-		// OBSERVE METRICS
-		VaadinMetricsTrailSupport support = VaadinMetricsTrailSupport.support(this);
-		this.serviceInjector.aggregate(MetricsTrailConsumer.class).forEach(support::hook);
+		// REGISTER ON NEW TRAILS
+		MetricsTrailSupport.addListener(this, ReferenceMode.WEAK);
 	}
+
+	// #################################################################################################################
+	// ############################################### DISCOVER ROUTES #################################################
+	// #################################################################################################################
 
 	private void readJar(JarFile jarFile, String applicationBasePath) {
 		Collections.list(jarFile.entries()).parallelStream()
@@ -412,6 +426,10 @@ class CottonServletService extends VaadinServletService {
 		}
 	}
 
+	// #################################################################################################################
+	// ############################################## SESSION INJECTION ################################################
+	// #################################################################################################################
+
 	@Override
 	protected VaadinSession createVaadinSession(VaadinRequest request) {
 		return this.serviceInjector.instantiate(CottonSession.class,
@@ -420,15 +438,62 @@ class CottonServletService extends VaadinServletService {
 	}
 
 	@Override
-	public void fireSessionDestroy(VaadinSession vaadinSession) {
+	public void fireSessionDestroy(VaadinSession session) {
 		if (this.serviceInjector.isActive()) {
-			vaadinSession.access(() -> this.serviceInjector.destroy(vaadinSession));
+			session.access(() -> this.serviceInjector.destroy(session));
 		}
-		super.fireSessionDestroy(vaadinSession);
+		MetricsTrailSupport.end(session.getAttribute(MetricsTrail.class));
+		super.fireSessionDestroy(session);
+	}
+
+	// #################################################################################################################
+	// ############################################### TRAIL THREADING #################################################
+	// #################################################################################################################
+
+	@Override
+	public void announce(MetricsTrail trail, EventType eventType) throws Exception {
+		if (eventType == EventType.BEGIN) {
+			this.metricsTrailConsumers.forEach(trail::hook);
+		}
 	}
 
 	@Override
-	protected Optional<Instantiator> loadInstantiators() {
-		return Optional.of(new CottonInstantiator());
+	public VaadinSession findVaadinSession(VaadinRequest request) throws SessionExpiredException {
+		VaadinSession session = super.findVaadinSession(request);
+		if (session != null) {
+			session.lock();
+			if (session.getAttribute(MetricsTrail.class) == null) {
+				MetricsTrailSupport.begin();
+				session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
+
+				MetricsTrailSupport.commit(CottonMetrics.SESSION_BEGIN.build(
+						new MetricAttribute("sessionId", session.getSession().getId()),
+						new MetricAttribute("pushSessionId", session.getPushId())));
+
+				WebBrowser browser = session.getBrowser();
+				MetricsTrailSupport.commit(CottonMetrics.SESSION_BROWSER_INFO.build(
+						new MetricAttribute("application", browser.getBrowserApplication()),
+						new MetricAttribute("browserType", BrowserType.of(browser.isChrome(), browser.isEdge(),
+								browser.isFirefox(), browser.isIE(), browser.isOpera(), browser.isSafari()).name()),
+						new MetricAttribute("browserVersion", browser.getBrowserMajorVersion() + "." + browser.getBrowserMinorVersion()),
+						new MetricAttribute("systemEnvironment", SystemEnvironmentType.of(
+								Null.get(browser::isAndroid, false), Null.get(browser::isIPad, false),
+								Null.get(browser::isIPhone, false), Null.get(browser::isLinux, false),
+								Null.get(browser::isMacOSX, false), Null.get(browser::isWindows, false),
+								Null.get(browser::isWindowsPhone, false)).name())));
+			} else {
+				MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
+			}
+			session.unlock();
+		}
+		return session;
+	}
+
+	@Override
+	public void requestEnd(VaadinRequest request, VaadinResponse response, VaadinSession session) {
+		if (MetricsTrailSupport.has()) {
+			MetricsTrailSupport.release();
+		}
+		super.requestEnd(request, response, session);
 	}
 }

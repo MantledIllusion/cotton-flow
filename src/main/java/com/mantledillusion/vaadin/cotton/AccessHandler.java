@@ -6,7 +6,8 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Optional;
-import com.mantledillusion.metrics.trail.VaadinMetricsTrailSupport;
+import com.mantledillusion.metrics.trail.MetricsTrailSupport;
+import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.metrics.trail.api.MetricAttribute;
 import com.mantledillusion.vaadin.cotton.exception.http400.Http403UnauthorizedException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
@@ -142,7 +143,7 @@ final class AccessHandler implements BeforeLeaveListener {
         }
 
         if (destination == null) {
-            VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SECURITY_ACCESS_DENIED.build(
+            MetricsTrailSupport.commit(CottonMetrics.SECURITY_ACCESS_DENIED.build(
                     new MetricAttribute("target", event.getNavigationTarget().getName()),
                     new MetricAttribute("user", authenticationHandler.isLoggedIn() ?
                             authenticationHandler.getUser().toString() : null)));
@@ -151,13 +152,31 @@ final class AccessHandler implements BeforeLeaveListener {
                     + event.getNavigationTarget().getSimpleName() + "' is restricted"), null);
         } else {
             if (destination.getRestrictionType() != RestrictionType.NONE) {
-                VaadinMetricsTrailSupport.getCurrent().commit(CottonMetrics.SECURITY_ACCESS_GRANTED.build(
+                MetricsTrailSupport.commit(CottonMetrics.SECURITY_ACCESS_GRANTED.build(
                         new MetricAttribute("target", event.getNavigationTarget().getName()),
                         new MetricAttribute("user", authenticationHandler.getUser().toString())));
             }
             if (event.getNavigationTarget() != destination.getNavigationTarget()) {
                 event.forwardTo(destination.getNavigationTarget());
+            } else {
+                Metric metric = CottonMetrics.SESSION_NAVIGATION.build(event.getLocation().getPath());
+                String query = event.getLocation().getQueryParameters().getQueryString();
+                if (!query.isEmpty()) {
+                    for (Map.Entry<String, String> param : fromParamAppender(query).entrySet()) {
+                        metric.getAttributes().add(new MetricAttribute(param.getKey(), param.getValue()));
+                    }
+                }
+                MetricsTrailSupport.commit(metric);
             }
         }
+    }
+
+    private static Map<String, String> fromParamAppender(String query) {
+        Map<String, String> params = new HashMap<>();
+        for (String param : query.split("&")) {
+            String[] splitted = param.split("=");
+            params.put(splitted[0], splitted[1]);
+        }
+        return params;
     }
 }
