@@ -5,7 +5,6 @@ import com.mantledillusion.essentials.reflection.TypeEssentials;
 import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.injection.hura.core.Bus;
 import com.mantledillusion.injection.hura.core.Injector;
-import com.mantledillusion.injection.hura.core.annotation.injection.Aggregate;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
@@ -53,7 +52,7 @@ import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-class CottonServletService extends VaadinServletService implements RequestHandler {
+class CottonServletService extends VaadinServletService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
 	private static final String JAR = "jar";
@@ -451,39 +450,39 @@ class CottonServletService extends VaadinServletService implements RequestHandle
 	@Override
 	protected List<RequestHandler> createRequestHandlers() throws ServiceException {
 		List<RequestHandler> handlers = super.createRequestHandlers();
-		handlers.add(this); // ADDING THE HANDLER LAST WILL MAKE IT BECOME FIRST AFTER ORDER IS INVERTED
+
+		// ADDING THE HANDLER LAST WILL MAKE IT BECOME FIRST AFTER ORDER IS INVERTED
+		handlers.add((session, request, response) -> {
+			session.lock();
+			if (session.getAttribute(MetricsTrail.class) == null) {
+				MetricsTrailSupport.begin();
+				session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
+
+				MetricsTrailSupport.commit(CottonMetrics.SESSION_BEGIN.build(
+						new MetricAttribute("sessionId", session.getSession().getId()),
+						new MetricAttribute("pushSessionId", session.getPushId())));
+
+				WebBrowser browser = session.getBrowser();
+				MetricsTrailSupport.commit(CottonMetrics.SESSION_BROWSER_INFO.build(
+						new MetricAttribute("application", browser.getBrowserApplication()),
+						new MetricAttribute("browserType", BrowserType.of(browser.isChrome(), browser.isEdge(),
+								browser.isFirefox(), browser.isIE(), browser.isOpera(), browser.isSafari()).name()),
+						new MetricAttribute("browserVersion", browser.getBrowserMajorVersion() + "." + browser.getBrowserMinorVersion()),
+						new MetricAttribute("systemEnvironment", SystemEnvironmentType.of(
+								Null.get(browser::isAndroid, false), Null.get(browser::isIPad, false),
+								Null.get(browser::isIPhone, false), Null.get(browser::isLinux, false),
+								Null.get(browser::isMacOSX, false), Null.get(browser::isWindows, false),
+								Null.get(browser::isWindowsPhone, false)).name())));
+			} else {
+				MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
+			}
+			session.unlock();
+
+			// THE GOAL IS NOT TO HANDLE THE REQUEST, BUT TO START THE TRAIL
+			return false;
+		});
+
 		return handlers;
-	}
-
-	@Override
-	public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
-		session.lock();
-		if (session.getAttribute(MetricsTrail.class) == null) {
-			MetricsTrailSupport.begin();
-			session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
-
-			MetricsTrailSupport.commit(CottonMetrics.SESSION_BEGIN.build(
-					new MetricAttribute("sessionId", session.getSession().getId()),
-					new MetricAttribute("pushSessionId", session.getPushId())));
-
-			WebBrowser browser = session.getBrowser();
-			MetricsTrailSupport.commit(CottonMetrics.SESSION_BROWSER_INFO.build(
-					new MetricAttribute("application", browser.getBrowserApplication()),
-					new MetricAttribute("browserType", BrowserType.of(browser.isChrome(), browser.isEdge(),
-							browser.isFirefox(), browser.isIE(), browser.isOpera(), browser.isSafari()).name()),
-					new MetricAttribute("browserVersion", browser.getBrowserMajorVersion() + "." + browser.getBrowserMinorVersion()),
-					new MetricAttribute("systemEnvironment", SystemEnvironmentType.of(
-							Null.get(browser::isAndroid, false), Null.get(browser::isIPad, false),
-							Null.get(browser::isIPhone, false), Null.get(browser::isLinux, false),
-							Null.get(browser::isMacOSX, false), Null.get(browser::isWindows, false),
-							Null.get(browser::isWindowsPhone, false)).name())));
-		} else {
-			MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
-		}
-		session.unlock();
-
-		// THE GOAL IS NOT TO HANDLE THE REQUEST, BUT TO START THE TRAIL
-		return false;
 	}
 
 	@Override
