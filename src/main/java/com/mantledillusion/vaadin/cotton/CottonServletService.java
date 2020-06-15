@@ -53,7 +53,7 @@ import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-class CottonServletService extends VaadinServletService implements MetricsTrailListener {
+class CottonServletService extends VaadinServletService implements RequestHandler, MetricsTrailListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
 	private static final String JAR = "jar";
@@ -458,35 +458,41 @@ class CottonServletService extends VaadinServletService implements MetricsTrailL
 	}
 
 	@Override
-	public VaadinSession findVaadinSession(VaadinRequest request) throws SessionExpiredException {
-		VaadinSession session = super.findVaadinSession(request);
-		if (session != null) {
-			session.lock();
-			if (session.getAttribute(MetricsTrail.class) == null) {
-				MetricsTrailSupport.begin();
-				session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
+	protected List<RequestHandler> createRequestHandlers() throws ServiceException {
+		List<RequestHandler> handlers = super.createRequestHandlers();
+		handlers.add(this); // ADDING THE HANDLER LAST WILL MAKE IT BECOME FIRST AFTER ORDER IS INVERTED
+		return handlers;
+	}
 
-				MetricsTrailSupport.commit(CottonMetrics.SESSION_BEGIN.build(
-						new MetricAttribute("sessionId", session.getSession().getId()),
-						new MetricAttribute("pushSessionId", session.getPushId())));
+	@Override
+	public boolean handleRequest(VaadinSession session, VaadinRequest request, VaadinResponse response) throws IOException {
+		session.lock();
+		if (session.getAttribute(MetricsTrail.class) == null) {
+			MetricsTrailSupport.begin();
+			session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
 
-				WebBrowser browser = session.getBrowser();
-				MetricsTrailSupport.commit(CottonMetrics.SESSION_BROWSER_INFO.build(
-						new MetricAttribute("application", browser.getBrowserApplication()),
-						new MetricAttribute("browserType", BrowserType.of(browser.isChrome(), browser.isEdge(),
-								browser.isFirefox(), browser.isIE(), browser.isOpera(), browser.isSafari()).name()),
-						new MetricAttribute("browserVersion", browser.getBrowserMajorVersion() + "." + browser.getBrowserMinorVersion()),
-						new MetricAttribute("systemEnvironment", SystemEnvironmentType.of(
-								Null.get(browser::isAndroid, false), Null.get(browser::isIPad, false),
-								Null.get(browser::isIPhone, false), Null.get(browser::isLinux, false),
-								Null.get(browser::isMacOSX, false), Null.get(browser::isWindows, false),
-								Null.get(browser::isWindowsPhone, false)).name())));
-			} else {
-				MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
-			}
-			session.unlock();
+			MetricsTrailSupport.commit(CottonMetrics.SESSION_BEGIN.build(
+					new MetricAttribute("sessionId", session.getSession().getId()),
+					new MetricAttribute("pushSessionId", session.getPushId())));
+
+			WebBrowser browser = session.getBrowser();
+			MetricsTrailSupport.commit(CottonMetrics.SESSION_BROWSER_INFO.build(
+					new MetricAttribute("application", browser.getBrowserApplication()),
+					new MetricAttribute("browserType", BrowserType.of(browser.isChrome(), browser.isEdge(),
+							browser.isFirefox(), browser.isIE(), browser.isOpera(), browser.isSafari()).name()),
+					new MetricAttribute("browserVersion", browser.getBrowserMajorVersion() + "." + browser.getBrowserMinorVersion()),
+					new MetricAttribute("systemEnvironment", SystemEnvironmentType.of(
+							Null.get(browser::isAndroid, false), Null.get(browser::isIPad, false),
+							Null.get(browser::isIPhone, false), Null.get(browser::isLinux, false),
+							Null.get(browser::isMacOSX, false), Null.get(browser::isWindows, false),
+							Null.get(browser::isWindowsPhone, false)).name())));
+		} else {
+			MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
 		}
-		return session;
+		session.unlock();
+
+		// THE GOAL IS NOT TO HANDLE THE REQUEST, BUT TO START THE TRAIL
+		return false;
 	}
 
 	@Override
