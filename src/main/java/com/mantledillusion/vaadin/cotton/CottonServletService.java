@@ -53,7 +53,7 @@ import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-class CottonServletService extends VaadinServletService implements RequestHandler, MetricsTrailListener {
+class CottonServletService extends VaadinServletService implements RequestHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
 	private static final String JAR = "jar";
@@ -284,9 +284,6 @@ class CottonServletService extends VaadinServletService implements RequestHandle
 	private final String applicationBasePackage;
 	private final boolean automaticRouteDiscovery;
 
-	@Aggregate
-	private List<MetricsTrailConsumer> metricsTrailConsumers;
-
 	CottonServletService(@Inject @Qualifier(CottonServlet.SID_SERVLET) VaadinServlet servlet,
 						 @Inject @Qualifier(CottonServlet.SID_DEPLOYMENTCONFIG) DeploymentConfiguration deploymentConfiguration,
 						 @Inject @Qualifier(Localizer.SID_LOCALIZER) Localizer localizer,
@@ -355,7 +352,8 @@ class CottonServletService extends VaadinServletService implements RequestHandle
 				setRoute(path, AccessHandler.ForwardingView.class, Collections.emptyList()));
 
 		// REGISTER ON NEW TRAILS
-		MetricsTrailSupport.addListener(this, ReferenceMode.WEAK);
+		this.serviceInjector.aggregate(MetricsTrailConsumer.class).forEach(consumer ->
+				MetricsTrailSupport.addPersistentHook(consumer, MetricsTrailListener.ReferenceMode.WEAK));
 	}
 
 	// #################################################################################################################
@@ -449,13 +447,6 @@ class CottonServletService extends VaadinServletService implements RequestHandle
 	// #################################################################################################################
 	// ############################################### TRAIL THREADING #################################################
 	// #################################################################################################################
-
-	@Override
-	public void announce(MetricsTrail trail, EventType eventType) throws Exception {
-		if (eventType == EventType.BEGIN) {
-			this.metricsTrailConsumers.forEach(trail::hook);
-		}
-	}
 
 	@Override
 	protected List<RequestHandler> createRequestHandlers() throws ServiceException {
