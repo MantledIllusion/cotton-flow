@@ -25,6 +25,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.ErrorEvent;
 import com.vaadin.flow.server.ErrorHandler;
+import com.vaadin.flow.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ class CottonErrorHandler implements ErrorHandler {
                             build()).
                     build());
 
-    static class CottonErrorView extends Div implements HasErrorParameter<Exception> {
+    static class CottonErrorView extends Div implements HasErrorParameter<Exception>, BeforeLeaveListener {
 
         @Inject
         @Qualifier(CottonErrorHandler.SID_ERROR_HANDLER)
@@ -76,21 +77,32 @@ class CottonErrorHandler implements ErrorHandler {
         @Inject
         private Injector injector;
 
+        private final Registration registration;
+        private Dialog errorDialog;
+
         @Construct
-        private CottonErrorView() {}
+        private CottonErrorView() {
+            this.registration = CottonUI.current().addBeforeLeaveListener(this);
+        }
 
         @Override
         public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<Exception> parameter) {
             this.errorHandler.writeMetric(parameter.getCaughtException(), parameter.getCustomMessage());
             int httpCode = extractHttpCode(parameter.getCaughtException());
-            Dialog errorDialog = DialogBuilder.createBasic(this.errorHandler.
+            this.errorDialog = DialogBuilder.createBasic(this.errorHandler.
                     determineContent(injector, httpCode, parameter.getCaughtException(), parameter.getCustomMessage())).
                     setCloseOnOutsideClick(false).
                     setCloseOnEsc(false).
                     build();
-            CssStyle.MAX_WIDTH.of(500, ECSSUnit.PX).apply(errorDialog);
-            errorDialog.open();
+            CssStyle.MAX_WIDTH.of(500, ECSSUnit.PX).apply(this.errorDialog);
+            this.errorDialog.open();
             return httpCode;
+        }
+
+        @Override
+        public void beforeLeave(BeforeLeaveEvent event) {
+            this.errorDialog.close();
+            this.registration.remove();
         }
     }
 
