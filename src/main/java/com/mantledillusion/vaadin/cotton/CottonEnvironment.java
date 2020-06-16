@@ -1,5 +1,7 @@
 package com.mantledillusion.vaadin.cotton;
 
+import com.mantledillusion.vaadin.cotton.component.builders.LabelBuilder;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.Push;
 
 import com.mantledillusion.injection.hura.core.annotation.instruction.Define;
@@ -123,10 +125,10 @@ public final class CottonEnvironment {
      * from resource files.
      * <p>
      * The resource files are expected to reside in the application's src/main/resouces directory like this:<br>
-     * - src/main/resouces/foo_en.properties<br>
-     * - src/main/resouces/foo_de.properties<br>
-     * - src/main/resouces/bar_en.properties<br>
-     * - src/main/resouces/bar_de.properties<br>
+     * - src/main/resources/foo_en.properties<br>
+     * - src/main/resources/foo_de.properties<br>
+     * - src/main/resources/bar_en.properties<br>
+     * - src/main/resources/bar_de.properties<br>
      * <p>
      * For the above example, this method would have to be called twice:<br>
      * - forLocalization("foo", "properties", Charset.forName("UTF-8"), Locale.ENGLISH, Locale.GERMAN);<br>
@@ -204,6 +206,52 @@ public final class CottonEnvironment {
         }
 
         return registrations;
+    }
+
+    // #################################################################################################################
+    // ############################################# ERROR HANDLING ####################################################
+    // #################################################################################################################
+
+    /**
+     * Builds a {@link List} of {@link Blueprint.SingletonAllocation}s that can @{@link Define} {@link ErrorRenderer}s
+     * for displaying errors as simple messages.
+     *
+     * @param errorType     The {@link Throwable} type to register for; might <b>not</b> be null.
+     * @param errorRenderer The {@link ErrorRenderer} to render with; might <b>not</b> be null.
+     * @return The {@link Blueprint.Allocation}s for the application's environment {@link Blueprint}, never null
+     */
+    public Blueprint.SingletonAllocation forErrorMessageProvider(Class<? extends Throwable> errorType, ErrorRenderer<String> errorRenderer) {
+        if (errorType == null) {
+            throw new IllegalArgumentException("Cannot register error handling for a null error type");
+        } else if (errorRenderer == null) {
+            throw new IllegalArgumentException("Cannot register error handling for a null renderer");
+        }
+        return Blueprint.SingletonAllocation.allocateToInstance(new CottonErrorHandler.CottonErrorContentProvider(errorType,
+                (injector, httpCode, t, message) -> LabelBuilder.create().
+                            setText(errorRenderer.render(httpCode, t, message)).
+                            build()));
+    }
+
+    /**
+     * Builds a {@link List} of {@link Blueprint.SingletonAllocation}s that can @{@link Define} {@link ErrorRenderer}s
+     * for displaying errors in complex views.
+     *
+     * @param errorType     The {@link Throwable} type to register for; might <b>not</b> be null.
+     * @param errorViewType The {@link Component} to render onto; might <b>not</b> be null.
+     * @return The {@link Blueprint.Allocation}s for the application's environment {@link Blueprint}, never null
+     */
+    public <V extends Component & ErrorRenderer<Void>> Blueprint.SingletonAllocation forErrorView(Class<? extends Throwable> errorType, Class<V> errorViewType) {
+        if (errorType == null) {
+            throw new IllegalArgumentException("Cannot register error handling for a null error type");
+        } else if (errorViewType == null) {
+            throw new IllegalArgumentException("Cannot register error handling for a null view type");
+        }
+        return Blueprint.SingletonAllocation.allocateToInstance(new CottonErrorHandler.CottonErrorContentProvider(errorType,
+                (injector, httpCode, t, message) -> {
+            V errorView = injector.instantiate(errorViewType);
+            errorView.render(httpCode, t, message);
+            return errorView;
+                }));
     }
 
     // #################################################################################################################

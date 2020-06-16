@@ -35,6 +35,7 @@ import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.*;
+import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.shared.Registration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -349,6 +350,10 @@ class CottonServletService extends VaadinServletService {
 		}
 		forwardedPaths.forEach(path -> getRouter().getRegistry().
 				setRoute(path, AccessHandler.ForwardingView.class, Collections.emptyList()));
+
+		// REGISTER NAVIGATION ERROR VIEW
+		((ApplicationRouteRegistry) getRouteRegistry()).setErrorNavigationTargets(
+				Collections.singleton(CottonErrorHandler.CottonErrorView.class));
 
 		// REGISTER ON NEW TRAILS
 		this.serviceInjector.aggregate(MetricsTrailConsumer.class).forEach(consumer ->

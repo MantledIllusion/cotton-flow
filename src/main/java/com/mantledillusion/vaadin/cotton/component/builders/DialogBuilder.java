@@ -16,6 +16,8 @@ import com.vaadin.flow.component.dialog.GeneratedVaadinDialog;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
+import java.util.function.Supplier;
+
 /**
  * {@link ComponentBuilder} for {@link Dialog}s.
  */
@@ -32,7 +34,7 @@ public class DialogBuilder extends AbstractComponentBuilder<Dialog, DialogBuilde
 
         private final DialogBuilder parent;
 
-        private BasicDialogBuilder(DialogBuilder parent, String msgId, Object... indexedMessageParameters) {
+        private BasicDialogBuilder(DialogBuilder parent, Supplier<Component> contentSupplier) {
             super(parent);
             this.parent = parent.configure(dialog -> parent.set(ButtonBuilder.class, ButtonBuilder.create().setSizeUndefined()), true);
 
@@ -47,14 +49,10 @@ public class DialogBuilder extends AbstractComponentBuilder<Dialog, DialogBuilde
                 dialog.add(VerticalLayoutBuilder.create().
                         setWidthFull().
                         setHeightUndefined().
-                        setPadding(true).
+                        setPadding(false).
                         setSpacing(true).
                         setDefaultHorizontalComponentAlignment(FlexComponent.Alignment.CENTER).
-                        add(LabelBuilder.create().
-                                setWidthFull().
-                                setHeightUndefined().
-                                setText(WebEnv.getTranslation(msgId, indexedMessageParameters)).
-                                build()).
+                        add(contentSupplier.get()).
                         add(btnLayout).
                         build());
             }, true);
@@ -240,7 +238,23 @@ public class DialogBuilder extends AbstractComponentBuilder<Dialog, DialogBuilde
      * @return A new instance, never null.
      */
     public static BasicDialogBuilder createBasic(String msgId, Object... indexedMessageParameters) {
-        return new BasicDialogBuilder(new DialogBuilder(), msgId, indexedMessageParameters);
+        return new BasicDialogBuilder(new DialogBuilder(), () -> LabelBuilder.create().
+                setWidthFull().
+                setHeightUndefined().
+                setText(WebEnv.getTranslation(msgId, indexedMessageParameters)).
+                build());
+    }
+
+    /**
+     * Factory method for a very basic dialog that just contains a text and has 0-&gt;n options to close it with.
+     *
+     * @param content
+     *            The basic {@link Dialog}'s content; might <b>not</b> be null.
+     *
+     * @return A new instance, never null.
+     */
+    public static BasicDialogBuilder createBasic(Component content) {
+        return new BasicDialogBuilder(new DialogBuilder(), () -> content);
     }
 
     @Override

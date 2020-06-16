@@ -151,6 +151,26 @@ public interface CssStyle extends CssProperty, CssValue {
     CssSizeProperty MARGIN = new CssSizeProperty("margin");
 
     /**
+     * The CSS "min-width" style property.
+     */
+    CssSizeProperty MIN_WIDTH = new CssSizeProperty("min-width");
+
+    /**
+     * The CSS "max-width" style property.
+     */
+    CssSizeProperty MAX_WIDTH = new CssSizeProperty("max-width");
+
+    /**
+     * The CSS "min-height" style property.
+     */
+    CssSizeProperty MIN_HEIGHT = new CssSizeProperty("min-height");
+
+    /**
+     * The CSS "max-height" style property.
+     */
+    CssSizeProperty MAX_HEIGHT = new CssSizeProperty("max-height");
+
+    /**
      * The CSS "overflow-x" style property.
      */
     CssNamedValueProperty<CssOverflowType> OVERFLOW_X = new CssNamedValueProperty<>("overflow-x");

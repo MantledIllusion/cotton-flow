@@ -31,8 +31,6 @@ import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.server.VaadinSession;
 
 class Localizer implements I18NProvider {
-
-	private static final long serialVersionUID = 1L;
 	
 	static final String SID_LOCALIZER = "_localizer";
 

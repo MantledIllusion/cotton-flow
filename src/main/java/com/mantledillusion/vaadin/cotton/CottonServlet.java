@@ -128,13 +128,19 @@ public class CottonServlet extends VaadinServlet {
             Blueprint.SingletonAllocation localizer = Blueprint.SingletonAllocation.
                     allocateToInstance(Localizer.SID_LOCALIZER, new Localizer(resourceBundleRegistry, supportedLocales2));
 
+            // ERROR HANDLER
+            Collection<CottonErrorHandler.CottonErrorContentProvider> errorContentProviders = this.servletInjector.
+                    aggregate(CottonErrorHandler.CottonErrorContentProvider.class);
+            Blueprint.SingletonAllocation errorHandler = Blueprint.SingletonAllocation.
+                    allocateToInstance(CottonErrorHandler.SID_ERROR_HANDLER, new CottonErrorHandler(errorContentProviders));
+
             // APPLICATION
             Blueprint.PropertyAllocation initializerClass = Blueprint.PropertyAllocation.of(PID_INITIALIZERCLASS, this.applicationInitializerClass);
             Blueprint.PropertyAllocation basePackage = Blueprint.PropertyAllocation.of(PID_BASEPACKAGE, this.applicationPackage);
 
             // BUILD VAADIN SERVICE
             service = this.servletInjector.instantiate(CottonServletService.class, servlet, deploymentConfig, localizer,
-                    initializerClass, basePackage);
+                    errorHandler, initializerClass, basePackage);
             service.init();
         } catch (Exception e) {
             ServiceException se = new ServiceException(e);
