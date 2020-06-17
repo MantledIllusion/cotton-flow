@@ -444,7 +444,11 @@ class CottonServletService extends VaadinServletService {
 		if (this.serviceInjector.isActive()) {
 			session.access(() -> this.serviceInjector.destroy(session));
 		}
+
+		session.lock();
 		MetricsTrailSupport.end(session.getAttribute(MetricsTrail.class));
+		session.unlock();
+
 		super.fireSessionDestroy(session);
 	}
 
