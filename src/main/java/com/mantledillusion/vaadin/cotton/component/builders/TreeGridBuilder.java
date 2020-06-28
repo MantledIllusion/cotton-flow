@@ -64,7 +64,7 @@ public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFil
      *            The value provider; might <b>not</b> be null.
      * @return A new {@link GridColumnBuilder}, never null
      */
-    public GridColumnBuilder configureHierarchyColumn(ValueProvider<E, ?> valueProvider) {
+    public <V> GridColumnBuilder configureHierarchyColumn(ValueProvider<E, V> valueProvider) {
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addHierarchyColumn(valueProvider));
         configure(columnBuilder);
         return columnBuilder;

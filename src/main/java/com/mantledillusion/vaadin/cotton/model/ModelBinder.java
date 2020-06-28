@@ -347,12 +347,11 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 
 		@Override
 		void valueChanged(Context context, UpdateType type) {
-			Set<ElementType> elements = Collections.newSetFromMap(new IdentityHashMap<>());
 			boolean changed = false;
 
 			if (type != UpdateType.ADD) {
 				for (ElementType element: this.elementHandle.get()) {
-					if (!elements.contains(element)) {
+					if (this.property.contextualize(ModelBinder.this.getModel(), element).isEmpty()) {
 						this.elementHandle.remove(element);
 						changed = true;
 					}
@@ -366,11 +365,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 						this.elementHandle.add(null, element, sibling);
 						changed = true;
 					}
-					elements.add(element);
 					sibling = element;
 				}
-			} else {
-				this.property.stream(ModelBinder.this.getModel(), context).forEach(elements::add);
 			}
 
 			if (changed) {
