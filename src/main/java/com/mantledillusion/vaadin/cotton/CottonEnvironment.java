@@ -236,6 +236,7 @@ public final class CottonEnvironment {
      * Builds a {@link List} of {@link Blueprint.SingletonAllocation}s that can @{@link Define} {@link ErrorRenderer}s
      * for displaying errors in complex views.
      *
+     * @param <V> The error view type.
      * @param errorType     The {@link Throwable} type to register for; might <b>not</b> be null.
      * @param errorViewType The {@link Component} to render onto; might <b>not</b> be null.
      * @return The {@link Blueprint.Allocation}s for the application's environment {@link Blueprint}, never null

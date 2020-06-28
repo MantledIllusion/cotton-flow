@@ -60,6 +60,7 @@ public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFil
      * Builder method, configures a new column.
      *
      * @see TreeGrid#addHierarchyColumn(ValueProvider)
+     * @param <V> The column's value type.
      * @param valueProvider
      *            The value provider; might <b>not</b> be null.
      * @return A new {@link GridColumnBuilder}, never null
