@@ -177,7 +177,6 @@ class CottonErrorHandler implements ErrorHandler {
         Metric metric = CottonMetrics.SESSION_ERROR.build(t.getClass().getSimpleName());
         metric.getAttributes().add(new MetricAttribute("type", t.getClass().getName()));
         metric.getAttributes().add(new MetricAttribute("message", message));
-        metric.getAttributes().add(new MetricAttribute("stackTrace", out.toString()));
         MetricsTrailSupport.commit(metric);
     }
 
