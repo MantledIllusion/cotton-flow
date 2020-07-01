@@ -37,7 +37,7 @@ public class IconBuilder extends AbstractComponentBuilder<Icon, IconBuilder> imp
 
     @Override
     protected Icon instantiate() {
-        return new Icon();
+        return new Icon(this.collection, this.icon);
     }
 
     /**
