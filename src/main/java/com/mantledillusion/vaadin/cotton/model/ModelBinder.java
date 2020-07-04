@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.data.epiphy.context.Context;
+import com.mantledillusion.data.epiphy.context.TraversingMode;
 import com.mantledillusion.essentials.expression.Expression;
 import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PreDestroy;
 import com.vaadin.flow.component.Component;
@@ -359,19 +360,28 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 			}
 
 			if (type != UpdateType.REMOVE) {
-				ElementType sibling = null;
-				for (ElementType element: this.property.iterate(ModelBinder.this.getModel(), context)) {
-					if (!this.elementHandle.contains(element)) {
-						this.elementHandle.add(null, element, sibling);
-						changed = true;
-					}
-					sibling = element;
+				ElementType subSibling = null;
+				for (Context subContext: this.property.contextualize(ModelBinder.this.getModel(), context, TraversingMode.PARENT)) {
+					subSibling = addElement(null, subSibling, subContext);
 				}
 			}
 
 			if (changed) {
 				getDataProvider().refreshAll();
 			}
+		}
+
+		private ElementType addElement(ElementType parent, ElementType childSibling, Context childContext) {
+			ElementType child = this.property.get(ModelBinder.this.getModel(), childContext);
+			if (child != parent) {
+				this.elementHandle.add(parent, child, childSibling);
+
+				ElementType subSibling = null;
+				for (Context subContext: this.property.contextualize(ModelBinder.this.getModel(), childContext, TraversingMode.CHILD)) {
+					subSibling = addElement(child, subSibling, subContext);
+				}
+			}
+			return child;
 		}
 	}
 
