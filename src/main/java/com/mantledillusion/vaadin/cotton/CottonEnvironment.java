@@ -212,6 +212,10 @@ public final class CottonEnvironment {
     // ############################################# ERROR HANDLING ####################################################
     // #################################################################################################################
 
+    static final String PKEY_ERROR_HANDLING_SUPPORT_EMAIL_ADDRESS = "cotton.errorHandling.supportEmail.address";
+    static final String PKEY_ERROR_HANDLING_SUPPORT_EMAIL_SUBJECT = "cotton.errorHandling.supportEmail.subject";
+    static final String DEFAULT_ERROR_HANDLING_SUPPORT_EMAIL_SUBJECT = "Error in Application (TrailId: [trailId])";
+
     /**
      * Builds a {@link List} of {@link Blueprint.SingletonAllocation}s that can @{@link Define} {@link ErrorRenderer}s
      * for displaying errors as simple messages.
@@ -253,6 +257,37 @@ public final class CottonEnvironment {
             errorView.render(httpCode, t, message);
             return errorView;
                 }));
+    }
+
+    /**
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link Define} the email address to create a
+     * "send a mail" style button with on the error dialog displayed by the default {@link ErrorRenderer}.
+     *
+     * @param emailAddress The email address to open the user's email client for; might <b>not</b> be null.
+     * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
+     */
+    public static Blueprint.PropertyAllocation forErrorSupportEmailAddress(String emailAddress) {
+        if (emailAddress == null) {
+            throw new IllegalArgumentException("Cannot use a null error support email address");
+        }
+        return Blueprint.PropertyAllocation.of(PKEY_ERROR_HANDLING_SUPPORT_EMAIL_ADDRESS, emailAddress);
+    }
+
+    /**
+     * Builds a {@link Blueprint.PropertyAllocation} that can @{@link Define} the email subject to use for the
+     * "send a mail" style button with on the error dialog displayed by the default {@link ErrorRenderer}.
+     * <p>
+     * The subject can include the following placeholders:<br>
+     * - [trailId]: is replaced with the trail id of the session.<br>
+     *
+     * @param subject The email address to open the user's email client for; might <b>not</b> be null.
+     * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null
+     */
+    public static Blueprint.PropertyAllocation forErrorSupportEmailSubject(String subject) {
+        if (subject == null) {
+            throw new IllegalArgumentException("Cannot use a null error support email subject");
+        }
+        return Blueprint.PropertyAllocation.of(PKEY_ERROR_HANDLING_SUPPORT_EMAIL_SUBJECT, subject);
     }
 
     // #################################################################################################################

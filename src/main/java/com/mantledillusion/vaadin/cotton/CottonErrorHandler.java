@@ -1,6 +1,7 @@
 package com.mantledillusion.vaadin.cotton;
 
 import com.helger.css.ECSSUnit;
+import com.mantledillusion.essentials.string.StringEssentials;
 import com.mantledillusion.injection.hura.core.Injector;
 import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
@@ -8,16 +9,14 @@ import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.metrics.trail.MetricsTrailSupport;
 import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.metrics.trail.api.MetricAttribute;
-import com.mantledillusion.vaadin.cotton.component.builders.DialogBuilder;
-import com.mantledillusion.vaadin.cotton.component.builders.HorizontalLayoutBuilder;
-import com.mantledillusion.vaadin.cotton.component.builders.LabelBuilder;
-import com.mantledillusion.vaadin.cotton.component.builders.VerticalLayoutBuilder;
+import com.mantledillusion.vaadin.cotton.component.builders.*;
 import com.mantledillusion.vaadin.cotton.component.css.CssStyle;
 import com.mantledillusion.vaadin.cotton.exception.WebException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http902IllegalStateException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -26,15 +25,15 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.ErrorEvent;
 import com.vaadin.flow.server.ErrorHandler;
 import com.vaadin.flow.shared.Registration;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 import java.util.function.Supplier;
 
 class CottonErrorHandler implements ErrorHandler {
@@ -45,29 +44,6 @@ class CottonErrorHandler implements ErrorHandler {
         CssStyle.COLOR.ofHSB(0, 1, 0.75).apply(icon);
         return icon;
     };
-    private static final CottonErrorContentProvider DEFAULT_PROVIDER = new CottonErrorContentProvider(Throwable.class,
-            (injector, httpCode, error, errorMessage) ->  VerticalLayoutBuilder.create().
-                    setSizeUndefined().
-                    setPadding(false).
-                    setSpacing(true).
-                    add(HorizontalLayoutBuilder.create().
-                            setWidthUndefined().
-                            setPadding(false).
-                            setSpacing(true).
-                            add(FlexComponent.Alignment.CENTER, ERROR_ICON_SUPPLIER.get()).
-                            add(LabelBuilder.create().
-                                    setWidthFull().
-                                    setText(httpCode+": "+errorMessage).
-                                    setWrap(false).
-                                    build()).
-                            build()).
-                    add(FlexComponent.Alignment.CENTER, LabelBuilder.create().
-                            setText("TrailId: "+MetricsTrailSupport.id().toString()).
-                            setCssStyle(CssStyle.FONT_SIZE.of(0.8, ECSSUnit.EM)).
-                            setCssStyle(CssStyle.COLOR.ofHSB(0, 0, 0.5)).
-                            setWrap(false).
-                            build()).
-                    build());
 
     static class CottonErrorView extends Div implements HasErrorParameter<Exception>, BeforeLeaveListener {
 
@@ -129,8 +105,61 @@ class CottonErrorHandler implements ErrorHandler {
     static final String SID_ERROR_HANDLER = "_errorHandler";
 
     private final Map<Class<? extends Throwable>, CottonErrorContentProvider> contentProviders;
+    private final String supportMailTo;
+    private final String supportMailSubject;
+    private final CottonErrorContentProvider DEFAULT_PROVIDER = new CottonErrorContentProvider(Throwable.class,
+            (injector, httpCode, error, errorMessage) -> {
+                List<Component> options = new ArrayList<>();
+                if (CottonErrorHandler.this.supportMailTo != null) {
+                    Map<String, String> placeholders = Collections.singletonMap("trailId", MetricsTrailSupport.get().getTrailId().toString());
+                    String subject = null;
+                    try {
+                        subject = StringUtils.replace(URLEncoder.encode(StringEssentials.deepReplace(CottonErrorHandler.this.supportMailSubject,
+                                placeholders::get, placeholders::containsKey, "[", "]", ":"), "UTF-8"), "+", "%20");
+                    } catch (UnsupportedEncodingException e) {
+                        // UTF-8 is always available.
+                    }
+                    options.add(new Anchor("mailto:" + CottonErrorHandler.this.supportMailTo +
+                            "?subject=" + subject, IconBuilder.create().
+                            setIcon(VaadinIcon.ENVELOPE_O).
+                            setCssStyle(CssStyle.WIDTH.of(0.8, ECSSUnit.EM)).
+                            setCssStyle(CssStyle.HEIGHT.of(0.8, ECSSUnit.EM)).
+                            setCssStyle(CssStyle.COLOR.ofHSB(0, 0, 0.5)).
+                            build()));
+                }
 
-    public CottonErrorHandler(Collection<CottonErrorContentProvider> errorContentProviders) {
+                return VerticalLayoutBuilder.create().
+                        setSizeUndefined().
+                        setPadding(false).
+                        setSpacing(true).
+                        add(HorizontalLayoutBuilder.create().
+                                setWidthUndefined().
+                                setPadding(false).
+                                setSpacing(true).
+                                add(FlexComponent.Alignment.CENTER, ERROR_ICON_SUPPLIER.get()).
+                                add(LabelBuilder.create().
+                                        setWidthFull().
+                                        setText(httpCode+": "+errorMessage).
+                                        setWrap(false).
+                                        build()).
+                                build()).
+                        add(FlexComponent.Alignment.CENTER, HorizontalLayoutBuilder.create().
+                                setWidthUndefined().
+                                setPadding(false).
+                                setSpacing(true).
+                                add(FlexComponent.Alignment.END, LabelBuilder.create().
+                                        setText("TrailId: "+MetricsTrailSupport.id().toString()).
+                                        setCssStyle(CssStyle.FONT_SIZE.of(0.8, ECSSUnit.EM)).
+                                        setCssStyle(CssStyle.COLOR.ofHSB(0, 0, 0.5)).
+                                        setWrap(false).
+                                        build()).
+                                add(FlexComponent.Alignment.END, options.toArray(new Component[options.size()])).
+                                build()).
+                        build();
+            });
+
+    public CottonErrorHandler(Collection<CottonErrorContentProvider> errorContentProviders, String supportMailTo, String supportMailSubject) {
+        this.supportMailSubject = supportMailSubject;
         Map<Class<? extends Throwable>, CottonErrorContentProvider> contentProviders = new HashMap<>();
         for (CottonErrorContentProvider provider: errorContentProviders) {
             if (contentProviders.containsKey(provider.throwableType)) {
@@ -140,6 +169,7 @@ class CottonErrorHandler implements ErrorHandler {
             contentProviders.put(provider.throwableType, provider);
         }
         this.contentProviders = Collections.unmodifiableMap(contentProviders);
+        this.supportMailTo = supportMailTo;
     }
 
     @Override

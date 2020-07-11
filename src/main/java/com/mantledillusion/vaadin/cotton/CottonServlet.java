@@ -132,7 +132,11 @@ public class CottonServlet extends VaadinServlet {
             Collection<CottonErrorHandler.CottonErrorContentProvider> errorContentProviders = this.servletInjector.
                     aggregate(CottonErrorHandler.CottonErrorContentProvider.class);
             Blueprint.SingletonAllocation errorHandler = Blueprint.SingletonAllocation.
-                    allocateToInstance(CottonErrorHandler.SID_ERROR_HANDLER, new CottonErrorHandler(errorContentProviders));
+                    allocateToInstance(CottonErrorHandler.SID_ERROR_HANDLER, new CottonErrorHandler(errorContentProviders,
+                            this.servletInjector.resolve("${"+CottonEnvironment.PKEY_ERROR_HANDLING_SUPPORT_EMAIL_ADDRESS+
+                                    "}", false),
+                            this.servletInjector.resolve("${"+CottonEnvironment.PKEY_ERROR_HANDLING_SUPPORT_EMAIL_SUBJECT+
+                                    ":"+CottonEnvironment.DEFAULT_ERROR_HANDLING_SUPPORT_EMAIL_SUBJECT+"}")));
 
             // APPLICATION
             Blueprint.PropertyAllocation initializerClass = Blueprint.PropertyAllocation.of(PID_INITIALIZERCLASS, this.applicationInitializerClass);

@@ -206,6 +206,16 @@ public interface CssStyle extends CssProperty, CssValue {
     CssSizeProperty PADDING = new CssSizeProperty("padding");
 
     /**
+     * The CSS "width" style property.
+     */
+    CssSizeProperty WIDTH = new CssSizeProperty("width");
+
+    /**
+     * The CSS "height" style property.
+     */
+    CssSizeProperty HEIGHT = new CssSizeProperty("height");
+
+    /**
      * Applies this style on the given {@link HasElement}.
      *
      * @param hasElement The element to apply on; might <b>not</b> be null.
