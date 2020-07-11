@@ -87,7 +87,10 @@ class CottonErrorHandler implements ErrorHandler {
 
         @Override
         public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<Exception> parameter) {
+            LOGGER.error("UI navigation error occurred (TrailId: "+MetricsTrailSupport.get().getTrailId()+")",
+                    parameter.getCaughtException());
             this.errorHandler.writeMetric(parameter.getCaughtException(), parameter.getCustomMessage());
+
             int httpCode = extractHttpCode(parameter.getCaughtException());
             this.errorDialog = DialogBuilder.createBasic(this.errorHandler.
                     determineContent(injector, httpCode, parameter.getCaughtException(), parameter.getCustomMessage())).
@@ -141,7 +144,8 @@ class CottonErrorHandler implements ErrorHandler {
 
     @Override
     public void error(ErrorEvent event) {
-        LOGGER.error("Handling on-page error", event.getThrowable());
+        LOGGER.error("UI on-page error occurred (TrailId: "+MetricsTrailSupport.get().getTrailId()+")",
+                event.getThrowable());
         writeMetric(event.getThrowable(), event.getThrowable().getMessage());
 
         Injector injector = CottonSession.current().createInSessionContext(Injector.class);
