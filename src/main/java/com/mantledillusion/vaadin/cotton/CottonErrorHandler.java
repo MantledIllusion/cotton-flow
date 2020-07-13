@@ -63,7 +63,7 @@ class CottonErrorHandler implements ErrorHandler {
 
         @Override
         public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<Exception> parameter) {
-            LOGGER.error("UI navigation error occurred (TrailId: "+MetricsTrailSupport.get().getTrailId()+")",
+            LOGGER.error("UI navigation error occurred (TrailId: "+MetricsTrailSupport.get().getCorrelationId()+")",
                     parameter.getCaughtException());
             this.errorHandler.writeMetric(parameter.getCaughtException(), parameter.getCustomMessage());
 
@@ -111,7 +111,7 @@ class CottonErrorHandler implements ErrorHandler {
             (injector, httpCode, error, errorMessage) -> {
                 List<Component> options = new ArrayList<>();
                 if (CottonErrorHandler.this.supportMailTo != null) {
-                    Map<String, String> placeholders = Collections.singletonMap("trailId", MetricsTrailSupport.get().getTrailId().toString());
+                    Map<String, String> placeholders = Collections.singletonMap("trailId", MetricsTrailSupport.get().getCorrelationId().toString());
                     String subject = null;
                     try {
                         subject = StringUtils.replace(URLEncoder.encode(StringEssentials.deepReplace(CottonErrorHandler.this.supportMailSubject,
@@ -174,7 +174,7 @@ class CottonErrorHandler implements ErrorHandler {
 
     @Override
     public void error(ErrorEvent event) {
-        LOGGER.error("UI on-page error occurred (TrailId: "+MetricsTrailSupport.get().getTrailId()+")",
+        LOGGER.error("UI on-page error occurred (TrailId: "+MetricsTrailSupport.get().getCorrelationId()+")",
                 event.getThrowable());
         writeMetric(event.getThrowable(), event.getThrowable().getMessage());
 
