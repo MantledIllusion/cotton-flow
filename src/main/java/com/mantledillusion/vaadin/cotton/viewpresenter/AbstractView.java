@@ -4,9 +4,8 @@ import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumen
 import com.mantledillusion.vaadin.cotton.exception.http900.Http903NotImplementedException;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
-import com.vaadin.flow.component.html.Div;
 
-import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * Basic super type for {@link Presentable}s that are a {@link Composite} of different {@link Component}s.
@@ -16,13 +15,16 @@ public abstract class AbstractView extends Composite<Component> implements Prese
     private static final long serialVersionUID = 1L;
 
     private Component root;
+    private String id;
 
     @Override
     public final void registerActiveComponents(TemporalActiveComponentRegistry reg) throws Exception {
         this.root = buildUI(reg);
-        if (root == null) {
+        if (this.root == null) {
             throw new Http901IllegalArgumentException("The returned ui component representing the view "
                     + getClass().getSimpleName() + " was null, which is not allowed.");
+        } else if (this.id != null) {
+            setId(this.id);
         }
     }
 
@@ -34,6 +36,24 @@ public abstract class AbstractView extends Composite<Component> implements Prese
                             + " is build during its injection; however, this has not been completed yet.");
         }
         return this.root;
+    }
+
+    @Override
+    public Optional<String> getId() {
+        if (this.root != null) {
+            return super.getId();
+        } else {
+            return Optional.of(this.id);
+        }
+    }
+
+    @Override
+    public void setId(String id) {
+        if (this.root != null) {
+            super.setId(id);
+        } else {
+            this.id = id;
+        }
     }
 
     /**
