@@ -434,6 +434,29 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
     }
 
     /**
+     * Builder method, causes the items to be identified by the result of their equals/hashCode method.
+     * <p>
+     * Vaadin default, should only be used if items remain unchanged or use default equals/hashCode {@link Object}.
+     *
+     * @return this
+     */
+    public B identifyItemsByEqualsHashCode() {
+        return configure(grid -> grid.getDataCommunicator().getKeyMapper().setIdentifierGetter(Object::hashCode));
+    }
+
+    /**
+     * Builder method, causes the items to be identified by {@link System#identityHashCode(Object)}
+     * <p>
+     * Can be useful when items are changed and have their equals/hashCode methods calculate their result with the
+     * changing properties, causing the {@link Grid} to loose track of these items when changed.
+     *
+     * @return this
+     */
+    public B identifyItemsByIdentity() {
+        return configure(grid -> grid.getDataCommunicator().getKeyMapper().setIdentifierGetter(System::identityHashCode));
+    }
+
+    /**
      * Builder method, configures a new column.
      *
      * @see Grid#addColumn(ValueProvider, String...)
