@@ -42,7 +42,7 @@
 		<!-- com.mantledillusion dependencies -->
 		<hura.version>2.0.0.BETA1</hura.version>
 		<epiphy.version>4.0.0.BETA1</epiphy.version>
-		<trail-metrics.version>1.0.0.ALPHA8</trail-metrics.version>
+		<trail-metrics.version>1.0.0.BETA1</trail-metrics.version>
 		<expression-essentials.version>1.0.0</expression-essentials.version>
 
 		<!-- org.apache dependencies -->
