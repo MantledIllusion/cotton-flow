@@ -41,6 +41,20 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 		EXCHANGE, ADD, REMOVE;
 	}
 
+	enum UpdateDirection {
+		PARENT(true, false),
+		SELF(true, true),
+		CHILD(false, true);
+
+		private final boolean isUpStream;
+		private final boolean isDownStream;
+
+		UpdateDirection(boolean isUpStream, boolean isDownStream) {
+			this.isUpStream = isUpStream;
+			this.isDownStream = isDownStream;
+		}
+	}
+
 	private final Context context;
 	private final Auditor baseBindingAuditor = new Auditor(null);
 	private final Map<Property<ModelType, ?>, List<Binding<?>>> bindings = new IdentityHashMap<>();
@@ -111,7 +125,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 		}
 
 		@Override
-		public void valueChanged(Context context, UpdateType type, boolean onRoot) {
+		public void valueChanged(Context context, UpdateType type, ModelBinder.UpdateDirection direction) {
 			this.valueReader.trigger();
 		}
 	}
@@ -226,7 +240,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 		}
 
 		@Override
-		public synchronized void valueChanged(Context context, UpdateType type, boolean onRoot) {
+		public synchronized void valueChanged(Context context, UpdateType type, ModelBinder.UpdateDirection direction) {
 			if (!this.synchronizing) {
 				this.synchronizing = true;
 				refreshEnablement();
@@ -347,13 +361,13 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 		}
 
 		@Override
-		void valueChanged(Context context, UpdateType type, boolean onRoot) {
+		void valueChanged(Context context, UpdateType type, ModelBinder.UpdateDirection direction) {
 			boolean changed = false;
 
 			if (type != UpdateType.ADD) {
 				for (ElementType element: this.elementHandle.get()) {
 					if (this.property.contextualize(ModelBinder.this.getModel(), element).isEmpty()) {
-						if (onRoot) {
+						if (direction.isUpStream) {
 							this.elementHandle.remove(element);
 						}
 						changed = true;
@@ -364,7 +378,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 			if (type != UpdateType.REMOVE) {
 				ElementType subSibling = null;
 				for (Context subContext: this.property.contextualize(ModelBinder.this.getModel(), context, TraversingMode.PARENT)) {
-					if (onRoot) {
+					if (direction.isUpStream) {
 						subSibling = addElement(null, subSibling, subContext);
 					}
 					changed = true;
@@ -490,7 +504,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 	}
 
 	synchronized void updateAll(UpdateType type) {
-		this.bindings.forEach((property, bindings) -> bindings.forEach(binding -> binding.valueChanged(context, type, true)));
+		this.bindings.forEach((property, bindings) -> bindings.forEach(binding -> binding.valueChanged(context, type, UpdateDirection.PARENT)));
 	}
 
 	synchronized void update(Property<ModelType, ?> property, Context context, UpdateType type) {
@@ -499,7 +513,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 			// IF THE UPDATE'S PROPERTY IS A PARENT OF THE BINDING'S PROPERTY...
 			Set<Property<?, ?>> boundHierarchy = boundProperty.getHierarchy();
 			Set<Property<?, ?>> hierarchy = property.getHierarchy();
-			if (boundHierarchy.containsAll(hierarchy) || hierarchy.containsAll(boundHierarchy)) {
+			boolean upStream = boundHierarchy.containsAll(hierarchy);
+			boolean downStream = hierarchy.containsAll(boundHierarchy);
+			if (upStream || downStream) {
 				// GO OVER ALL OF THE UPDATE'S CONTEXTABLE PROPERTIES
 				for (Property<?, ?> contextedProperty : property.getHierarchy()) {
 					// CHECK IF THERE IS A KEY FOR THE CONTEXTED PROPERTY THAT IS UNEQUAL TO THE ONE IN THIS BINDER'S CONTEXT
@@ -509,7 +525,8 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 						continue boundPropertyLoop;
 					}
 				}
-				this.bindings.get(boundProperty).forEach(binding -> binding.valueChanged(context, type, property.equals(boundProperty)));
+				this.bindings.get(boundProperty).forEach(binding -> binding.valueChanged(context, type, upStream && downStream ?
+						UpdateDirection.SELF : (upStream ? UpdateDirection.PARENT : UpdateDirection.CHILD)));
 			}
 		}
 	}
