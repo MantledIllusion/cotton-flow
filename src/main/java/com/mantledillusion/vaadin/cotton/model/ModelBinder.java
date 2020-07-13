@@ -379,7 +379,9 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 		private ElementType addElement(ElementType parent, ElementType childSibling, Context childContext) {
 			ElementType child = this.property.get(ModelBinder.this.getModel(), childContext);
 			if (child != parent) {
-				this.elementHandle.add(parent, child, childSibling);
+				if (!this.elementHandle.contains(child)) {
+					this.elementHandle.add(parent, child, childSibling);
+				}
 
 				ElementType subSibling = null;
 				for (Context subContext: this.property.contextualize(ModelBinder.this.getModel(), childContext, TraversingMode.CHILD)) {
