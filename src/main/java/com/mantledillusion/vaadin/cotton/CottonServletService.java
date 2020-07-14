@@ -464,7 +464,9 @@ class CottonServletService extends VaadinServletService {
 		handlers.add((session, request, response) -> {
 			session.lock();
 			if (session.getAttribute(MetricsTrail.class) == null) {
-				MetricsTrailSupport.begin();
+				if (!MetricsTrailSupport.has()) {
+					MetricsTrailSupport.begin();
+				}
 				session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
 
 				MetricsTrailSupport.commit(CottonMetrics.SESSION_BEGIN.build(
@@ -482,7 +484,7 @@ class CottonServletService extends VaadinServletService {
 								Null.get(browser::isIPhone, false), Null.get(browser::isLinux, false),
 								Null.get(browser::isMacOSX, false), Null.get(browser::isWindows, false),
 								Null.get(browser::isWindowsPhone, false)).name())));
-			} else {
+			} else if (!MetricsTrailSupport.has()) {
 				MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
 			}
 			session.unlock();
