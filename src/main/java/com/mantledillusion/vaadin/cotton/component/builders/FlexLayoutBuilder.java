@@ -34,14 +34,13 @@ public class FlexLayoutBuilder extends AbstractComponentBuilder<FlexLayout, Flex
     }
 
     /**
-     * Builder method, configures the {@link Component}'s {@link FlexLayout.WrapMode}.
+     * Builder method, configures the {@link Component}'s {@link FlexLayout.FlexWrap}.
      *
-     * @see FlexLayout#setWrapMode(FlexLayout.WrapMode)
-     * @param wrapMode the flex wrap mode of the layout, never
-     *                     <code>null</code>
+     * @see FlexLayout#setFlexWrap(FlexLayout.FlexWrap)
+     * @param wrapMode the flex wrap mode of the layout, never <code>null</code>
      * @return this
      */
-    public FlexLayoutBuilder setWrapMode(FlexLayout.WrapMode wrapMode) {
-        return configure(flexLayout -> flexLayout.setWrapMode(wrapMode));
+    public FlexLayoutBuilder setFlexWrap(FlexLayout.FlexWrap wrapMode) {
+        return configure(flexLayout -> flexLayout.setFlexWrap(wrapMode));
     }
 }
