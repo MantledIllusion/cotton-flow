@@ -24,6 +24,11 @@ public abstract class AbstractFrame extends AbstractView {
         return this.dialog;
     }
 
+    @Override
+    public Dialog getContent() {
+        return (Dialog) super.getContent();
+    }
+
     /**
      * Builds this {@link Presentable}'s UI and return it.
      * <P>
