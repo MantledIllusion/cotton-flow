@@ -159,7 +159,8 @@ final class AccessHandler implements BeforeLeaveListener {
             if (event.getNavigationTarget() != destination.getNavigationTarget()) {
                 event.forwardTo(destination.getNavigationTarget());
             } else {
-                Metric metric = CottonMetrics.SESSION_NAVIGATION.build(event.getLocation().getPath());
+                String url = event.getSource().getRegistry().getTargetUrl(destination.getNavigationTarget()).get();
+                Metric metric = CottonMetrics.SESSION_NAVIGATION.build(url);
                 String query = event.getLocation().getQueryParameters().getQueryString();
                 if (!query.isEmpty()) {
                     for (Map.Entry<String, String> param : fromParamAppender(query).entrySet()) {
