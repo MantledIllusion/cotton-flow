@@ -36,8 +36,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- maven dependency versions -->
-		<vaadin-core.version>14.3.8</vaadin-core.version>
-		<vaadin-compatibility-mode.version>2.4.0</vaadin-compatibility-mode.version>
+		<vaadin-core.version>14.4.2</vaadin-core.version>
+		<vaadin-compatibility-mode.version>2.4.1</vaadin-compatibility-mode.version>
 
 		<!-- com.mantledillusion dependencies -->
 		<hura.version>2.0.0.BETA1</hura.version>
