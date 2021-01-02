@@ -112,7 +112,9 @@ public abstract class Binding<FieldValueType> implements AuditingConfigurer<Bind
         return this;
     }
 
-    void accessModeChanged(boolean couple) {};
+    void accessModeChanged(boolean couple) {
+
+    }
 
     abstract void valueChanged(Context context, ModelBinder.UpdateType type, ModelBinder.UpdateDirection direction);
 }

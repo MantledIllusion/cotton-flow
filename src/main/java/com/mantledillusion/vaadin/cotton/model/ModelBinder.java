@@ -20,6 +20,8 @@ import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.VaadinSessionState;
 import org.apache.commons.lang3.ObjectUtils;
 
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -119,7 +121,7 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 		public void accessModeChanged(boolean couple) {
 			if (couple) {
 				this.valueReader.trigger();
-			} else{
+			} else {
 				this.valueResetter.accept(getMaskedValue());
 			}
 		}
@@ -533,11 +535,16 @@ abstract class ModelBinder<ModelType> implements ModelHandler<ModelType>, Auditi
 
 	@PreDestroy
 	private synchronized void destroy() {
+		VaadinSession session = VaadinSession.getCurrent();
+		boolean sessionActive = session != null && session.getState() == VaadinSessionState.OPEN;
+
 		Iterator<Entry<Property<ModelType, ?>, List<Binding<?>>>> entryIterator = this.bindings.entrySet().iterator();
 		while (entryIterator.hasNext()) {
 			Iterator<Binding<?>> bindingIterator = entryIterator.next().getValue().iterator();
 			while (bindingIterator.hasNext()) {
-				bindingIterator.next().accessModeChanged(false);
+				if (sessionActive) {
+					bindingIterator.next().accessModeChanged(false);
+				}
 				bindingIterator.remove();
 			}
 			entryIterator.remove();

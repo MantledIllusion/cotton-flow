@@ -6,7 +6,6 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.vaadin.flow.server.VaadinSession;
 
-
 class CottonSession extends VaadinSession {
 
 	@Inject @Qualifier(Localizer.SID_LOCALIZER)
