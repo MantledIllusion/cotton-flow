@@ -5,7 +5,8 @@ import java.util.*;
 import com.mantledillusion.essentials.expression.Expression;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.metrics.trail.MetricsTrailSupport;
-import com.mantledillusion.metrics.trail.api.MetricAttribute;
+import com.mantledillusion.metrics.trail.api.Measurement;
+import com.mantledillusion.metrics.trail.api.MeasurementType;
 import com.mantledillusion.vaadin.cotton.CottonUI.AfterLoginListener;
 import com.mantledillusion.vaadin.cotton.CottonUI.BeforeLogoutListener;
 import com.mantledillusion.vaadin.cotton.event.user.AfterLoginEvent;
@@ -32,8 +33,8 @@ class AuthenticationHandler {
 	void login(User user) {
 		this.user = user;
 		MetricsTrailSupport.commit(CottonMetrics.SECURITY_USER_STATE.build(
-				MetricAttribute.operatorOf("LOGGED_IN"),
-				new MetricAttribute("user", user.toString())));
+				new Measurement("state", "LOGGED_IN", MeasurementType.STRING),
+				new Measurement("user", user.toString(), MeasurementType.STRING)));
 		AfterLoginEvent event = new AfterLoginEvent(CottonUI.current());
 		for (AfterLoginListener listener: CottonUI.getCurrent().getNavigationListeners(AfterLoginListener.class)) {
 			listener.afterLogin(event);
@@ -49,8 +50,8 @@ class AuthenticationHandler {
 			}
 		}
 		MetricsTrailSupport.commit(CottonMetrics.SECURITY_USER_STATE.build(
-				MetricAttribute.operatorOf("LOGGED_OUT"),
-				new MetricAttribute("user", this.user.toString())));
+				new Measurement("state", "LOGGED_OUT", MeasurementType.STRING),
+				new Measurement("user", this.user.toString(), MeasurementType.STRING)));
 		this.user = null;
 		CottonUI.current().getPage().reload();
 		return true;

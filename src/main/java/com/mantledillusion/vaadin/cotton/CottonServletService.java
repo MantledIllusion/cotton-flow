@@ -12,8 +12,9 @@ import com.mantledillusion.injection.hura.core.annotation.lifecycle.bean.PostDes
 import com.mantledillusion.injection.hura.core.annotation.property.Matches;
 import com.mantledillusion.injection.hura.core.annotation.property.Resolve;
 import com.mantledillusion.metrics.trail.*;
-import com.mantledillusion.metrics.trail.api.Metric;
-import com.mantledillusion.metrics.trail.api.MetricAttribute;
+import com.mantledillusion.metrics.trail.api.Event;
+import com.mantledillusion.metrics.trail.api.Measurement;
+import com.mantledillusion.metrics.trail.api.MeasurementType;
 import com.mantledillusion.vaadin.cotton.event.responsive.AfterResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.mantledillusion.vaadin.cotton.exception.http500.Http500InternalServerErrorException;
@@ -88,8 +89,10 @@ class CottonServletService extends VaadinServletService {
 				target = CottonUI.current().exchangeInjectedView(routeTargetType);
 				ms = System.currentTimeMillis() - ms;
 
-				MetricsTrailSupport.commit(CottonMetrics.SYSTEM_INJECTION.build(ms,
-						new MetricAttribute("class", routeTargetType.getName())));
+				MetricsTrailSupport.commit(CottonMetrics.SYSTEM_INJECTION.build(
+						new Measurement("injectionDuration", String.valueOf(ms), MeasurementType.LONG),
+						new Measurement("simpleName", routeTargetType.getSimpleName(), MeasurementType.STRING),
+						new Measurement("name", routeTargetType.getName(), MeasurementType.STRING)));
 			}
 			return target;
 		}
@@ -263,10 +266,13 @@ class CottonServletService extends VaadinServletService {
 			add(this.injector.instantiate(targetViewType));
 			ms = System.currentTimeMillis() - ms;
 
-			Metric metric = CottonMetrics.SYSTEM_INJECTION.build(ms,
-					new MetricAttribute("class", targetViewType.getName()));
+			Event metric = CottonMetrics.SYSTEM_INJECTION.build(
+					new Measurement("injectionDuration", String.valueOf(ms), MeasurementType.LONG),
+					new Measurement("simpleName", targetViewType.getSimpleName(), MeasurementType.STRING),
+					new Measurement("name", targetViewType.getName(), MeasurementType.STRING));
 			if (targetViewType != this.rootRouteTargetType) {
-				metric.getAttributes().add(new MetricAttribute("alternativeTo", this.rootRouteTargetType.getName()));
+				metric.getMeasurements().add(new Measurement("redirectedFromSimpleName", this.rootRouteTargetType.getSimpleName(), MeasurementType.STRING));
+				metric.getMeasurements().add(new Measurement("redirectedFromName", this.rootRouteTargetType.getName(), MeasurementType.STRING));
 			}
 			MetricsTrailSupport.commit(metric);
 		}
@@ -441,6 +447,14 @@ class CottonServletService extends VaadinServletService {
 
 	@Override
 	public void fireSessionDestroy(VaadinSession session) {
+		session.lock();
+		MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
+		MetricsTrailSupport.commit(CottonMetrics.SESSION_END.build(
+				new Measurement("sessionId", session.getSession().getId(), MeasurementType.STRING),
+				new Measurement("pushSessionId", session.getPushId(), MeasurementType.STRING)));
+		MetricsTrailSupport.release();
+		session.unlock();
+
 		if (this.serviceInjector.isActive()) {
 			session.access(() -> this.serviceInjector.destroy(session));
 		}
@@ -470,20 +484,20 @@ class CottonServletService extends VaadinServletService {
 				session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
 
 				MetricsTrailSupport.commit(CottonMetrics.SESSION_BEGIN.build(
-						new MetricAttribute("sessionId", session.getSession().getId()),
-						new MetricAttribute("pushSessionId", session.getPushId())));
+						new Measurement("sessionId", session.getSession().getId(), MeasurementType.STRING),
+						new Measurement("pushSessionId", session.getPushId(), MeasurementType.STRING)));
 
 				WebBrowser browser = session.getBrowser();
 				MetricsTrailSupport.commit(CottonMetrics.SESSION_BROWSER_INFO.build(
-						new MetricAttribute("application", browser.getBrowserApplication()),
-						new MetricAttribute("browserType", BrowserType.of(browser.isChrome(), browser.isEdge(),
-								browser.isFirefox(), browser.isIE(), browser.isOpera(), browser.isSafari()).name()),
-						new MetricAttribute("browserVersion", browser.getBrowserMajorVersion() + "." + browser.getBrowserMinorVersion()),
-						new MetricAttribute("systemEnvironment", SystemEnvironmentType.of(
+						new Measurement("application", browser.getBrowserApplication(), MeasurementType.STRING),
+						new Measurement("browserType", BrowserType.of(browser.isChrome(), browser.isEdge(), browser.isFirefox(),
+								browser.isIE(), browser.isOpera(), browser.isSafari()).name(), MeasurementType.STRING),
+						new Measurement("browserVersion", browser.getBrowserMajorVersion() + "." + browser.getBrowserMinorVersion(), MeasurementType.STRING),
+						new Measurement("systemEnvironment", SystemEnvironmentType.of(
 								Null.get(browser::isAndroid, false), Null.get(browser::isIPad, false),
 								Null.get(browser::isIPhone, false), Null.get(browser::isLinux, false),
 								Null.get(browser::isMacOSX, false), Null.get(browser::isWindows, false),
-								Null.get(browser::isWindowsPhone, false)).name())));
+								Null.get(browser::isWindowsPhone, false)).name(), MeasurementType.STRING)));
 			} else if (!MetricsTrailSupport.has()) {
 				MetricsTrailSupport.bind(session.getAttribute(MetricsTrail.class));
 			}

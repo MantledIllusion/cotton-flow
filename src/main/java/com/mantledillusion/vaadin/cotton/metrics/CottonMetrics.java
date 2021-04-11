@@ -1,131 +1,124 @@
 package com.mantledillusion.vaadin.cotton.metrics;
 
-import com.mantledillusion.metrics.trail.EnumeratedMetric;
-import com.mantledillusion.metrics.trail.api.Metric;
-import com.mantledillusion.metrics.trail.api.MetricType;
+import com.mantledillusion.metrics.trail.EnumeratedEvent;
+import com.mantledillusion.metrics.trail.api.Event;
+import com.mantledillusion.metrics.trail.api.Measurement;
 
 /**
- * Enum for all {@link com.mantledillusion.metrics.trail.api.Metric} types that are dispatched by Cotton.
+ * Enum for all {@link Event} types that are dispatched by Cotton.
  */
-public enum CottonMetrics implements EnumeratedMetric {
+public enum CottonMetrics implements EnumeratedEvent {
 
     /**
-     * {@link Metric} ID for the {@link MetricType#ALERT} an observer creates when a new session is started.
+     * ID for the {@link Event} an observer creates when a new session is started.
      * <p>
      * Metric ID: cotton.session.begin
      * <p>
-     * Properties:<br>
+     * Contains the {@link Measurement} :<br>
      * - 'sessionId': The session's ID.<br>
      * - 'pushSessionId': The async push session's ID.<br>
      */
-    SESSION_BEGIN(MetricType.ALERT),
+    SESSION_BEGIN,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#ALERT} an observer creates when a session ends.
+     * ID for the {@link Event} an observer creates when a session ends.
      * <p>
      * Metric ID: cotton.session.end
+     * <p>
+     * Contains the {@link Measurement} :<br>
+     * - 'sessionId': The session's ID.<br>
+     * - 'pushSessionId': The async push session's ID.<br>
      */
-    SESSION_END(MetricType.ALERT),
+    SESSION_END,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#ALERT} an observer creates about the browser beginning a session.
+     * ID for the {@link Event} an observer creates about the browser beginning a session.
      * <p>
      * Metric ID: cotton.session.browser.info
      * <p>
-     * Contains the attributes:<br>
+     * Contains the {@link Measurement} :<br>
      * - 'application': The application name<br>
      * - 'browserType': The {@link BrowserType}<br>
      * - 'browserVersion': The browser's version<br>
      * - 'systemEnvironment': The {@link SystemEnvironmentType}<br>
      */
-    SESSION_BROWSER_INFO(MetricType.ALERT),
+    SESSION_BROWSER_INFO,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#PHASE} an observer creates when the URL changes.
+     * ID for the {@link Event} an observer creates when the URL changes.
      * <p>
      * Metric ID: cotton.session.navigation
      * <p>
-     * Contains the attributes:<br>
-     * - {@link Metric#OPERATOR_ATTRIBUTE_KEY}: The path navigated to<br>
+     * Contains the {@link Measurement} :<br>
+     * - 'url': The path navigated to<br>
      * - [query parameter key] : Query parameter values, comma separated<br>
      */
-    SESSION_NAVIGATION(MetricType.PHASE),
+    SESSION_NAVIGATION,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#ALERT} an {@link com.vaadin.flow.server.ErrorHandler} creates when
+     * ID for the {@link Event} an {@link com.vaadin.flow.server.ErrorHandler} creates when
      * an uncatched {@link Throwable} occurs.
      * <p>
      * Metric ID: cotton.session.error
      * <p>
-     * Contains the attributes:<br>
-     * - {@link Metric#OPERATOR_ATTRIBUTE_KEY}: The simple name of the {@link Throwable}'s class<br>
-     * - 'type': The fully qualified class name of the {@link Throwable}'s class<br>
+     * Contains the {@link Measurement} :<br>
+     * - 'simpleName': The simple name of the {@link Throwable}'s class<br>
+     * - 'name': The fully qualified class name of the {@link Throwable}'s class<br>
      * - 'message': The {@link Throwable}'s message<br>
-     * - 'stackTrace': The {@link Throwable}'s stack trace<br>
      */
-    SESSION_ERROR(MetricType.ALERT),
+    SESSION_ERROR,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#METER} of the duration it took Cotton to inject a specific component.
+     * ID for the {@link Event} of the duration it took Cotton to inject a specific component.
      * <p>
      * Metric ID: cotton.system.injection
      * <p>
-     * Properties:<br>
-     * - {@link Metric#OPERATOR_ATTRIBUTE_KEY}: The duration in milliseconds it took to inject the component.<br>
-     * - 'class': The {@link Class} of the injected component.<br>
+     * Contains the {@link Measurement} :<br>
+     * - 'injectionDuration': The duration in milliseconds it took to inject the component.<br>
+     * - 'simpleName': The simple {@link Class} name of the injected component.<br>
+     * - 'name': The fully qualified {@link Class} name of the injected component.<br>
+     * - 'redirectedFromSimpleName': The simple {@link Class} name that was redirected from.<br>
+     * - 'redirectedFromName': The fully qualified {@link Class} name that was redirected from.<br>
      */
-    SYSTEM_INJECTION(MetricType.METER),
+    SYSTEM_INJECTION,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#PHASE} of a user logging in our out.
+     * ID for the {@link Event} of a user logging in our out.
      * <p>
      * Metric ID: cotton.security.user.state
      * <p>
-     * Properties:<br>
-     * - {@link Metric#OPERATOR_ATTRIBUTE_KEY}: Either "LOGGED_IN" or "LOGGED_OUT".<br>
+     * Contains the {@link Measurement} :<br>
+     * - 'state': Either "LOGGED_IN" or "LOGGED_OUT".<br>
      * - 'user': The identifier of the user.<br>
      */
-    SECURITY_USER_STATE(MetricType.PHASE),
+    SECURITY_USER_STATE,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#ALERT} when acces to a view is permitted.
+     * ID for the {@link Event} when acces to a view is permitted.
      * <p>
      * Metric ID: cotton.security.access.permitted
      * <p>
-     * Properties:<br>
-     * - 'target': The {@link Class} of the view access was permitted to.<br>
+     * Contains the {@link Measurement} :<br>
+     * - 'simpleName': The simple {@link Class} name of the view access was permitted to.<br>
+     * - 'name': The fully qualified {@link Class} name of the view access was permitted to.<br>
      * - 'user': The identifier of the user whose access was permitted.<br>
      */
-    SECURITY_ACCESS_GRANTED(MetricType.ALERT),
+    SECURITY_ACCESS_GRANTED,
 
     /**
-     * {@link Metric} ID for the {@link MetricType#ALERT} when acces to a view is denied.
+     * ID for the {@link Event} when acces to a view is denied.
      * <p>
      * Metric ID: cotton.security.access.denied
      * <p>
-     * Properties:<br>
-     * - 'target': The {@link Class} of the view access was denied to.<br>
+     * Contains the {@link Measurement} :<br>
+     * - 'simpleName': The simple {@link Class} name of the view access was denied to.<br>
+     * - 'name': The fully qualified {@link Class} name of the view access was denied to.<br>
      * - 'user': The identifier of the user whose access was denied (may be null).<br>
      */
-    SECURITY_ACCESS_DENIED(MetricType.ALERT);
-
-    private static final String METRICS_DOMAIN = "cotton";
-
-    private final String metricId;
-    private final MetricType type;
-
-    CottonMetrics(MetricType type) {
-        this.metricId = generateMetricId(METRICS_DOMAIN, this);
-        this.type = type;
-    }
+    SECURITY_ACCESS_DENIED;
 
     @Override
-    public String getMetricId() {
-        return this.metricId;
-    }
-
-    @Override
-    public MetricType getType() {
-        return type;
+    public String getPrefix() {
+        return "cotton";
     }
 }

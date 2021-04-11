@@ -7,8 +7,9 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Inject;
 import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.metrics.trail.MetricsTrailSupport;
-import com.mantledillusion.metrics.trail.api.Metric;
-import com.mantledillusion.metrics.trail.api.MetricAttribute;
+import com.mantledillusion.metrics.trail.api.Event;
+import com.mantledillusion.metrics.trail.api.Measurement;
+import com.mantledillusion.metrics.trail.api.MeasurementType;
 import com.mantledillusion.vaadin.cotton.component.builders.*;
 import com.mantledillusion.vaadin.cotton.component.css.CssStyle;
 import com.mantledillusion.vaadin.cotton.exception.WebException;
@@ -208,9 +209,10 @@ class CottonErrorHandler implements ErrorHandler {
         PrintWriter writer = new PrintWriter(out);
         t.printStackTrace(writer);
 
-        Metric metric = CottonMetrics.SESSION_ERROR.build(t.getClass().getSimpleName());
-        metric.getAttributes().add(new MetricAttribute("type", t.getClass().getName()));
-        metric.getAttributes().add(new MetricAttribute("message", message));
+        Event metric = CottonMetrics.SESSION_ERROR.build(
+                new Measurement("simpleName", t.getClass().getSimpleName(), MeasurementType.STRING),
+                new Measurement("name", t.getClass().getName(), MeasurementType.STRING),
+                new Measurement("message", message, MeasurementType.STRING));
         MetricsTrailSupport.commit(metric);
     }
 

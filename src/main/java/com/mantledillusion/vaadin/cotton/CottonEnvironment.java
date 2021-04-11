@@ -1,5 +1,6 @@
 package com.mantledillusion.vaadin.cotton;
 
+import com.mantledillusion.metrics.trail.api.Event;
 import com.mantledillusion.vaadin.cotton.component.builders.LabelBuilder;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.Push;
@@ -9,7 +10,6 @@ import com.mantledillusion.injection.hura.core.Blueprint;
 import com.mantledillusion.metrics.trail.MetricsConsumer;
 import com.mantledillusion.metrics.trail.MetricsPredicate;
 import com.mantledillusion.metrics.trail.MetricsTrailConsumer;
-import com.mantledillusion.metrics.trail.api.Metric;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
@@ -324,16 +324,16 @@ public final class CottonEnvironment {
      *
      * @param consumerId The unique id to add the consumer under, which will be delivered
      *                   to the consumer on each
-     *                   {@link MetricsConsumer#consume(String, UUID, Metric)}
+     *                   {@link MetricsConsumer#consume(String, UUID, Event)}
      *                   invocation. Allows the same consumer to be registered multiple
      *                   times with differing configurations; might <b>not</b> be null.
      * @param consumer   The consumer to add; might <b>not</b> be null.
      * @param gate       The predicate that needs to
-     *                   {@link MetricsPredicate#test(Metric)} true to trigger
-     *                   flushing all of a session's accumulated {@link Metric}s;
+     *                   {@link MetricsPredicate#test(Event)} true to trigger
+     *                   flushing all of a session's accumulated {@link Event}s;
      *                   might be null.
      * @param filter     The predicate that needs to
-     *                   {@link MetricsPredicate#test(Metric)} true to allow an
+     *                   {@link MetricsPredicate#test(Event)} true to allow an
      *                   about-to-be-flushed event to be delivered to the consumer; might
      *                   be null.
      * @return The {@link Blueprint.Allocation} for the application's environment {@link Blueprint}, never null

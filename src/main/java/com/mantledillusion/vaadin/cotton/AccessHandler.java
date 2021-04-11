@@ -7,8 +7,9 @@ import com.mantledillusion.injection.hura.core.annotation.injection.Qualifier;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Construct;
 import com.mantledillusion.injection.hura.core.annotation.instruction.Optional;
 import com.mantledillusion.metrics.trail.MetricsTrailSupport;
-import com.mantledillusion.metrics.trail.api.Metric;
-import com.mantledillusion.metrics.trail.api.MetricAttribute;
+import com.mantledillusion.metrics.trail.api.Event;
+import com.mantledillusion.metrics.trail.api.Measurement;
+import com.mantledillusion.metrics.trail.api.MeasurementType;
 import com.mantledillusion.vaadin.cotton.exception.http400.Http403UnauthorizedException;
 import com.mantledillusion.vaadin.cotton.metrics.CottonMetrics;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Restricted;
@@ -144,28 +145,30 @@ final class AccessHandler implements BeforeLeaveListener {
 
         if (destination == null) {
             MetricsTrailSupport.commit(CottonMetrics.SECURITY_ACCESS_DENIED.build(
-                    new MetricAttribute("target", event.getNavigationTarget().getName()),
-                    new MetricAttribute("user", authenticationHandler.isLoggedIn() ?
-                            authenticationHandler.getUser().toString() : null)));
+                    new Measurement("simpleName", event.getNavigationTarget().getSimpleName(), MeasurementType.STRING),
+                    new Measurement("name", event.getNavigationTarget().getName(), MeasurementType.STRING),
+                    new Measurement("user", authenticationHandler.isLoggedIn() ?
+                            authenticationHandler.getUser().toString() : null, MeasurementType.STRING)));
 
             event.rerouteToError(new Http403UnauthorizedException("Access to the view '"
                     + event.getNavigationTarget().getSimpleName() + "' is restricted"), null);
         } else {
             if (destination.getRestrictionType() != RestrictionType.NONE) {
                 MetricsTrailSupport.commit(CottonMetrics.SECURITY_ACCESS_GRANTED.build(
-                        new MetricAttribute("target", event.getNavigationTarget().getName()),
-                        new MetricAttribute("user", authenticationHandler.getUser().toString())));
+                        new Measurement("simpleName", event.getNavigationTarget().getSimpleName(), MeasurementType.STRING),
+                        new Measurement("name", event.getNavigationTarget().getName(), MeasurementType.STRING),
+                        new Measurement("user", authenticationHandler.getUser().toString(), MeasurementType.STRING)));
             }
             if (event.getNavigationTarget() != destination.getNavigationTarget()) {
                 event.forwardTo(destination.getNavigationTarget());
             } else {
                 java.util.Optional<String> url = event.getSource().getRegistry().getTargetUrl(destination.getNavigationTarget());
                 if (url.isPresent()) {
-                    Metric metric = CottonMetrics.SESSION_NAVIGATION.build(url.get());
+                    Event metric = CottonMetrics.SESSION_NAVIGATION.build(new Measurement("url", url.get(), MeasurementType.STRING));
                     String query = event.getLocation().getQueryParameters().getQueryString();
                     if (!query.isEmpty()) {
                         for (Map.Entry<String, String> param : fromParamAppender(query).entrySet()) {
-                            metric.getAttributes().add(new MetricAttribute(param.getKey(), param.getValue()));
+                            metric.getMeasurements().add(new Measurement(param.getKey(), param.getValue(), MeasurementType.STRING));
                         }
                     }
                     MetricsTrailSupport.commit(metric);
