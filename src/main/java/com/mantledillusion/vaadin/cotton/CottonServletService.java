@@ -59,6 +59,7 @@ class CottonServletService extends VaadinServletService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
 	private static final String JAR = "jar";
 	private static final String FILE = "file";
+	private static final String FOREIGN_TRAIL = "_foreignMetricsTrail";
 
 	static final String SID_SERVLETSERVICE = "_servletService";
 	static final String PKEY_RESPONSIVE_ADAPTION_WAIT_MS = "_responsiveAdaptionWaitMs";
@@ -381,11 +382,10 @@ class CottonServletService extends VaadinServletService {
 			Class<? extends Component> routeTarget = (Class<? extends Component>) clazz;
 			RouteConfiguration router = RouteConfiguration.forRegistry(getRouter().getRegistry());
 			router.setAnnotatedRoute(routeTarget);
-			if (HasUrlParameter.class.isAssignableFrom(clazz)) {
-				LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl((Class<C>) routeTarget, "{parameter}") + "'");
-			} else {
-				LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + router.getUrl(routeTarget) + "'");
-			}
+			router.getAvailableRoutes().stream()
+					.filter(route -> route.getNavigationTarget().equals(clazz))
+					.findFirst()
+					.ifPresent(route -> LOGGER.debug("Routing '" + clazz.getSimpleName() + "' to '" + route.getTemplate() + "'"));
 		}
 	}
 
@@ -480,6 +480,9 @@ class CottonServletService extends VaadinServletService {
 			if (session.getAttribute(MetricsTrail.class) == null) {
 				if (!MetricsTrailSupport.has()) {
 					MetricsTrailSupport.begin();
+					session.setAttribute(FOREIGN_TRAIL, Boolean.FALSE);
+				} else {
+					session.setAttribute(FOREIGN_TRAIL, Boolean.TRUE);
 				}
 				session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
 
@@ -512,9 +515,12 @@ class CottonServletService extends VaadinServletService {
 
 	@Override
 	public void requestEnd(VaadinRequest request, VaadinResponse response, VaadinSession session) {
-		if (MetricsTrailSupport.has()) {
+		session.lock();
+		if (MetricsTrailSupport.has() && !((Boolean) session.getAttribute(FOREIGN_TRAIL))) {
 			MetricsTrailSupport.release();
 		}
+		session.unlock();
+
 		super.requestEnd(request, response, session);
 	}
 }

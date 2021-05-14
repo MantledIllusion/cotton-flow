@@ -50,8 +50,10 @@ public enum CottonMetrics implements EnumeratedEvent {
      * Metric ID: cotton.session.navigation
      * <p>
      * Contains the {@link Measurement} :<br>
-     * - 'url': The path navigated to<br>
-     * - [query parameter key] : Query parameter values, comma separated<br>
+     * - 'simpleName': The simple {@link Class} name of the view access was permitted to.<br>
+     * - 'name': The fully qualified {@link Class} name of the view access was permitted to.<br>
+     * - 'path': The path navigated to<br>
+     * - '?[query parameter key]' : Query parameter values, comma separated<br>
      */
     SESSION_NAVIGATION,
 

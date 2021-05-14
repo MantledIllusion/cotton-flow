@@ -162,17 +162,15 @@ final class AccessHandler implements BeforeLeaveListener {
             if (event.getNavigationTarget() != destination.getNavigationTarget()) {
                 event.forwardTo(destination.getNavigationTarget());
             } else {
-                java.util.Optional<String> url = event.getSource().getRegistry().getTargetUrl(destination.getNavigationTarget());
-                if (url.isPresent()) {
-                    Event metric = CottonMetrics.SESSION_NAVIGATION.build(new Measurement("url", url.get(), MeasurementType.STRING));
-                    String query = event.getLocation().getQueryParameters().getQueryString();
-                    if (!query.isEmpty()) {
-                        for (Map.Entry<String, String> param : fromParamAppender(query).entrySet()) {
-                            metric.getMeasurements().add(new Measurement(param.getKey(), param.getValue(), MeasurementType.STRING));
-                        }
-                    }
-                    MetricsTrailSupport.commit(metric);
-                }
+                Event metric = CottonMetrics.SESSION_NAVIGATION.build(
+                        new Measurement("simpleName", event.getNavigationTarget().getSimpleName(), MeasurementType.STRING),
+                        new Measurement("name", event.getNavigationTarget().getName(), MeasurementType.STRING),
+                        new Measurement("path", event.getLocation().getPath(), MeasurementType.STRING));
+
+                event.getLocation().getQueryParameters().getParameters().forEach((key, value) ->
+                        metric.getMeasurements().add(new Measurement('?' + key, StringUtils.join(value, ','), MeasurementType.STRING)));
+
+                MetricsTrailSupport.commit(metric);
             }
         }
     }

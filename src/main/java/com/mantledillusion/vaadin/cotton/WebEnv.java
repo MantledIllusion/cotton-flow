@@ -10,6 +10,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.router.RouteParam;
+import com.vaadin.flow.router.RouteParameters;
 
 /**
  * Offers static methods in the web environment context of the current {@link CottonUI} instance.
@@ -48,10 +50,11 @@ public final class WebEnv {
      * Navigates to the given location.
      *
      * @param navigationTarget The view to whose location to navigate to; might <b>not</b> be null.
+     * @param routeParams The route params to set; might <b>not</b> contain nulls, might be empty.
      * @see UI#navigate(Class)
      */
-    public static void navigateTo(Class<? extends Component> navigationTarget) {
-        CottonUI.current().navigate(navigationTarget);
+    public static void navigateTo(Class<? extends Component> navigationTarget, RouteParam... routeParams) {
+        CottonUI.current().navigate(navigationTarget, new RouteParameters(routeParams));
     }
 
     /**
