@@ -38,6 +38,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.shared.Registration;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -57,9 +58,9 @@ import java.util.stream.Collectors;
 class CottonServletService extends VaadinServletService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CottonServletService.class);
+	private static final ThreadLocal<Boolean> FOREIGN_TRAIL = new ThreadLocal<>();
 	private static final String JAR = "jar";
 	private static final String FILE = "file";
-	private static final String FOREIGN_TRAIL = "_foreignMetricsTrail";
 
 	static final String SID_SERVLETSERVICE = "_servletService";
 	static final String PKEY_RESPONSIVE_ADAPTION_WAIT_MS = "_responsiveAdaptionWaitMs";
@@ -480,9 +481,9 @@ class CottonServletService extends VaadinServletService {
 			if (session.getAttribute(MetricsTrail.class) == null) {
 				if (!MetricsTrailSupport.has()) {
 					MetricsTrailSupport.begin();
-					session.setAttribute(FOREIGN_TRAIL, Boolean.FALSE);
+					FOREIGN_TRAIL.set(Boolean.FALSE);
 				} else {
-					session.setAttribute(FOREIGN_TRAIL, Boolean.TRUE);
+					FOREIGN_TRAIL.set(Boolean.TRUE);
 				}
 				session.setAttribute(MetricsTrail.class, MetricsTrailSupport.get());
 
@@ -515,11 +516,9 @@ class CottonServletService extends VaadinServletService {
 
 	@Override
 	public void requestEnd(VaadinRequest request, VaadinResponse response, VaadinSession session) {
-		session.lock();
-		if (MetricsTrailSupport.has() && !((Boolean) session.getAttribute(FOREIGN_TRAIL))) {
+		if (MetricsTrailSupport.has() && !ObjectUtils.defaultIfNull(FOREIGN_TRAIL.get(), Boolean.FALSE)) {
 			MetricsTrailSupport.release();
 		}
-		session.unlock();
 
 		super.requestEnd(request, response, session);
 	}
