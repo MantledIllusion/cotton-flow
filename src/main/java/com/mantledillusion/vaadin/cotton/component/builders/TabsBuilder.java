@@ -161,6 +161,21 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
     }
 
     /**
+     * Builder method, configures a new {@link Tab}.
+     *
+     * @see Tabs#add(Tab...)
+     * @param content The {@link Component} the new {@link Tab} is being configured for; will automatically call
+     *                {@link Component#setVisible(boolean)} depending on whether the {@link Tab} is being (de)selected.
+     * @return A new {@link TabBuilder}, never null
+     */
+    public TabBuilder configureTab(Component content) {
+        TabBuilder tabBuilder = new TabBuilder();
+        configure(tabBuilder);
+        tabBuilder.configure(tab -> get(Tabs.class).addSelectedChangeListener(event -> content.setVisible(event.getSelectedTab() == tab)));
+        return tabBuilder;
+    }
+
+    /**
      * Builder method, configures the {@link Component}'s selected {@link Tab}.
      *
      * @see Tabs#setSelectedIndex(int)
