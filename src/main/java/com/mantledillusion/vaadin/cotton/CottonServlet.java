@@ -21,8 +21,8 @@ import java.util.*;
  * <p>
  * In application who are completely injected by Hura, this {@link javax.servlet.Servlet} class can be injected directly.
  * <p>
- * In other environments (such as Spring or plain Servlet-API deployments), this class has to be extended,
- * so the protected constructor is used with an instance of the {@link Blueprint} that defines the application's environment.
+ * In other environments (such as Spring or plain Servlet-API deployments), this class can be instantiated or extended,
+ * so the public constructor is used with an instance of the {@link Blueprint} that defines the application's environment.
  */
 public class CottonServlet extends VaadinServlet {
 
@@ -65,7 +65,7 @@ public class CottonServlet extends VaadinServlet {
      * @param cottonEnvironment The {@link Blueprint} that @{@link com.mantledillusion.injection.hura.core.annotation.instruction.Define}s
      *                          the application's environment; might <b>not</b> be null.
      */
-    protected CottonServlet(Blueprint cottonEnvironment) {
+    public CottonServlet(Blueprint cottonEnvironment) {
         if (cottonEnvironment == null) {
             throw new Http901IllegalArgumentException("Cannot initialize a " + CottonServlet.class.getSimpleName() + " using a null cotton environment blueprint");
         }
