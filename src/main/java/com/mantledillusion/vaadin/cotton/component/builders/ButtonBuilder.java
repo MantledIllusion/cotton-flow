@@ -17,7 +17,7 @@ public class ButtonBuilder extends AbstractComponentBuilder<Button, ButtonBuilde
 		HasTextBuilder<Button, ButtonBuilder>,
 		HasEnabledBuilder<Button, ButtonBuilder>,
 		FocusableBuilder<Button, ButtonBuilder>,
-		ClickableBuilder<Button, ButtonBuilder> {
+        ClickNotifierBuilder<Button, ButtonBuilder> {
 
 	private ButtonBuilder() {}
 

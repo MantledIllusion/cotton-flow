@@ -3,9 +3,11 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.function.SerializablePredicate;
 import org.apache.commons.lang3.StringUtils;
 
@@ -25,7 +27,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 		HasStyleBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
 		HasEnabledBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
 		HasItemsBuilder<CheckboxGroup<E>, E, CheckBoxGroupBuilder<E, F>>,
-		HasValueBuilder<CheckboxGroup<E>, Set<E>, CheckBoxGroupBuilder<E, F>>,
+		HasValueBuilder<CheckboxGroup<E>, Set<E>, AbstractField.ComponentValueChangeEvent<CheckboxGroup<E>, Set<E>>, CheckBoxGroupBuilder<E, F>>,
 		HasComponentsBuilder<CheckboxGroup<E>, CheckBoxGroupBuilder<E, F>>,
         HasSimpleDataProviderBuilder<CheckboxGroup<E>, E, F, CheckBoxGroupBuilder<E, F>> {
 
@@ -37,7 +39,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 * @return A new instance, never null.
 	 */
 	public static CheckBoxGroupBuilder<Object, HasDataProviderBuilder.ConfigurableFilter<Object>> create() {
-		return new CheckBoxGroupBuilder();
+		return new CheckBoxGroupBuilder<>();
 	}
 
 	/**
@@ -48,7 +50,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 * @return A new instance, never null.
 	 */
 	public static <E> CheckBoxGroupBuilder<E, HasDataProviderBuilder.ConfigurableFilter<E>> create(Class<E> elementType) {
-		return new CheckBoxGroupBuilder();
+		return new CheckBoxGroupBuilder<>();
 	}
 
 	/**
@@ -62,7 +64,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 */
 	public static <E, F extends HasDataProviderBuilder.ConfigurableFilter<E>> CheckBoxGroupBuilder<E, F> create(Class<E> elementType,
 																												Class<F> filterType) {
-		return new CheckBoxGroupBuilder();
+		return new CheckBoxGroupBuilder<>();
 	}
 
 	@Override
@@ -83,7 +85,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 *            The label text or a message id to translate via {@link WebEnv}; might be null.
 	 * @return this
 	 */
-	public CheckBoxGroupBuilder setLabel(String msgId) {
+	public CheckBoxGroupBuilder<E, F> setLabel(String msgId) {
 		return configure(checkBoxGroup -> checkBoxGroup.setLabel(WebEnv.getTranslation(msgId)));
 	}
 
@@ -95,7 +97,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 *            The predicate enabling items; might <b>not</b> be null.
 	 * @return this
 	 */
-	public CheckBoxGroupBuilder setItemEnabledProvider(SerializablePredicate<E> itemEnabledProvider) {
+	public CheckBoxGroupBuilder<E, F> setItemEnabledProvider(SerializablePredicate<E> itemEnabledProvider) {
 		return configure(checkBoxGroup -> checkBoxGroup.setItemEnabledProvider(itemEnabledProvider));
 	}
 
@@ -107,7 +109,7 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 *            The generator for item labels or message ids to translate via {@link WebEnv}; might <b>not</b> be null.
 	 * @return this
 	 */
-	public CheckBoxGroupBuilder setItemLabelGenerator(ItemLabelGenerator<E> itemLabelGenerator) {
+	public CheckBoxGroupBuilder<E, F> setItemLabelGenerator(ItemLabelGenerator<E> itemLabelGenerator) {
 		return configure(checkBoxGroup -> checkBoxGroup.setItemLabelGenerator(
 				item -> WebEnv.getTranslation(itemLabelGenerator.apply(item))));
 	}
@@ -121,8 +123,20 @@ public class CheckBoxGroupBuilder<E, F extends HasDataProviderBuilder.Configurab
 	 *            The message id prefix to append an item's {@link Object#toString()} value to; might be null.
 	 * @return this
 	 */
-	public CheckBoxGroupBuilder setItemLabelMessageIdPrefix(String messageIdPrefix) {
+	public CheckBoxGroupBuilder<E, F> setItemLabelMessageIdPrefix(String messageIdPrefix) {
 		return configure(checkBoxGroup -> checkBoxGroup.setItemLabelGenerator(
 				item -> WebEnv.getTranslation(StringUtils.defaultIfBlank(messageIdPrefix, StringUtils.EMPTY)+item)));
+	}
+
+	/**
+	 * Builder method, configures a listener for {@link com.vaadin.flow.data.selection.MultiSelectionEvent}s.
+	 * 
+	 * @see CheckboxGroup#addSelectionListener(MultiSelectionListener)
+	 * @param listener 
+	 * 			The listener to add; might <b>not</b> be null.
+	 * @return this
+	 */
+	public CheckBoxGroupBuilder<E, F> addSelectionListener(MultiSelectionListener<CheckboxGroup<E>, E> listener) {
+		return configure(checkBoxGroup -> checkBoxGroup.addSelectionListener(listener));
 	}
 }

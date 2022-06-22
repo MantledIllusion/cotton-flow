@@ -3,6 +3,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.textfield.NumberField;
 
 /**
@@ -19,7 +20,10 @@ public class NumberFieldBuilder extends AbstractComponentBuilder<NumberField, Nu
         HasAutocapitalizeBuilder<NumberField, NumberFieldBuilder>,
         HasAutocorrectBuilder<NumberField, NumberFieldBuilder>,
         HasEnabledBuilder<NumberField, NumberFieldBuilder>,
-        HasValueBuilder<NumberField, Double, NumberFieldBuilder> {
+        HasValueBuilder<NumberField, Double, AbstractField.ComponentValueChangeEvent<NumberField, Double>, NumberFieldBuilder>,
+        CompositionNotifierBuilder<NumberField, NumberFieldBuilder>,
+        InputNotifierBuilder<NumberField, NumberFieldBuilder>,
+        KeyNotifierBuilder<NumberField, NumberFieldBuilder> {
 
     private NumberFieldBuilder() {}
 

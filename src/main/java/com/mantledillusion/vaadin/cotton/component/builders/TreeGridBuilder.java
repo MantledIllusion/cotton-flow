@@ -3,6 +3,9 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasDataProviderBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasHierarchicalDataProviderBuilder;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.treegrid.CollapseEvent;
+import com.vaadin.flow.component.treegrid.ExpandEvent;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.function.ValueProvider;
 
@@ -69,5 +72,29 @@ public class TreeGridBuilder<E, F extends HasDataProviderBuilder.ConfigurableFil
         GridColumnBuilder columnBuilder = new GridColumnBuilder(grid -> grid.addHierarchyColumn(valueProvider));
         configure(columnBuilder);
         return columnBuilder;
+    }
+
+    /**
+     * Builder method, configures a listener for {@link ExpandEvent}s.
+     *
+     * @see TreeGrid#addExpandListener(ComponentEventListener)
+     * @param listener
+     *          The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public TreeGridBuilder<E, F> addExpandListener(ComponentEventListener<ExpandEvent<E, TreeGrid<E>>> listener) {
+        return configure(treeGrid -> treeGrid.addExpandListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link CollapseEvent}s.
+     *
+     * @see TreeGrid#addCollapseListener(ComponentEventListener)
+     * @param listener
+     *          The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public TreeGridBuilder<E, F> addCollapseListener(ComponentEventListener<CollapseEvent<E, TreeGrid<E>>> listener) {
+        return configure(treeGrid -> treeGrid.addCollapseListener(listener));
     }
 }

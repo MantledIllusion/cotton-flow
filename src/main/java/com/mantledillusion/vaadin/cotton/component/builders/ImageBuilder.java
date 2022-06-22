@@ -14,7 +14,7 @@ public class ImageBuilder extends AbstractComponentBuilder<Image, ImageBuilder> 
         HasSizeBuilder<Image, ImageBuilder>,
         HasComponentsBuilder<Image, ImageBuilder>,
         HasTextBuilder<Image, ImageBuilder>,
-        ClickableBuilder<Image, ImageBuilder> {
+        ClickNotifierBuilder<Image, ImageBuilder> {
 
     private ImageBuilder() {}
 

@@ -1,6 +1,5 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
-import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
@@ -45,7 +44,7 @@ public class FormLayoutBuilder extends AbstractComponentBuilder<FormLayout, Form
             HasElementBuilder<FormLayout.FormItem, FormItemBuilder>,
             HasStyleBuilder<FormLayout.FormItem, FormItemBuilder>,
             HasComponentsBuilder<FormLayout.FormItem, FormItemBuilder>,
-            ClickableBuilder<FormLayout.FormItem, FormItemBuilder>,
+            ClickNotifierBuilder<FormLayout.FormItem, FormItemBuilder>,
             Configurer<FormLayout> {
 
         private final Function<FormLayout, FormLayout.FormItem> formItemSupplier;

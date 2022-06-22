@@ -9,9 +9,9 @@ import com.vaadin.flow.component.*;
  * @param <C>
  *            The {@link Component} type implementing {@link ClickNotifier}.
  * @param <B>
- *            The final implementation type of {@link ClickableBuilder}.
+ *            The final implementation type of {@link ClickNotifierBuilder}.
  */
-public interface ClickableBuilder<C extends Component & ClickNotifier<C>, B extends ClickableBuilder<C, B>> extends EntityBuilder<C, B> {
+public interface ClickNotifierBuilder<C extends Component & ClickNotifier<C>, B extends ClickNotifierBuilder<C, B>> extends EntityBuilder<C, B> {
 
     /**
      * Builder method, configures a {@link ComponentEventListener} for the {@link Component}'s {@link ClickEvent}s.

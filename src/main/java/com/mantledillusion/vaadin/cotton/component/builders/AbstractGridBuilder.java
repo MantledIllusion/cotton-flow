@@ -8,15 +8,18 @@ import com.mantledillusion.vaadin.cotton.component.EntityBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http902IllegalStateException;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.grid.ColumnTextAlign;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.grid.SortOrderProvider;
+import com.vaadin.flow.component.grid.*;
+import com.vaadin.flow.component.grid.dnd.GridDragEndEvent;
+import com.vaadin.flow.component.grid.dnd.GridDragStartEvent;
+import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 
@@ -586,5 +589,113 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
         })));
         configure(columnBuilder);
         return columnBuilder;
+    }
+
+    /**
+     * Builder method, configures a listener for {@link ItemClickEvent}s.
+     *
+     * @see Grid#addItemClickListener(ComponentEventListener)
+     * @param listener
+     *          The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addItemClickListener(ComponentEventListener<ItemClickEvent<E>> listener) {
+        return configure(grid -> grid.addItemClickListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link ItemDoubleClickEvent}s.
+     *
+     * @see Grid#addItemDoubleClickListener(ComponentEventListener)
+     * @param listener
+     *          The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addItemDoubleClickListener(ComponentEventListener<ItemDoubleClickEvent<E>> listener) {
+        return configure(grid -> grid.addItemDoubleClickListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link com.vaadin.flow.data.selection.SelectionEvent}s.
+     *
+     * @see Grid#addSelectionListener(SelectionListener)
+     * @param listener
+     *          The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addSelectionListener(SelectionListener<Grid<E>, E> listener) {
+        return configure(grid -> grid.addSelectionListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link SortEvent}s.
+     *
+     * @see Grid#addSortListener(ComponentEventListener)
+     * @param listener
+     * 			The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addSortListener(ComponentEventListener<SortEvent<Grid<E>, GridSortOrder<E>>> listener) {
+        return configure(grid -> grid.addSortListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link ColumnReorderEvent}s.
+     *
+     * @see Grid#addColumnResizeListener(ComponentEventListener)
+     * @param listener
+     * 			The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addColumnReorderListener(ComponentEventListener<ColumnReorderEvent<E>> listener) {
+        return configure(grid -> grid.addColumnReorderListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link ColumnResizeEvent}s.
+     *
+     * @see Grid#addColumnResizeListener(ComponentEventListener)
+     * @param listener
+     * 			The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addColumnResizeListener(ComponentEventListener<ColumnResizeEvent<E>> listener) {
+        return configure(grid -> grid.addColumnResizeListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link GridDragStartEvent}s.
+     *
+     * @see Grid#addDragStartListener(ComponentEventListener)
+     * @param listener
+     * 			The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addDragStartListener(ComponentEventListener<GridDragStartEvent<E>> listener) {
+        return configure(grid -> grid.addDragStartListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link GridDragEndEvent}s.
+     *
+     * @see Grid#addDragEndListener(ComponentEventListener)
+     * @param listener
+     * 			The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addDragEndListener(ComponentEventListener<GridDragEndEvent<E>> listener) {
+        return configure(grid -> grid.addDragEndListener(listener));
+    }
+
+    /**
+     * Builder method, configures a listener for {@link GridDropEvent}s.
+     *
+     * @see Grid#addDropListener(ComponentEventListener)
+     * @param listener
+     * 			The listener to add; might <b>not</b> be null.
+     * @return this
+     */
+    public B addDropListener(ComponentEventListener<GridDropEvent<E>> listener) {
+        return configure(grid -> grid.addDropListener(listener));
     }
 }

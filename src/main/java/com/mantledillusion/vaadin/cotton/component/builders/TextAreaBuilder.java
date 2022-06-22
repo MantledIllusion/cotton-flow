@@ -3,6 +3,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
 
@@ -20,7 +21,10 @@ public class TextAreaBuilder extends AbstractComponentBuilder<TextArea, TextArea
 		HasAutocorrectBuilder<TextArea, TextAreaBuilder>,
 		FocusableBuilder<TextArea, TextAreaBuilder>,
 		HasEnabledBuilder<TextArea, TextAreaBuilder>,
-		HasValueBuilder<TextArea, String, TextAreaBuilder> {
+		HasValueBuilder<TextArea, String, AbstractField.ComponentValueChangeEvent<TextArea, String>, TextAreaBuilder>,
+		CompositionNotifierBuilder<TextArea, TextAreaBuilder>,
+		InputNotifierBuilder<TextArea, TextAreaBuilder>,
+		KeyNotifierBuilder<TextArea, TextAreaBuilder> {
 
 	private TextAreaBuilder() {}
 

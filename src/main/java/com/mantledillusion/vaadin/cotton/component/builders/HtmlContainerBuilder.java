@@ -17,7 +17,7 @@ public class HtmlContainerBuilder<C extends HtmlContainer & ClickNotifier<C>> ex
         HasSizeBuilder<C, HtmlContainerBuilder<C>>,
         HasComponentsBuilder<C, HtmlContainerBuilder<C>>,
         HasTextBuilder<C, HtmlContainerBuilder<C>>,
-        ClickableBuilder<C, HtmlContainerBuilder<C>> {
+        ClickNotifierBuilder<C, HtmlContainerBuilder<C>> {
 
     /**
      * Simplistic {@link HtmlContainer} extension allowing to set HTML code as text.

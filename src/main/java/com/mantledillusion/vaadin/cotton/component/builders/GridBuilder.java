@@ -3,7 +3,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasDataProviderBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasSimpleDataProviderBuilder;
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.*;
 
 /**
  * {@link ComponentBuilder} for {@link Grid}s.

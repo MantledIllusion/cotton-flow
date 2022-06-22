@@ -4,7 +4,10 @@ import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Presentable;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DetachEvent;
 
 /**
  * Base implementation of {@link ComponentBuilder} that provides all of the base functionality except
@@ -60,6 +63,28 @@ abstract class AbstractComponentBuilder<C extends Component, B extends AbstractC
 			throw new Http901IllegalArgumentException("Cannot register a component at a null active component registry");
 		}
 		return configure(activeComponent -> activeComponentRegistry.register(activeComponent, id));
+	}
+
+	/**
+	 * Adds a listener for {@link AttachEvent}s.
+	 *
+	 * @see Component#addAttachListener(ComponentEventListener)
+	 * @param listener The listener to add; might <b>not</b> be null.
+	 * @return this
+	 */
+	public final B addAttachListener(ComponentEventListener<AttachEvent> listener) {
+		return configure(component -> component.addAttachListener(listener));
+	}
+
+	/**
+	 * Adds a listener for {@link DetachEvent}s.
+	 *
+	 * @see Component#addDetachListener(ComponentEventListener)
+	 * @param listener The listener to add; might <b>not</b> be null.
+	 * @return this
+	 */
+	public final B addDetachListener(ComponentEventListener<DetachEvent> listener) {
+		return configure(component -> component.addDetachListener(listener));
 	}
 
 	/**

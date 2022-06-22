@@ -6,8 +6,11 @@ import java.util.Locale;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.datepicker.GeneratedVaadinDatePicker;
 
 /**
  * {@link ComponentBuilder} for {@link DatePicker}s.
@@ -18,7 +21,7 @@ public class DatePickerBuilder extends AbstractComponentBuilder<DatePicker, Date
 		HasStyleBuilder<DatePicker, DatePickerBuilder>,
 		FocusableBuilder<DatePicker, DatePickerBuilder>,
 		HasEnabledBuilder<DatePicker, DatePickerBuilder>,
-		HasValueBuilder<DatePicker, LocalDate, DatePickerBuilder> {
+		HasValueBuilder<DatePicker, LocalDate, AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, DatePickerBuilder> {
 
 	private DatePickerBuilder() {}
 
@@ -151,5 +154,27 @@ public class DatePickerBuilder extends AbstractComponentBuilder<DatePicker, Date
 	 */
 	public DatePickerBuilder setWeekNumbersVisible(boolean visible) {
 		return configure(datePicker -> datePicker.setWeekNumbersVisible(visible));
+	}
+
+	/**
+	 * Builder method, configures a listener for {@link GeneratedVaadinDatePicker.InvalidChangeEvent}s.
+	 *
+	 * @param listener
+	 * 			The listener to add; might <b>not</b> be null.
+	 * @return this
+	 */
+	public DatePickerBuilder addInvalidChangeListener(ComponentEventListener<GeneratedVaadinDatePicker.InvalidChangeEvent<DatePicker>> listener) {
+		return configure(datePicker -> datePicker.addInvalidChangeListener(listener));
+	}
+
+	/**
+	 * Builder method, configures a listener for {@link GeneratedVaadinDatePicker.OpenedChangeEvent}s.
+	 *
+	 * @param listener
+	 * 			The listener to add; might <b>not</b> be null.
+	 * @return this
+	 */
+	public DatePickerBuilder addOpenedChangeListener(ComponentEventListener<GeneratedVaadinDatePicker.OpenedChangeEvent<DatePicker>> listener) {
+		return configure(datePicker -> datePicker.addOpenedChangeListener(listener));
 	}
 }

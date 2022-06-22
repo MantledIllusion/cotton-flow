@@ -3,6 +3,9 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.timepicker.GeneratedVaadinTimePicker;
 import com.vaadin.flow.component.timepicker.TimePicker;
 
 import java.time.Duration;
@@ -18,7 +21,7 @@ public class TimePickerBuilder extends AbstractComponentBuilder<TimePicker, Time
 		HasStyleBuilder<TimePicker, TimePickerBuilder>,
 		FocusableBuilder<TimePicker, TimePickerBuilder>,
 		HasEnabledBuilder<TimePicker, TimePickerBuilder>,
-		HasValueBuilder<TimePicker, LocalTime, TimePickerBuilder> {
+		HasValueBuilder<TimePicker, LocalTime, AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, TimePickerBuilder> {
 
 	private TimePickerBuilder() {}
 
@@ -119,5 +122,16 @@ public class TimePickerBuilder extends AbstractComponentBuilder<TimePicker, Time
 	 */
 	public TimePickerBuilder setWeekNumbersVisible(Duration step) {
 		return configure(timePicker -> timePicker.setStep(step));
+	}
+
+	/**
+	 * Builder method, configures a listener for {@link GeneratedVaadinTimePicker.InvalidChangeEvent}s.
+	 *
+	 * @param listener
+	 * 			The listener to add; might <b>not</b> be null.
+	 * @return this
+	 */
+	public TimePickerBuilder addInvalidChangeListener(ComponentEventListener<GeneratedVaadinTimePicker.InvalidChangeEvent<TimePicker>> listener) {
+		return configure(datePicker -> datePicker.addInvalidChangeListener(listener));
 	}
 }

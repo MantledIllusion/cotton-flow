@@ -17,7 +17,7 @@ public class VerticalLayoutBuilder extends AbstractComponentBuilder<VerticalLayo
         HasComponentsBuilder<VerticalLayout, VerticalLayoutBuilder>,
         ThemableLayoutBuilder<VerticalLayout, VerticalLayoutBuilder>,
         FlexComponentBuilder<VerticalLayout, VerticalLayoutBuilder>,
-        ClickableBuilder<VerticalLayout, VerticalLayoutBuilder> {
+        ClickNotifierBuilder<VerticalLayout, VerticalLayoutBuilder> {
 
     private VerticalLayoutBuilder() {}
 

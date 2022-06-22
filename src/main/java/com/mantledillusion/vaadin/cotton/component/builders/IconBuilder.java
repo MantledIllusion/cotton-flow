@@ -1,7 +1,7 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
-import com.mantledillusion.vaadin.cotton.component.mixin.ClickableBuilder;
+import com.mantledillusion.vaadin.cotton.component.mixin.ClickNotifierBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasElementBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.HasStyleBuilder;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
@@ -17,7 +17,7 @@ import java.util.Locale;
 public class IconBuilder extends AbstractComponentBuilder<Icon, IconBuilder> implements
         HasElementBuilder<Icon, IconBuilder>,
         HasStyleBuilder<Icon, IconBuilder>,
-        ClickableBuilder<Icon, IconBuilder> {
+        ClickNotifierBuilder<Icon, IconBuilder> {
 
     private String collection;
     private String icon;

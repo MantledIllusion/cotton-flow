@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 
@@ -22,7 +23,10 @@ public class TextFieldBuilder extends AbstractComponentBuilder<TextField, TextFi
 		HasAutocorrectBuilder<TextField, TextFieldBuilder>,
 		FocusableBuilder<TextField, TextFieldBuilder>,
 		HasEnabledBuilder<TextField, TextFieldBuilder>,
-		HasValueBuilder<TextField, String, TextFieldBuilder> {
+		HasValueBuilder<TextField, String, AbstractField.ComponentValueChangeEvent<TextField, String>, TextFieldBuilder>,
+		CompositionNotifierBuilder<TextField, TextFieldBuilder>,
+		InputNotifierBuilder<TextField, TextFieldBuilder>,
+		KeyNotifierBuilder<TextField, TextFieldBuilder> {
 
 	private TextFieldBuilder() {}
 

@@ -3,6 +3,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
@@ -24,7 +25,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 		HasStyleBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
 		HasEnabledBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
 		HasItemsBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E, F>>,
-		HasValueBuilder<RadioButtonGroup<E>, E, RadioButtonGroupBuilder<E, F>>,
+		HasValueBuilder<RadioButtonGroup<E>, E, AbstractField.ComponentValueChangeEvent<RadioButtonGroup<E>, E>, RadioButtonGroupBuilder<E, F>>,
 		HasComponentsBuilder<RadioButtonGroup<E>, RadioButtonGroupBuilder<E, F>>,
         HasSimpleDataProviderBuilder<RadioButtonGroup<E>, E, F, RadioButtonGroupBuilder<E, F>> {
 

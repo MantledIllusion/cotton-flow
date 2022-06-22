@@ -3,6 +3,7 @@ package com.mantledillusion.vaadin.cotton.component.builders;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 
@@ -18,7 +19,7 @@ public class DateTimePickerBuilder extends AbstractComponentBuilder<DateTimePick
 		HasStyleBuilder<DateTimePicker, DateTimePickerBuilder>,
 		FocusableBuilder<DateTimePicker, DateTimePickerBuilder>,
 		HasEnabledBuilder<DateTimePicker, DateTimePickerBuilder>,
-		HasValueBuilder<DateTimePicker, LocalDateTime, DateTimePickerBuilder> {
+		HasValueBuilder<DateTimePicker, LocalDateTime, AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, DateTimePickerBuilder> {
 
 	private DateTimePickerBuilder() {}
 

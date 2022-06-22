@@ -13,7 +13,8 @@ public class RouterLinkBuilder extends AbstractComponentBuilder<RouterLink, Rout
         HasComponentsBuilder<RouterLink, RouterLinkBuilder>,
         HasStyleBuilder<RouterLink, RouterLinkBuilder>,
         HasEnabledBuilder<RouterLink, RouterLinkBuilder>,
-        HasTextBuilder<RouterLink, RouterLinkBuilder> {
+        HasTextBuilder<RouterLink, RouterLinkBuilder>,
+        FocusableBuilder<RouterLink, RouterLinkBuilder> {
 
     private RouterLinkBuilder() {}
 
