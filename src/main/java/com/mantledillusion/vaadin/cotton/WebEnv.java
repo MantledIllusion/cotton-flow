@@ -8,10 +8,7 @@ import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefres
 import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.QueryParameters;
-import com.vaadin.flow.router.RouteParam;
-import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.*;
 
 /**
  * Offers static methods in the web environment context of the current {@link CottonUI} instance.
@@ -28,8 +25,8 @@ public final class WebEnv {
     /**
      * Navigates to the given location.
      *
-     * @param location The location to navigate to; might <b>not</b> be null.
      * @see UI#navigate(String)
+     * @param location The location to navigate to; might <b>not</b> be null.
      */
     public static void navigateTo(String location) {
         CottonUI.current().navigate(location);
@@ -38,9 +35,9 @@ public final class WebEnv {
     /**
      * Navigates to the given location.
      *
+     * @see UI#navigate(String, QueryParameters)
      * @param location        The location to navigate to; might <b>not</b> be null.
      * @param queryParameters The {@link QueryParameters} to set; might <b>not</b> be null.
-     * @see UI#navigate(String, QueryParameters)
      */
     public static void navigateTo(String location, QueryParameters queryParameters) {
         CottonUI.current().navigate(location, queryParameters);
@@ -49,9 +46,9 @@ public final class WebEnv {
     /**
      * Navigates to the given location.
      *
+     * @see UI#navigate(Class, RouteParameters)
      * @param navigationTarget The view to whose location to navigate to; might <b>not</b> be null.
      * @param routeParams The route params to set; might <b>not</b> contain nulls, might be empty.
-     * @see UI#navigate(Class)
      */
     public static void navigateTo(Class<? extends Component> navigationTarget, RouteParam... routeParams) {
         CottonUI.current().navigate(navigationTarget, new RouteParameters(routeParams));
@@ -60,15 +57,56 @@ public final class WebEnv {
     /**
      * Navigates to the given location.
      *
+     * @see UI#navigate(Class, Object)
      * @param <T>              url parameter type
      * @param <C>              navigation target type
      * @param navigationTarget The view to whose location to navigate to; might <b>not</b> be null.
      * @param parameter        The navigation parameter to pass; might be null.
-     * @see UI#navigate(Class, Object)
      */
     public static <T, C extends Component & HasUrlParameter<T>> void navigateTo(Class<? extends C> navigationTarget,
                                                                                 T parameter) {
         CottonUI.current().navigate(navigationTarget, parameter);
+    }
+
+    /**
+     * Opens the given location in a new tab.
+     *
+     * @see com.vaadin.flow.component.page.Page#open(String)
+     * @param location The location to navigate to; might <b>not</b> be null.
+     */
+    public static void openTab(String location) {
+        CottonUI.current().getPage().open(location);
+    }
+
+    /**
+     * Opens the given location in a new tab.
+     *
+     * @see com.vaadin.flow.component.page.Page#open(String)
+     * @see RouteConfiguration#getUrl(Class, RouteParameters)
+     * @param navigationTarget The view to whose location to navigate to; might <b>not</b> be null.
+     * @param routeParams The route params to set; might <b>not</b> contain nulls, might be empty.
+     */
+    public static void openTab(Class<? extends Component> navigationTarget, RouteParam... routeParams) {
+        CottonUI.current().getPage().open(RouteConfiguration
+                .forRegistry(CottonUI.current().getInternals().getRouter().getRegistry())
+                .getUrl(navigationTarget, new RouteParameters(routeParams)));
+    }
+
+    /**
+     * Opens the given location in a new tab.
+     *
+     * @see com.vaadin.flow.component.page.Page#open(String)
+     * @see RouteConfiguration#getUrl(Class, Object)
+     * @param <T>              url parameter type
+     * @param <C>              navigation target type
+     * @param navigationTarget The view to whose location to navigate to; might <b>not</b> be null.
+     * @param parameter        The navigation parameter to pass; might be null.
+     */
+    public static <T, C extends Component & HasUrlParameter<T>> void openTab(Class<? extends C> navigationTarget,
+                                                                             T parameter) {
+        CottonUI.current().getPage().open(RouteConfiguration
+                .forRegistry(CottonUI.current().getInternals().getRouter().getRegistry())
+                .getUrl(navigationTarget, parameter));
     }
 
     // #########################################################################################################################################
