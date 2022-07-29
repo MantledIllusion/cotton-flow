@@ -224,7 +224,7 @@ public final class CottonEnvironment {
      * @param errorRenderer The {@link ErrorRenderer} to render with; might <b>not</b> be null.
      * @return The {@link Blueprint.Allocation}s for the application's environment {@link Blueprint}, never null
      */
-    public Blueprint.SingletonAllocation forErrorMessageProvider(Class<? extends Throwable> errorType, ErrorRenderer<String> errorRenderer) {
+    public static Blueprint.SingletonAllocation forErrorMessageProvider(Class<? extends Throwable> errorType, ErrorRenderer<String> errorRenderer) {
         if (errorType == null) {
             throw new IllegalArgumentException("Cannot register error handling for a null error type");
         } else if (errorRenderer == null) {
@@ -245,7 +245,7 @@ public final class CottonEnvironment {
      * @param errorViewType The {@link Component} to render onto; might <b>not</b> be null.
      * @return The {@link Blueprint.Allocation}s for the application's environment {@link Blueprint}, never null
      */
-    public <V extends Component & ErrorRenderer<Void>> Blueprint.SingletonAllocation forErrorView(Class<? extends Throwable> errorType, Class<V> errorViewType) {
+    public static <V extends Component & ErrorRenderer<Void>> Blueprint.SingletonAllocation forErrorView(Class<? extends Throwable> errorType, Class<V> errorViewType) {
         if (errorType == null) {
             throw new IllegalArgumentException("Cannot register error handling for a null error type");
         } else if (errorViewType == null) {
