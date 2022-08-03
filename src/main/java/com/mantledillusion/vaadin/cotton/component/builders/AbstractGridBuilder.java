@@ -17,12 +17,15 @@ import com.vaadin.flow.component.grid.dnd.GridDropEvent;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.data.event.SortEvent;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -395,6 +398,17 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
          */
         public GridColumnBuilder setSortOrderProvider(SortOrderProvider provider) {
             return configure(column -> column.setSortOrderProvider(provider));
+        }
+
+        /**
+         * Builder method, configures the initial {@link SortDirection} of the column.
+         *
+         * @param direction The direction to sort the column by; might be null.
+         * @return this
+         */
+        @SuppressWarnings("unchecked")
+        public GridColumnBuilder setInitialSortDirection(SortDirection direction) {
+            return configure(column -> ((C) column.getGrid()).sort(Collections.singletonList(new GridSortOrder<>(column, direction))));
         }
 
         /**
