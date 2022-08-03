@@ -5,7 +5,7 @@
 
 	<groupId>com.mantledillusion.vaadin</groupId>
 	<artifactId>cotton</artifactId>
-	<version>2.2.2-SNAPSHOT</version>
+	<version>2.2.2</version>
 
 	<name>Cotton</name>
 	<description>Cotton is a Vaadin extension destined for the ultimate of developer convenience.</description>
