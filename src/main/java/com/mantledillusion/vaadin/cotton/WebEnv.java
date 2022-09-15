@@ -276,7 +276,7 @@ public final class WebEnv {
                     filter(child -> CottonServletService.CottonResponsiveWrapper.class.isAssignableFrom(child.getClass())).
                     map(child -> (CottonServletService.CottonResponsiveWrapper) child).
                     forEach(responsiveWrapper -> responsiveWrapper.adaptIfRequired(clientDetails.getWindowInnerWidth(),
-                            clientDetails.getWindowInnerHeight(), Responsive.Alternative.AdaptionMode.ENFORCE));
+                            clientDetails.getWindowInnerHeight(), Responsive.ScreenClass.AdaptionMode.ENFORCE));
         });
     }
 }

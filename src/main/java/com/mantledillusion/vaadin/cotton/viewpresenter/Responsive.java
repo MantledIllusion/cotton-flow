@@ -4,6 +4,7 @@ import com.mantledillusion.injection.hura.core.annotation.lifecycle.annotation.P
 import com.mantledillusion.vaadin.cotton.event.responsive.BeforeResponsiveRefreshEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.shared.BrowserDetails;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -14,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * {@link Annotation} for any @{@link Route}d {@link Component}s that can react to the client browser's environment by
- * injecting different, more fitting {@link Component} an an @{@link Alternative} instead.
+ * injecting different, more fitting {@link Component} of an @{@link ScreenClass} instead.
  */
 @Retention(RUNTIME)
 @Target(TYPE)
@@ -22,14 +23,151 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Responsive {
 
     /**
-     * Defines an @{@link Alternative} to a @{@link Route}d {@link Component} to inject if the requesting client
-     * browser's environment matches this @{@link Alternative}'s configuration.
-     * <p>
-     * The default configuration is set in a way that single fields of the @{@link Alternative} can be set individually
-     * while ignoring the others. As a result, if no configuration is done at all, the @{@link Alternative} matches
-     * every possible client browser environment there can be.
+     * Determines a hint of whether a client browser's characteristic has to match the class or can be ignored.
      */
-    @interface Alternative {
+    enum MatchType {
+
+        /**
+         * The characteristic has to be true in order for the class to match.
+         */
+        TRUE,
+
+        /**
+         * The characteristic has to be false in order for the class to match.
+         */
+        FALSE,
+
+        /**
+         * The characteristic is ignored, the class matches either way.
+         */
+        UNDETERMINED
+    }
+
+    /**
+     * Defines an @{@link Responsive.DeviceClass} to a @{@link Route}d {@link Component} to inject if the requesting client
+     * browser's environment matches this @{@link Responsive.DeviceClass}'s configuration.
+     * <p>
+     * The default configuration is set in a way that single fields of the @{@link Responsive.DeviceClass} can be set individually
+     * while ignoring the others. As a result, if no configuration is done at all, the @{@link Responsive.DeviceClass} matches
+     * every possible client browser environment there can be.
+     * <p>
+     * Since a {@link DeviceClass} class cannot change during browsing, this class only has a @{@link Responsive}
+     * effect at the moment when a view is visited.
+     */
+    @Retention(RUNTIME)
+    @Target(TYPE)
+    @interface DeviceClass {
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isAndroid()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @return The hint, never null
+         */
+        MatchType isAndroid() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isChromeOS()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @return The hint, never null
+         */
+        MatchType isChromeOS() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isIOS()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @deprecated see {@link BrowserDetails#isIOS()}
+         * @return The hint, never null
+         */
+        @Deprecated
+        MatchType isIOS() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isIPhone()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @return The hint, never null
+         */
+        MatchType isIPhone() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isIPad()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @deprecated see {@link BrowserDetails#isIPad()}
+         * @return The hint, never null
+         */
+        @Deprecated
+        MatchType isIPad() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isMacOSX()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @return The hint, never null
+         */
+        MatchType isMacOSX() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isLinux()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @return The hint, never null
+         */
+        MatchType isLinux() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isWindows()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @return The hint, never null
+         */
+        MatchType isWindows() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the client has to be {@link BrowserDetails#isWindowsPhone()} for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is {@link MatchType#UNDETERMINED}.
+         *
+         * @return The hint, never null
+         */
+        MatchType isWindowsPhone() default MatchType.UNDETERMINED;
+
+        /**
+         * Determines whether the {@link DeviceClass}' hints are and-conjoined, which means that all have to match in
+         * order for the @{@link DeviceClass} to match.
+         * <p>
+         * The default is <code>false</code>.
+         *
+         * @return True if the hints are and-conjoined, false otherwise
+         */
+        boolean andConjoined() default false;
+    }
+
+    /**
+     * Defines an @{@link ScreenClass} to a @{@link Route}d {@link Component} to inject if the requesting client
+     * browser's environment matches this @{@link ScreenClass}'s configuration.
+     * <p>
+     * The default configuration is set in a way that single fields of the @{@link ScreenClass} can be set individually
+     * while ignoring the others. As a result, if no configuration is done at all, the @{@link ScreenClass} matches
+     * every possible client browser environment there can be.
+     * <p>
+     * Since a {@link ScreenClass} class can change during browsing, this class is @{@link Responsive} for screen
+     * size changes.
+     */
+    @Retention(RUNTIME)
+    @Target(TYPE)
+    @interface ScreenClass {
 
         /**
          * Defines modes of how to evaluate a client browser's screen size.
@@ -39,63 +177,41 @@ public @interface Responsive {
             /**
              * Evaluate the screen by absolute pixels.
              * <p>
-             * For the @{@link Alternative} to match, the browser's resolution has to be in the fixed bounds
-             * of @{@link Alternative#fromX()} | @{@link Alternative#toX()}
-             * and @{@link Alternative#fromY()} | @{@link Alternative#toY()}.
+             * For the @{@link ScreenClass} to match, the browser's resolution has to be in the fixed bounds
+             * of @{@link ScreenClass#fromX()} | @{@link ScreenClass#toX()}
+             * and @{@link ScreenClass#fromY()} | @{@link ScreenClass#toY()}.
              */
             ABSOLUTE,
 
             /**
              * Evaluate the screen by its X/Y ratio.
              * <p>
-             * For the @{@link Alternative} to match, a ratio is build out of the the browser's resolution which has
-             * to be in the ratio @{@link Alternative#fromX()} / @{@link Alternative#fromY()}
-             * and the ratio @{@link Alternative#toX()} ()} / @{@link Alternative#toY()}.
+             * For the @{@link ScreenClass} to match, a ratio is build out of the the browser's resolution which has
+             * to be in the ratio @{@link ScreenClass#fromX()} / @{@link ScreenClass#fromY()}
+             * and the ratio @{@link ScreenClass#toX()} ()} / @{@link ScreenClass#toY()}.
              */
             RATIO
         }
 
         /**
-         * Determines a hint of whether a client browser's characteristic has to match the @{@link Alternative} or can
-         * be ignored.
-         */
-        enum DeviceHint {
-
-            /**
-             * The characteristic has to be true in order for the @{@link Alternative} to match.
-             */
-            TRUE,
-
-            /**
-             * The characteristic has to be false in order for the @{@link Alternative} to match.
-             */
-            FALSE,
-
-            /**
-             * The characteristic is ignored, the @{@link Alternative} matches either way.
-             */
-            UNDETERMINED
-        }
-
-        /**
-         * Determines the mode of how the automatic switch to the @{@link Alternative} should be performed.
+         * Determines the mode of how the automatic switch to the @{@link ScreenClass} should be performed.
          */
         enum AdaptionMode {
 
             /**
-             * Prohibit the automatic switch to the {@link Alternative}; only the
+             * Prohibit the automatic switch to the {@link ScreenClass}; only the
              * {@link BeforeResponsiveRefreshEvent} will be send.
              */
             PROHIBIT,
 
             /**
-             * Perform the automatic switch to the {@link Alternative}, as long as the
+             * Perform the automatic switch to the {@link ScreenClass}, as long as the
              * {@link BeforeResponsiveRefreshEvent} is not declined.
              */
             PERFORM,
 
             /**
-             * Always perform the automatic switch to the {@link Alternative}; sending the
+             * Always perform the automatic switch to the {@link ScreenClass}; sending the
              * {@link BeforeResponsiveRefreshEvent} is only done for information purposes.
              */
             ENFORCE;
@@ -110,18 +226,10 @@ public @interface Responsive {
         }
 
         /**
-         * The alternative {@link Component} to inject instead of the {@link Component} annotated
-         * with @{@link Responsive} if the @{@link Alternative}'s configuration matches.
-         *
-         * @return The alternative {@link Component}, never null
-         */
-        Class<? extends Component> value();
-
-        /**
          * The mode to use to evaluate the client browser's screen resolution with.
          * <p>
          * The used mode changes the way the fields {@link #fromX()}, {@link #toX()}, {@link #fromY()} and
-         * {@link #toY()} are evaluated when trying to match an @{@link Alternative} to a client browser's resolution.
+         * {@link #toY()} are evaluated when trying to match an @{@link ScreenClass} to a client browser's resolution.
          * <p>
          * The default is {@link ScreenMode#ABSOLUTE}, so with {@link Integer#MIN_VALUE}/{@link Integer#MAX_VALUE} used
          * for the from/to values, the default settings match every screen size there is.
@@ -167,25 +275,16 @@ public @interface Responsive {
         int toY() default Integer.MAX_VALUE;
 
         /**
-         * Determines whether the client has to be a mobile device in order for the @{@link Alternative} to match.
+         * Determines whether the client has to be a touch device in order for the @{@link ScreenClass} to match.
          * <p>
-         * The default is {@link DeviceHint#UNDETERMINED}.
+         * The default is {@link MatchType#UNDETERMINED}.
          *
          * @return The hint, never null
          */
-        DeviceHint isMobileDevice() default DeviceHint.UNDETERMINED;
+        MatchType isTouchDevice() default MatchType.UNDETERMINED;
 
         /**
-         * Determines whether the client has to be a touch device in order for the @{@link Alternative} to match.
-         * <p>
-         * The default is {@link DeviceHint#UNDETERMINED}.
-         *
-         * @return The hint, never null
-         */
-        DeviceHint isTouchDevice() default DeviceHint.UNDETERMINED;
-
-        /**
-         * Determines the mode of how the automatic switch to the @{@link Alternative} should be performed.
+         * Determines the mode of how the automatic switch to the @{@link ScreenClass} should be performed.
          * <p>
          * The default is {@link AdaptionMode#PERFORM}.
          *
@@ -195,15 +294,14 @@ public @interface Responsive {
     }
 
     /**
-     * Defines the @{@link Alternative}s for the @{@link Route}d component annotated with @{@link Responsive} to inject
+     * Defines the @{@link Component}s for the @{@link Route}d component annotated with @{@link Responsive} to inject
      * depending on the client browser's environment.
      * <p>
-     * The defined @{@link Alternative}'s configurations have to be non-overlapping; there should not be a client
-     * browser environment existing for which the configurations of multiple @{@link Alternative}s are matching. If
-     * that happens, it cannot be decided which @{@link Alternative} to inject, so the {@link Component} annotated
-     * with @{@link Responsive} is injected as a fallback and a warning is logged.
+     * The defined @{@link Component}'s {@link ScreenClass} and @{@link DeviceClass} configurations should be
+     * non-overlapping; there should not be a client browser environment existing for which the configurations of
+     * multiple @{@link Component}s are matching. If that happens, the first {@link Component} declared is used.
      *
-     * @return The @{@link Alternative}s for the annotated, {@link Route}d {@link Component}, never null, might be empty
+     * @return The @{@link Component}s for the annotated, {@link Route}d {@link Component}, never null, might be empty
      */
-    Alternative[] value();
+    Class<? extends Component>[] value();
 }

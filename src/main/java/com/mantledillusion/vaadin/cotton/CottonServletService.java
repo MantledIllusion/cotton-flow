@@ -38,7 +38,6 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.*;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.shared.Registration;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +50,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
 
 class CottonServletService extends VaadinServletService {
 
@@ -81,10 +81,30 @@ class CottonServletService extends VaadinServletService {
 			T target;
 
 			if (routeTargetType.isAnnotationPresent(Responsive.class)) {
-				CottonResponsiveWrapper wrapper = CottonUI.current().exchangeInjectedView(CottonResponsiveWrapper.class);
-				CottonUI.current().getPage().retrieveExtendedClientDetails(details ->
-						wrapper.initialize((Class<? extends Component>) routeTargetType, details));
-				target = (T) wrapper;
+				CottonResponsiveDecider decider = new CottonResponsiveDecider((Class<? extends Component>) routeTargetType);
+
+				if (decider.isScreenDependent()) {
+					CottonResponsiveWrapper wrapper = CottonUI.current().exchangeInjectedView(CottonResponsiveWrapper.class);
+					CottonUI.current().getPage().retrieveExtendedClientDetails(details ->
+							wrapper.initialize(decider, details));
+					target = (T) wrapper;
+				} else {
+					Class<? extends Component> targetViewType = decider.determineViewType().orElse(decider.routeTargetType);
+
+					long ms = System.currentTimeMillis();
+					target = (T) CottonUI.current().exchangeInjectedView(targetViewType);
+					ms = System.currentTimeMillis() - ms;
+
+					Event metric = CottonMetrics.SYSTEM_INJECTION.build(
+							new Measurement("injectionDuration", String.valueOf(ms), MeasurementType.LONG),
+							new Measurement("simpleName", targetViewType.getSimpleName(), MeasurementType.STRING),
+							new Measurement("name", targetViewType.getName(), MeasurementType.STRING));
+					if (targetViewType != decider.routeTargetType) {
+						metric.getMeasurements().add(new Measurement("redirectedFromSimpleName", decider.routeTargetType.getSimpleName(), MeasurementType.STRING));
+						metric.getMeasurements().add(new Measurement("redirectedFromName", decider.routeTargetType.getName(), MeasurementType.STRING));
+					}
+					MetricsTrailSupport.commit(metric);
+				}
 			} else {
 				long ms = System.currentTimeMillis();
 				target = CottonUI.current().exchangeInjectedView(routeTargetType);
@@ -104,20 +124,137 @@ class CottonServletService extends VaadinServletService {
 		}
 	}
 
+	private static class CottonResponsiveDecider {
+
+		private static final List<BiPredicate<CottonResponsiveDecider, Responsive.DeviceClass>> DEVICE_MATCHERS = Arrays.asList(
+				(decider, deviceClass) -> deviceClass.isAndroid() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceAndroid == (deviceClass.isAndroid() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isChromeOS() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceChromeOS == (deviceClass.isChromeOS() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isIOS() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceIOS == (deviceClass.isIOS() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isIPhone() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceIPhone == (deviceClass.isIPhone() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isIPad() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceIPad == (deviceClass.isIPad() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isLinux() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceLinux == (deviceClass.isLinux() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isMacOSX() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceMacOSX == (deviceClass.isMacOSX() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isWindows() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceWindows == (deviceClass.isWindows() == Responsive.MatchType.TRUE),
+				(decider, deviceClass) -> deviceClass.isWindowsPhone() != Responsive.MatchType.UNDETERMINED
+						&& decider.isDeviceWindowsPhone == (deviceClass.isWindowsPhone() == Responsive.MatchType.TRUE)
+		);
+
+		private final Class<? extends Component> routeTargetType;
+		private final Class<? extends Component>[] alternativeTargetTypes;
+
+		private final boolean isDeviceAndroid;
+		private final boolean isDeviceChromeOS;
+		private final boolean isDeviceIOS;
+		private final boolean isDeviceIPhone;
+		private final boolean isDeviceIPad;
+		private final boolean isDeviceLinux;
+		private final boolean isDeviceMacOSX;
+		private final boolean isDeviceWindows;
+		private final boolean isDeviceWindowsPhone;
+
+		private boolean isScreenAsyncAdaptive;
+		private boolean isScreenTouchReactive;
+
+		private CottonResponsiveDecider(Class<? extends Component> routeTargetType) {
+			this.routeTargetType = routeTargetType;
+			this.alternativeTargetTypes = routeTargetType.getAnnotation(Responsive.class).value();
+
+			WebBrowser browser = CottonSession.current().getBrowser();
+			this.isDeviceAndroid = browser.isAndroid();
+			this.isDeviceChromeOS = browser.isChromeOS();
+			this.isDeviceIOS = browser.isIOS();
+			this.isDeviceIPhone = browser.isIPhone();
+			this.isDeviceIPad = browser.isIPad();
+			this.isDeviceLinux = browser.isLinux();
+			this.isDeviceMacOSX = browser.isMacOSX();
+			this.isDeviceWindows = browser.isWindows();
+			this.isDeviceWindowsPhone = browser.isWindowsPhone();
+		}
+
+		private boolean isScreenDependent() {
+			return Arrays.stream(this.alternativeTargetTypes)
+					.anyMatch(alternativeTargetType -> alternativeTargetType.isAnnotationPresent(Responsive.ScreenClass.class));
+		}
+
+		private void initializeForScreen(ExtendedClientDetails clientDetails) {
+			this.isScreenAsyncAdaptive = CottonServletService.getCurrent().ensurePushAvailable() &&
+					this.routeTargetType.isAnnotationPresent(Push.class);
+			this.isScreenTouchReactive = clientDetails.isTouchDevice();
+		}
+
+		private Optional<Class<? extends Component>> determineViewType() {
+			return Arrays.stream(this.alternativeTargetTypes)
+					.filter(alternativeTargetType -> matchesDevice(alternativeTargetType))
+					.findFirst();
+		}
+
+		private Optional<Class<? extends Component>> determineViewType(int width, int height) {
+			return Arrays.stream(this.alternativeTargetTypes)
+					.filter(alternativeTargetType -> matchesDevice(alternativeTargetType))
+					.filter(alternativeTargetType -> matchesScreen(alternativeTargetType, width, height))
+					.findFirst();
+		}
+
+		private boolean matchesDevice(Class<? extends Component> alternativeTargetType) {
+			if (alternativeTargetType.isAnnotationPresent(Responsive.DeviceClass.class)) {
+				Responsive.DeviceClass deviceClass = alternativeTargetType.getAnnotation(Responsive.DeviceClass.class);
+				if (deviceClass.andConjoined()) {
+					return DEVICE_MATCHERS.stream().allMatch(predicate -> predicate.test(this, deviceClass));
+				} else {
+					return DEVICE_MATCHERS.stream().anyMatch(predicate -> predicate.test(this, deviceClass));
+				}
+			} else {
+				return true;
+			}
+		}
+
+		private boolean matchesScreen(Class<? extends Component> alternativeTargetType, int width, int height) {
+			if (alternativeTargetType.isAnnotationPresent(Responsive.ScreenClass.class)) {
+				Responsive.ScreenClass screenClass = alternativeTargetType.getAnnotation(Responsive.ScreenClass.class);
+
+				if (this.isScreenTouchReactive && screenClass.isTouchDevice() == Responsive.MatchType.FALSE ||
+						!this.isScreenTouchReactive && screenClass.isTouchDevice() == Responsive.MatchType.TRUE) {
+					return false;
+				}
+
+				switch (screenClass.mode()) {
+					case ABSOLUTE:
+						return width >= screenClass.fromX() && width <= screenClass.toX() &&
+								height >= screenClass.fromY() && height <= screenClass.toY();
+					case RATIO:
+						double clientRatio = width / (double) height;
+						double alternativeFromRatio = Math.min(screenClass.fromX() / (double) screenClass.fromY(),
+								screenClass.toX() / (double) screenClass.toY());
+						double alternativeToRatio = Math.max(screenClass.fromX() / (double) screenClass.fromY(),
+								screenClass.toX() / (double) screenClass.toY());
+						return clientRatio >= alternativeFromRatio && clientRatio <= alternativeToRatio;
+					default:
+						throw new Http500InternalServerErrorException("Handling of alternative mode " +
+								screenClass.mode().name() + " not implemented");
+				}
+			} else {
+				return true;
+			}
+		}
+	}
+
 	static class CottonResponsiveWrapper extends Div implements BrowserWindowResizeListener {
 
 		private final Injector injector;
 		private final Registration registration;
 		private final ExecutorService executorService;
 		private final int responsiveAdaptionWaitMs;
+		private CottonResponsiveDecider decider;
 		private Pair<Integer, Integer> resizeDimension;
 		private long resizeWaitMs;
-
-		private Class<? extends Component> rootRouteTargetType;
-		private Responsive.Alternative[] alternativeRouteTargets;
-		private boolean asyncResponsiveAdaptionEnabled;
-		private boolean isMobileDevice;
-		private boolean isTouchDevice;
 
 
 		@Construct
@@ -127,29 +264,22 @@ class CottonServletService extends VaadinServletService {
 			this.registration = CottonUI.current().getPage().addBrowserWindowResizeListener(this);
 			this.executorService = Executors.newSingleThreadExecutor();
 			this.responsiveAdaptionWaitMs = Math.max(0, Integer.parseInt(responsiveAdaptionWaitMs));
+
+			getElement().getStyle().set("width", "100%");
+			getElement().getStyle().set("height", "100%");
 		}
 
-		private <T extends Component> void initialize(Class<T> rootRouteTargetType, ExtendedClientDetails clientDetails) {
-			this.rootRouteTargetType = rootRouteTargetType;
-			this.alternativeRouteTargets = rootRouteTargetType.getAnnotation(Responsive.class).value();
-			this.asyncResponsiveAdaptionEnabled = CottonServletService.getCurrent().ensurePushAvailable() &&
-					rootRouteTargetType.isAnnotationPresent(Push.class);
-
-			this.isMobileDevice = isMobileDevice(CottonSession.current().getBrowser());
-			this.isTouchDevice = clientDetails.isTouchDevice();
-
-			Responsive.Alternative alternative = determineViewType(clientDetails.getWindowInnerWidth(),
-					clientDetails.getWindowInnerHeight());
-			injectAlternative(alternative != null ? alternative.value() : this.rootRouteTargetType);
-		}
-
-		private boolean isMobileDevice(WebBrowser webBrowser) {
-			return webBrowser.isWindowsPhone() || webBrowser.isAndroid() || webBrowser.isChromeOS() || webBrowser.isIPhone();
+		private <T extends Component> void initialize(CottonResponsiveDecider decider, ExtendedClientDetails clientDetails) {
+			this.decider = decider;
+			this.decider.initializeForScreen(clientDetails);
+			Optional<Class<? extends Component>> alternativeTargetType = this.decider.determineViewType(
+					clientDetails.getWindowInnerWidth(), clientDetails.getWindowInnerHeight());
+			injectAlternative(alternativeTargetType.orElse(this.decider.routeTargetType));
 		}
 
 		@Override
 		public void browserWindowResized(BrowserWindowResizeEvent resizeEvent) {
-			if (this.asyncResponsiveAdaptionEnabled) {
+			if (this.decider.isScreenAsyncAdaptive) {
 				boolean beginTask = false;
 				synchronized (this) {
 					this.resizeWaitMs = System.currentTimeMillis() + this.responsiveAdaptionWaitMs;
@@ -181,24 +311,23 @@ class CottonServletService extends VaadinServletService {
 							Pair<Integer, Integer> resizeDimension = this.resizeDimension;
 							this.resizeDimension = null;
 							cottonUI.access(() -> adaptIfRequired(resizeDimension.getLeft(),
-									resizeDimension.getRight(), Responsive.Alternative.AdaptionMode.PERFORM));
+									resizeDimension.getRight(), Responsive.ScreenClass.AdaptionMode.PERFORM));
 						}
 					});
 				}
 			} else {
-				adaptIfRequired(resizeEvent.getWidth(), resizeEvent.getHeight(), Responsive.Alternative.AdaptionMode.PERFORM);
+				adaptIfRequired(resizeEvent.getWidth(), resizeEvent.getHeight(), Responsive.ScreenClass.AdaptionMode.PERFORM);
 			}
 		}
 
-		void adaptIfRequired(int width, int height, Responsive.Alternative.AdaptionMode adaptionMode) {
-			Responsive.Alternative alternative = determineViewType(width, height);
-			Class<? extends Component> targetViewType;
-			if (alternative != null) {
-				targetViewType = alternative.value();
-				adaptionMode = Responsive.Alternative.AdaptionMode.combine(adaptionMode, alternative.automaticAdaptionMode());
-			} else {
-				targetViewType = this.rootRouteTargetType;
-			}
+		void adaptIfRequired(int width, int height, Responsive.ScreenClass.AdaptionMode sourceAdaptionMode) {
+			Class<? extends Component> targetViewType = this.decider.determineViewType(width, height)
+					.orElse(this.decider.routeTargetType);
+			Responsive.ScreenClass.AdaptionMode adaptionMode = Optional
+					.ofNullable(targetViewType.getAnnotation(Responsive.ScreenClass.class))
+					.map(Responsive.ScreenClass::automaticAdaptionMode)
+					.map(targetAdaptionMode -> Responsive.ScreenClass.AdaptionMode.combine(sourceAdaptionMode, targetAdaptionMode))
+					.orElse(sourceAdaptionMode);
 
 			if (getChildren().noneMatch(child -> child.getClass() == targetViewType)) {
 				BeforeResponsiveRefreshEvent event = new BeforeResponsiveRefreshEvent(CottonUI.current(), adaptionMode);
@@ -216,50 +345,6 @@ class CottonServletService extends VaadinServletService {
 			}
 		}
 
-		private Responsive.Alternative determineViewType(int width, int height) {
-			Map<Class<? extends Component>, Responsive.Alternative> matches = Arrays.stream(this.alternativeRouteTargets).
-					filter(alternative -> matchesClientEnvironment(alternative, width, height)).
-					collect(Collectors.toMap(Responsive.Alternative::value, alternative -> alternative));
-
-			if (matches.size() == 1) {
-				return matches.values().iterator().next();
-			} else if (!matches.isEmpty()) {
-				LOGGER.warn("The @" + Responsive.class.getSimpleName()+ " class " +
-						this.rootRouteTargetType.getSimpleName() + " specifies " + this.alternativeRouteTargets.length +
-						" alternatives of which the configuration of " + matches.size() + " (" +
-						StringUtils.join(matches.keySet().stream().map(Class::getSimpleName), ", ") +
-						") match to the client's environment (isTouchDevice=" + this.isTouchDevice + ", width=" +
-						width + ", height=" + height + "); cannot decide which alternative to choose.");
-			}
-			return null;
-		}
-
-		private boolean matchesClientEnvironment(Responsive.Alternative alternative, int width, int height) {
-			if (this.isMobileDevice && alternative.isMobileDevice() == Responsive.Alternative.DeviceHint.FALSE ||
-					!this.isMobileDevice && alternative.isMobileDevice() == Responsive.Alternative.DeviceHint.TRUE) {
-				return false;
-			} else if (this.isTouchDevice && alternative.isTouchDevice() == Responsive.Alternative.DeviceHint.FALSE ||
-					!this.isTouchDevice && alternative.isTouchDevice() == Responsive.Alternative.DeviceHint.TRUE) {
-				return false;
-			}
-
-			switch (alternative.mode()) {
-				case ABSOLUTE:
-					return width >= alternative.fromX() && width <= alternative.toX() &&
-							height >= alternative.fromY() && height <= alternative.toY();
-				case RATIO:
-					double clientRatio = width / (double) height;
-					double alternativeFromRatio = Math.min(alternative.fromX() / (double) alternative.fromY(),
-							alternative.toX() / (double) alternative.toY());
-					double alternativeToRatio = Math.max(alternative.fromX() / (double) alternative.fromY(),
-							alternative.toX() / (double) alternative.toY());
-					return clientRatio >= alternativeFromRatio && clientRatio <= alternativeToRatio;
-				default:
-					throw new Http500InternalServerErrorException("Handling of alternative mode " +
-							alternative.mode().name() + " not implemented");
-			}
-		}
-
 		private void injectAlternative(Class<? extends Component> targetViewType) {
 			removeAll();
 
@@ -271,9 +356,9 @@ class CottonServletService extends VaadinServletService {
 					new Measurement("injectionDuration", String.valueOf(ms), MeasurementType.LONG),
 					new Measurement("simpleName", targetViewType.getSimpleName(), MeasurementType.STRING),
 					new Measurement("name", targetViewType.getName(), MeasurementType.STRING));
-			if (targetViewType != this.rootRouteTargetType) {
-				metric.getMeasurements().add(new Measurement("redirectedFromSimpleName", this.rootRouteTargetType.getSimpleName(), MeasurementType.STRING));
-				metric.getMeasurements().add(new Measurement("redirectedFromName", this.rootRouteTargetType.getName(), MeasurementType.STRING));
+			if (targetViewType != this.decider.routeTargetType) {
+				metric.getMeasurements().add(new Measurement("redirectedFromSimpleName", this.decider.routeTargetType.getSimpleName(), MeasurementType.STRING));
+				metric.getMeasurements().add(new Measurement("redirectedFromName", this.decider.routeTargetType.getName(), MeasurementType.STRING));
 			}
 			MetricsTrailSupport.commit(metric);
 		}

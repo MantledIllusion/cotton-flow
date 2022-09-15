@@ -18,7 +18,7 @@ import com.mantledillusion.vaadin.cotton.exception.http900.Http900NoSessionConte
 import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
 import com.mantledillusion.vaadin.cotton.exception.http900.Http903NotImplementedException;
 import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive;
-import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive.Alternative;
+import com.mantledillusion.vaadin.cotton.viewpresenter.Responsive.ScreenClass;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.shared.Registration;
@@ -82,13 +82,13 @@ public final class CottonUI extends UI {
 	 * A listener that may be added to the {@link CottonUI} using
 	 * {@link CottonUI#addAfterResponsiveRefreshListener(AfterResponsiveRefreshListener)}.
 	 * <p>
-	 * Will be notified after a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 * Will be notified after a @{@link Responsive} view has exchanged its @{@link ScreenClass}.
 	 */
 	@FunctionalInterface
 	public interface AfterResponsiveRefreshListener {
 
 		/**
-		 * Is called after a @{@link Responsive} view has exchanged its @{@link Alternative}.
+		 * Is called after a @{@link Responsive} view has exchanged its @{@link ScreenClass}.
 		 *
 		 * @param event The dispatched {@link AfterResponsiveRefreshEvent}; might <b>not</b> be null.
 		 */
@@ -99,13 +99,13 @@ public final class CottonUI extends UI {
 	 * A listener that may be added to the {@link CottonUI} using
 	 * {@link CottonUI#addBeforeResponsiveRefreshListener(BeforeResponsiveRefreshListener)}.
 	 * <p>
-	 * Will be notified before a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 * Will be notified before a @{@link Responsive} view has exchanged its @{@link ScreenClass}.
 	 */
 	@FunctionalInterface
 	public interface BeforeResponsiveRefreshListener {
 
 		/**
-		 * Is called before a @{@link Responsive} view has exchanged its @{@link Alternative}.
+		 * Is called before a @{@link Responsive} view has exchanged its @{@link ScreenClass}.
 		 *
 		 * @param event The dispatched {@link BeforeResponsiveRefreshEvent}; might <b>not</b> be null.
 		 */
@@ -153,7 +153,7 @@ public final class CottonUI extends UI {
 	}
 
 	/**
-	 * Adds a listener that will be notified after a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 * Adds a listener that will be notified after a @{@link Responsive} view has exchanged its @{@link ScreenClass}.
 	 *
 	 * @param listener
 	 *            The listener to add; might <b>not</b> be null.
@@ -164,7 +164,7 @@ public final class CottonUI extends UI {
 	}
 
 	/**
-	 * Adds a listener that will be notified before a @{@link Responsive} view has exchanged its @{@link Alternative}.
+	 * Adds a listener that will be notified before a @{@link Responsive} view has exchanged its @{@link ScreenClass}.
 	 *
 	 * @param listener
 	 *            The listener to add; might <b>not</b> be null.
