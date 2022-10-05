@@ -198,13 +198,30 @@ public final class WebEnv {
      * accepted, true otherwise
      */
     public static boolean logIn(User user) {
+        return logIn(user, false);
+    }
+
+    /**
+     * Will log in the given {@link User}.
+     * <p>
+     * Another {@link User} possibly logged in at the moment will automatically be attempted to be logged out if its
+     * not equal to the given one.
+     *
+     * @param user The {@link User} to log in; might be null.
+     * @param reload Whether or not the {@link com.vaadin.flow.component.page.Page} should reload after a successful login
+     * @return False if there is a {@link User} currently logged in whose {@link BeforeLogoutEvent} has not being
+     * accepted, true otherwise
+     */
+    public static boolean logIn(User user, boolean reload) {
         if (!Objects.equals(user, getLoggedInUser())) {
             if (isLoggedIn() && !logOut()) {
                 return false;
             }
             if (user != null) {
                 CottonSession.current().getAuthenticationHandler().login(user);
-                CottonUI.current().getPage().reload();
+                if (reload) {
+                    CottonUI.current().getPage().reload();
+                }
             }
         }
         return true;
