@@ -198,7 +198,7 @@ public final class WebEnv {
      * accepted, true otherwise
      */
     public static boolean logIn(User user) {
-        return logIn(user, false);
+        return logIn(user, true);
     }
 
     /**
