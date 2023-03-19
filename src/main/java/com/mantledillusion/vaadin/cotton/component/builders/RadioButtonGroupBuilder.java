@@ -83,7 +83,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	 *            The label text or a message id to translate via {@link WebEnv}; might be null.
 	 * @return this
 	 */
-	public RadioButtonGroupBuilder setLabel(String msgId) {
+	public RadioButtonGroupBuilder<E, F> setLabel(String msgId) {
 		return configure(radioButtonGroup -> radioButtonGroup.setLabel(WebEnv.getTranslation(msgId)));
 	}
 
@@ -95,7 +95,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	 *            The predicate enabling items; might <b>not</b> be null.
 	 * @return this
 	 */
-	public RadioButtonGroupBuilder setItemEnabledProvider(SerializablePredicate<E> itemEnabledProvider) {
+	public RadioButtonGroupBuilder<E, F> setItemEnabledProvider(SerializablePredicate<E> itemEnabledProvider) {
 		return configure(radioButtonGroup -> radioButtonGroup.setItemEnabledProvider(itemEnabledProvider));
 	}
 
@@ -107,7 +107,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	 *            The generator for item labels or message ids to translate via {@link WebEnv}; might <b>not</b> be null.
 	 * @return this
 	 */
-	public RadioButtonGroupBuilder setRenderer(ComponentRenderer<? extends Component, E> renderer) {
+	public RadioButtonGroupBuilder<E, F> setRenderer(ComponentRenderer<? extends Component, E> renderer) {
 		return configure(radioButtonGroup -> radioButtonGroup.setRenderer(renderer));
 	}
 
@@ -120,7 +120,7 @@ public class RadioButtonGroupBuilder<E, F extends HasDataProviderBuilder.Configu
 	 *            The message id prefix to append an item's {@link Object#toString()} value to; might be null.
 	 * @return this
 	 */
-	public RadioButtonGroupBuilder setRenderMessageIdPrefix(String messageIdPrefix) {
+	public RadioButtonGroupBuilder<E, F> setRenderMessageIdPrefix(String messageIdPrefix) {
 		return configure(radioButtonGroup -> radioButtonGroup.setRenderer(new TextRenderer<>(
 				item -> WebEnv.getTranslation(StringUtils.defaultIfBlank(messageIdPrefix, StringUtils.EMPTY)+item))));
 	}
