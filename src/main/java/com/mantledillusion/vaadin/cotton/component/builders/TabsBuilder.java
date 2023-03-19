@@ -1,15 +1,20 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
+import com.mantledillusion.vaadin.cotton.model.ModelAccessor;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabVariant;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
+
+import java.util.function.BiConsumer;
 
 /**
  * {@link ComponentBuilder} for {@link Tabs}.
@@ -50,7 +55,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
         }
 
         /**
-         * Builder method, configures the {@link Component}'s label.
+         * Builder method, configures the {@link Tab}'s label.
          *
          * @see Tab#setLabel(String)
          * @param msgId
@@ -62,7 +67,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
         }
 
         /**
-         * Builder method, configures the {@link Component}'s flex grow.
+         * Builder method, configures the {@link Tab}'s flex grow.
          *
          * @see Tab#setFlexGrow(double)
          * @param flexGrow
@@ -74,7 +79,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
         }
 
         /**
-         * Builder method, configures the {@link Component} to be selected.
+         * Builder method, configures the {@link Tab} to be selected.
          *
          * @see Tab#setSelected(boolean)
          * @param selected
@@ -107,11 +112,61 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
         }
 
         /**
+         * Builder method, configures the {@link Tab}'s enablement.
+         *
+         * @see Tab#setVisible(boolean)
+         * @param enabled
+         *          True if the {@link Tab} should be enabled, false otherwise.
+         * @return this
+         */
+        public TabBuilder setEnabled(boolean enabled) {
+            return configure(tab -> tab.setEnabled(enabled));
+        }
+
+        /**
+         * Builder method, configures the {@link Tab}'s visibility.
+         *
+         * @see Tab#setVisible(boolean)
+         * @param visible
+         *          True if the {@link Tab} should be invisible, false otherwise.
+         * @return this
+         */
+        public TabBuilder setVisible(boolean visible) {
+            return configure(tab -> tab.setVisible(visible));
+        }
+
+        /**
          * Adds the currently configured tab to the {@link Tabs} being build by the returned {@link TabsBuilder}.
          *
          * @return The {@link TabsBuilder} that started this {@link TabsBuilder.TabBuilder}, never null
          */
         public TabsBuilder add() {
+            return TabsBuilder.this;
+        }
+
+        /**
+         * Adds the currently configured tab to the {@link Tabs} being build by the returned {@link TabsBuilder} and
+         * uses the given {@link ModelAccessor} to bind the {@link Tab} to the given {@link Property}.
+         *
+         * @param <ModelType>
+         *            The type of the model to whose property to bind.
+         * @param binder
+         *            The {@link ModelAccessor} to bind the {@link Tab} with; might <b>not</b> be null.
+         * @param property
+         *            The {@link Property} to bind the {@link Tab} to; might <b>not</b> be null.
+         * @return The {@link TabsBuilder} that started this {@link TabsBuilder.TabBuilder}, never null
+         */
+        public <ModelType, ValueType> TabsBuilder add(ModelAccessor<ModelType> binder,
+                                                      Property<ModelType, ValueType> property,
+                                                      BiConsumer<Tab, ValueType> valueSetter) {
+            if (binder == null) {
+                throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
+            } else if (property == null) {
+                throw new Http901IllegalArgumentException("Cannot bind using a null property.");
+            } else if (valueSetter == null) {
+                throw new Http901IllegalArgumentException("Cannot bind using a null valueSetter.");
+            }
+            configure(tab -> binder.bindConsumer(valueType -> valueSetter.accept(tab, valueType), property));
             return TabsBuilder.this;
         }
     }
