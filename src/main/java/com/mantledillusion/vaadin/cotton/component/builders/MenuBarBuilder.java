@@ -29,6 +29,7 @@ public class MenuBarBuilder extends AbstractComponentBuilder<MenuBar, MenuBarBui
      */
     public static class MenuItemBuilder<PC, PB> extends AbstractEntityBuilder<MenuItem, MenuItemBuilder<PC, PB>> implements
             Configurer<PC>,
+            RegistrationBuilder<MenuItem, MenuItemBuilder<PC, PB>>,
             HasEnabledBuilder<MenuItem, MenuItemBuilder<PC, PB>>,
             HasComponentsBuilder<MenuItem, MenuItemBuilder<PC, PB>>,
             ClickNotifierBuilder<MenuItem, MenuItemBuilder<PC, PB>> {

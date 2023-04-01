@@ -44,8 +44,9 @@ public abstract class AbstractGridBuilder<C extends Grid<E>, B extends AbstractG
      * {@link EntityBuilder} for {@link Grid.Column}s.
      */
     public class GridColumnBuilder extends AbstractEntityBuilder<Grid.Column<E>, GridColumnBuilder> implements
-            HasElementBuilder<Grid.Column<E>, GridColumnBuilder>,
-            Configurer<C> {
+            Configurer<C>,
+            RegistrationBuilder<Grid.Column<E>, GridColumnBuilder>,
+            HasElementBuilder<Grid.Column<E>, GridColumnBuilder> {
 
         private final Function<C, Grid.Column<E>> columnSupplier;
 

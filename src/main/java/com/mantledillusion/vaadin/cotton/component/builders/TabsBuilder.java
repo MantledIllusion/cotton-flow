@@ -32,6 +32,7 @@ public class TabsBuilder extends AbstractComponentBuilder<Tabs, TabsBuilder> imp
      */
     public class TabBuilder extends AbstractEntityBuilder<Tab, TabBuilder> implements
             Configurer<Tabs>,
+            RegistrationBuilder<Tab, TabBuilder>,
             HasElementBuilder<Tab, TabBuilder>,
             HasThemeVariantBuilder<Tab, TabBuilder, TabVariant>,
             HasStyleBuilder<Tab, TabBuilder>,
