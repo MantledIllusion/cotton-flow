@@ -1,14 +1,18 @@
 package com.mantledillusion.vaadin.cotton.component.builders;
 
+import com.mantledillusion.data.epiphy.Property;
 import com.mantledillusion.vaadin.cotton.WebEnv;
 import com.mantledillusion.vaadin.cotton.component.ComponentBuilder;
 import com.mantledillusion.vaadin.cotton.component.Configurer;
 import com.mantledillusion.vaadin.cotton.component.mixin.*;
+import com.mantledillusion.vaadin.cotton.exception.http900.Http901IllegalArgumentException;
+import com.mantledillusion.vaadin.cotton.model.ModelAccessor;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
 
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -125,6 +129,33 @@ public class MenuBarBuilder extends AbstractComponentBuilder<MenuBar, MenuBarBui
         }
 
         public PB add() {
+            return this.parentBuilder;
+        }
+
+        /**
+         * Adds the currently configured menu item to the {@link MenuBar} being build by the returned
+         * {@link MenuBarBuilder} and uses the given {@link ModelAccessor} to bind the {@link MenuItem} to the
+         * given {@link Property}.
+         *
+         * @param <ModelType>
+         *            The type of the model to whose property to bind.
+         * @param binder
+         *            The {@link ModelAccessor} to bind the {@link MenuItem} with; might <b>not</b> be null.
+         * @param property
+         *            The {@link Property} to bind the {@link MenuItem} to; might <b>not</b> be null.
+         * @return The {@link MenuBarBuilder} that started this {@link MenuBarBuilder.MenuItemBuilder}, never null
+         */
+        public <ModelType, ValueType> PB add(ModelAccessor<ModelType> binder,
+                                             Property<ModelType, ValueType> property,
+                                             BiConsumer<MenuItem, ValueType> valueSetter) {
+            if (binder == null) {
+                throw new Http901IllegalArgumentException("Cannot bind using a null binder.");
+            } else if (property == null) {
+                throw new Http901IllegalArgumentException("Cannot bind using a null property.");
+            } else if (valueSetter == null) {
+                throw new Http901IllegalArgumentException("Cannot bind using a null valueSetter.");
+            }
+            configure(menuItem -> binder.bindConsumer(valueType -> valueSetter.accept(menuItem, valueType), property));
             return this.parentBuilder;
         }
     }
